@@ -62,12 +62,8 @@ def load_tests(loader, tests, ignore):
     packages = [None, peptides]
 
     for pkg in iter(packages.pop, None):
-
         # import the base module and add it to the tests
-        globs = dict(
-            numpy=numpy,
-            **pkg.__dict__
-        )
+        globs = dict(numpy=numpy, peptides=peptides, **pkg.__dict__)
         tests.addTests(
             doctest.DocTestSuite(
                 pkg,
@@ -77,29 +73,15 @@ def load_tests(loader, tests, ignore):
                 optionflags=+doctest.ELLIPSIS,
             )
         )
-
+        # find submodules
         for (_, subpkgname, subispkg) in pkgutil.walk_packages(pkg.__path__):
             # do not import __main__ module to avoid side effects!
             if subpkgname == "__main__":
                 continue
-            # import the submodule and add it to the tests
-            module = importlib.import_module(".".join([pkg.__name__, subpkgname]))
-            globs = dict(
-                numpy=numpy,
-                **module.__dict__
-            )
-            tests.addTests(
-                doctest.DocTestSuite(
-                    module,
-                    globs=globs,
-                    setUp=setUp,
-                    tearDown=tearDown,
-                    optionflags=+doctest.ELLIPSIS,
-                )
-            )
             # if the submodule is a package, we need to process its submodules
             # as well, so we add it to the package queue
             if subispkg:
+                module = importlib.import_module(".".join([pkg.__name__, subpkgname]))
                 packages.append(module)
 
     return tests

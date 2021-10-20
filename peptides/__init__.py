@@ -2,6 +2,7 @@
 
 import array
 import math
+import statistics
 
 from .data import tables
 
@@ -34,15 +35,54 @@ class Peptide(object):
         ile = self.sequence.count("I") / len(self.sequence)
         return (ala + 2.9 * val + 3.9 * (leu + ile)) * 100
 
-    def auto_correlation(self, lag, property, center=True):
+    def auto_correlation(self, table, lag=1, center=True):
         """Compute the auto-correlation index of a peptide sequence.
-        """
-        raise NotImplementedError("auto_correlation")
 
-    def auto_covariance(self, lag, property, center=True):
-        """Compute the auto-covariance index of a peptide sequence.
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> table = peptides.tables.HYDROPHOBICITY["KyteDoolittle"]
+            >>> peptide.auto_correlation(table=table)
+            -0.3519908...
+            >>> peptide.auto_correlation(table=table, lag=5)
+            0.00113355...
+
         """
-        raise NotImplementedError("auto_covariance")
+        # center the table if requested
+        if center:
+            mu = statistics.mean(table.values())
+            sigma = statistics.stdev(table.values())
+            table = {k:(v-mu)/sigma for k,v in table.items()}
+        # compute using Cruciani formula
+        s1 = s2 = 0.0
+        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
+            s1 += table.get(aa1, 0.0) * table.get(aa2, 0.0)
+            s2 += table.get(aa1, 0.0) ** 2
+        # return correlation
+        return s1 / s2
+
+    def auto_covariance(self, table, lag=1, center=True):
+        """Compute the auto-covariance index of a peptide sequence.
+
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> table = peptides.tables.HYDROPHOBICITY["KyteDoolittle"]
+            >>> peptide.auto_covariance(table)
+            -0.414005...
+            >>> peptide.auto_covariance(table, lag=5)
+            0.0010003...
+
+        """
+        # center the table if requested
+        if center:
+            mu = statistics.mean(table.values())
+            sigma = statistics.stdev(table.values())
+            table = {k:(v-mu)/sigma for k,v in table.items()}
+        # compute using Cruciani formula
+        s = 0.0
+        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
+            s += table.get(aa1, 0.0) * table.get(aa2, 0.0)
+        # return correlation
+        return s / len(self.sequence)
 
     def blosum_indices(self):
         """Compute the BLOSUM62-derived indices of a peptide sequence.
@@ -122,10 +162,33 @@ class Peptide(object):
 
         return charge
 
-    def cross_covariance(self, lag, property1, property2, center=True):
+    def cross_covariance(self, table1, table2, lag=1, center=True):
         """Compute the cross-covariance index of a peptide sequence.
+
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> table1 = peptides.tables.HYDROPHOBICITY["KyteDoolittle"]
+            >>> table2 = peptides.tables.HYDROPHOBICITY["Eisenberg"]
+            >>> peptide.cross_covariance(table1, table2)
+            -0.3026609...
+            >>> peptide.cross_covariance(table1, table2, lag=5)
+            0.0259803...
+
         """
-        raise NotImplementedError("cross_covariance")
+        # center the table if requested
+        if center:
+            mu1 = statistics.mean(table1.values())
+            sigma1 = statistics.stdev(table1.values())
+            table1 = {k:(v-mu1)/sigma1 for k,v in table1.items()}
+            mu2 = statistics.mean(table2.values())
+            sigma2 = statistics.stdev(table2.values())
+            table2 = {k:(v-mu2)/sigma2 for k,v in table2.items()}
+        # compute using Cruciani formula
+        s = 0.0
+        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
+            s += table1.get(aa1, 0.0) * table2.get(aa2, 0.0)
+        # return correlation
+        return s / len(self.sequence)
 
     def cruciani_properties(self):
         """Compute the Cruciani properties of protein sequence.
