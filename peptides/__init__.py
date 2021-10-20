@@ -20,6 +20,17 @@ class Peptide(object):
     def __init__(self, sequence: str):
         self.sequence = sequence
 
+    def __len__(self):
+        return len(self.sequence)
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return Peptide(self.sequence[index])
+        return self.sequence[index]
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.sequence!r})"
+
     def aliphatic_index(self) -> float:
         """Compute the aliphatic index of the peptide.
 
