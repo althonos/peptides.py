@@ -433,14 +433,42 @@ class Peptide(object):
 
         return mass
 
-    def isoelectric_point(self):
-        """Compute the isoelectric point of a protein sequence.
+    def isoelectric_point(self, pKscale: str = "EMBOSS"):
+          """Compute the isoelectric point of a protein sequence.
 
-        The isoelectric point (*pI*), is the *pH* at which a particular
-        molecule or surface carries no net electrical charge.
+          The isoelectric point (*pI*), is the *pH* at which a particular
+          molecule or surface carries no net electrical charge.
 
-        """
-        raise NotImplementedError("isoelectric_point")
+          Example:
+              >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+              >>> peptide.isoelectric_point(pKscale="EMBOSS")
+              9.71...
+              >>> peptide.isoelectric_point(pKscale="Murray")
+              9.81...
+              >>> peptide.isoelectric_point(pKscale="Sillero")
+              9.89...
+              >>> peptide.isoelectric_point(pKscale="Solomon")
+              9.58...
+              >>> peptide.isoelectric_point(pKscale="Stryer")
+              9.62...
+              >>> peptide.isoelectric_point(pKscale="Lehninger")
+              9.93...
+              >>> peptide.isoelectric_point(pKscale="Dawson")
+              9.56...
+              >>> peptide.isoelectric_point(pKscale="Rodwell")
+              9.71...
+
+          """
+          # use a simple bissecting loop to minimize the charge function
+          top, bottom, x = 0, 14, 7
+          while not math.isclose(top, bottom):
+              x = (top+bottom) / 2
+              c = self.charge(pH=x, pKscale=pKscale)
+              if c >= 0:
+                  top = x
+              if c <= 0:
+                  bottom = x
+          return x
 
     def protfp_descriptors(self):
         """Compute the protFP descriptors of a protein sequence.
