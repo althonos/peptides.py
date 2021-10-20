@@ -1,5 +1,3 @@
-# import numpy
-
 import array
 import math
 import statistics
@@ -363,12 +361,6 @@ class Peptide(object):
 
     def membrane_position(self):
         """Compute the theoretical class of a protein sequence.
-
-        Example:
-            >>> peptide = Peptide("EGVNDNECEGFFSAR")
-            >>> peptide.mass_shift("silac_13c")
-            6.020129
-
         """
         raise NotImplementedError("membrane_position")
 
@@ -483,6 +475,20 @@ class Peptide(object):
 
     def protfp_descriptors(self):
         """Compute the protFP descriptors of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, fp in enumerate(peptide.protfp_descriptors()):
+            ...     print(f"ProtFP{i+1:<3} {fp: .4f}")
+            ProtFP1    0.2065
+            ProtFP2   -0.0565
+            ProtFP3    1.9930
+            ProtFP4   -0.2845
+            ProtFP5    0.7315
+            ProtFP6    0.7000
+            ProtFP7    0.1715
+            ProtFP8    0.1135
+
         """
         out = array.array("d")
         for i in range(len(tables.PROTFP)):
