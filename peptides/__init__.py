@@ -9,7 +9,8 @@ __version__ = "0.1.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
 __license__ = "GPLv3"
 __credits__ = """
-Daniel Osorio *et al.* for the ``Peptides`` R package.
+Daniel Osorio, Paola Rondón-Villarreal and Rodrigo Torres for ``Peptides``.
+Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
 """.strip()
 
 
@@ -63,7 +64,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(10):
+        for i in range(len(tables.BLOSUM)):
             scale = tables.BLOSUM[f"BLOSUM{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return out
@@ -108,7 +109,7 @@ class Peptide(object):
         sign_scale = tables.CHARGE["sign"]
         scale = tables.PK.get(pKscale)
         if scale is None:
-            raise ValueError("Invalid pK scale name: {!r}".format(pKscale))
+            raise ValueError(f"Invalid pK scale: {scale!r}")
 
         # nterm
         charge = 1.0 / (1.0 + 10**(1.0 * (pH - scale['nTer'])))
@@ -139,7 +140,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(3):
+        for i in range(len(tables.CRUCIANI)):
             scale = tables.CRUCIANI[f"PP{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return out
@@ -160,7 +161,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(6):
+        for i in range(len(tables.FASGAI)):
             scale = tables.FASGAI[f"F{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return out
@@ -209,7 +210,7 @@ class Peptide(object):
             0.092...
 
         """
-        scale = _aadata.HYDROPHOBICITY.get(scale)
+        scale = tables.HYDROPHOBICITY.get(scale)
         if scale is None:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
         return sum(scale[aa] for aa in self.sequence) / len(self.sequence)
@@ -247,18 +248,53 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(10):
+        for i in range(len(tables.KIDERA)):
             scale = tables.KIDERA[f"KF{i+1}"]
             out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
         return out
 
-    def mass_shift(self):
+    def mass_shift(self, aa_shift="silac_13c", monoisotopic=True):
         """Compute the mass difference of modified peptides.
+
+        Example:
+            >>> peptide = Peptide("EGVNDNECEGFFSAR")
+            >>> peptide.mass_shift(aa_shift="silac_13c")
+            6.020129
+            >>> peptide.mass_shift(aa_shift=dict(R=10.00827))
+            10.00827
+
         """
-        raise NotImplementedError("mass_shift")
+        if isinstance(aa_shift, str):
+            table = tables.MASS_SHIFT.get(aa_shift)
+            if table is None:
+                raise ValueError(f"Invalid mass shift scale: {aa_shift!r}")
+            scale = {}
+            if aa_shift == "silac_13c":
+                scale["K"] = table["K"] - 0.064229 * (not monoisotopic)
+                scale["R"] = table["R"] - 0.064229 * (not monoisotopic)
+            elif aa_shift == "silac_13c15n":
+                scale["K"] = table["K"] - 0.071499 * (not monoisotopic)
+                scale["R"] = table["R"] - 0.078669 * (not monoisotopic)
+            elif aa_shift == "15n":
+                for k,v in table.items():
+                    scales[k] = v * 0.997035 - 0.003635 * (not monoisotopic)
+        elif isinstance(aa_shift, dict):
+            scale = aa_shift
+        else:
+            raise TypeError(f"Expected str or dict, found {aa_shift.__class__.__name__}")
+
+        s = scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
+        s += sum(scale.get(aa, 0.0) for aa in self.sequence)
+        return s
 
     def membrane_position(self):
         """Compute the theoretical class of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("EGVNDNECEGFFSAR")
+            >>> peptide.mass_shift("silac_13c")
+            6.020129
+
         """
         raise NotImplementedError("membrane_position")
 
@@ -275,20 +311,64 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(3):
+        for i in range(len(tables.MSWHIM)):
             scale = tables.MSWHIM[f"MSWHIM{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
 
-    def molecular_weight(self, monoisotopic=False, average_scale="expasy", label=None, aa_shift=None):
+    def molecular_weight(self, average="expasy", aa_shift=None):
         """Compute the molecular weight of a protein sequence.
-        """
-        raise NotImplementedError("molecular_weight")
 
-    def mz(self, charge=2, label=None, aa_shift=None, cysteins=57.021464):
-        """Compute the m/z (mass/charge) ratio for a peptide.
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> peptide.molecular_weight()
+            2485.91...
+            >>> peptide.molecular_weight(average="mascot")
+            2485.89...
+            >>> peptide.molecular_weight(average="monoisotopic")
+            2484.11...
+
         """
-        raise NotImplementedError("mz")
+        scale = tables.MOLECULAR_WEIGHT.get(average)
+        if scale is None:
+            raise ValueError(f"Invalid average weight scale: {average!r}")
+
+        # sum the weight of each amino acid
+        mass = sum(scale.get(aa) for aa in self.sequence)
+        # add weight of water molecules
+        mass += scale["H2O"]
+        # add mass shift for labeled proteins
+        if aa_shift is not None:
+            mass += self.mass_shift(aa_shift=aa_shift, monoisotopic=average=="monoisotopic")
+
+        return mass
+
+    def mz(self, charge=2, aa_shift=None, cysteins=57.021464):
+        """Compute the m/z (mass/charge) ratio for a peptide.
+
+        Example:
+            >>> peptide = Peptide("EGVNDNECEGFFSAR")
+            >>> peptide.mz()
+            865.857...
+            >>> peptide.mz(aa_shift=dict(K=6.020129, R=6.020129))
+            868.867...
+            >>> peptide.mz(aa_shift="silac_13c", cysteins=58.005479)
+            869.359...
+
+        """
+        if not isinstance(charge, int):
+            raise TypeError(f"Expected int, found {charge.__class__.__name__!r}")
+
+        # compute the mass of the uncharged peptide
+        mass = self.molecular_weight(average="monoisotopic", aa_shift=aa_shift)
+        # add modification at cysteins
+        mass += self.sequence.count("C") * cysteins
+        # modify for charged peptides
+        if charge >= 0:
+            mass += charge * 1.007276 # weights of H+1 ions
+            mass /= charge            # divide by charge state
+
+        return mass
 
     def isoelectric_point(self):
         """Compute the isoelectric point of a protein sequence.
@@ -303,7 +383,7 @@ class Peptide(object):
         """Compute the protFP descriptors of a protein sequence.
         """
         out = array.array("d")
-        for i in range(8):
+        for i in range(len(tables.PROTFP)):
             scale = tables.PROTFP[f"ProtFP{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
@@ -326,7 +406,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(8):
+        for i in range(len(tables.ST_SCALES)):
             scale = tables.ST_SCALES[f"ST{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
@@ -346,7 +426,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(5):
+        for i in range(len(tables.T_SCALES)):
             scale = tables.T_SCALES[f"T{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
@@ -369,7 +449,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(8):
+        for i in range(len(tables.VHSE)):
             scale = tables.VHSE[f"VHSE{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
@@ -389,7 +469,7 @@ class Peptide(object):
 
         """
         out = array.array("d")
-        for i in range(5):
+        for i in range(len(tables.Z_SCALES)):
             scale = tables.Z_SCALES[f"Z{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
