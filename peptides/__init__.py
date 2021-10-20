@@ -45,6 +45,22 @@ class Peptide(object):
 
     def blosum_indices(self):
         """Compute the BLOSUM62-derived indices of a peptide sequence.
+
+        Example:
+            >>> peptide = Peptide("KLKLLLLLKLK")
+            >>> for i, b in enumerate(peptide.blosum_indices()):
+            ...     print(f"BLOSUM{i+1:<3} {b: .4f}")
+            BLOSUM1   -0.4827
+            BLOSUM2   -0.5618
+            BLOSUM3   -0.8509
+            BLOSUM4   -0.4173
+            BLOSUM5    0.3173
+            BLOSUM6    0.2527
+            BLOSUM7    0.1464
+            BLOSUM8    0.1427
+            BLOSUM9   -0.2145
+            BLOSUM10  -0.3218
+
         """
         out = array.array("d")
         for i in range(10):
@@ -112,19 +128,40 @@ class Peptide(object):
 
     def cruciani_properties(self):
         """Compute the Cruciani properties of protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, b in enumerate(peptide.cruciani_properties()):
+            ...     print(f"PP{i+1:<3} {b: .4f}")
+            PP1   -0.1130
+            PP2   -0.0220
+            PP3    0.2735
+
         """
         out = array.array("d")
         for i in range(3):
-            scale = tables.CRUCIANI[f"scale{i+1}"]
+            scale = tables.CRUCIANI[f"PP{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return out
 
     def fasgai_vectors(self):
         """Compute the FASGAI vectors of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, b in enumerate(peptide.fasgai_vectors()):
+            ...     print(f"F{i+1:<3} {b: .5f}")
+            F1   -0.13675
+            F2   -0.45485
+            F3   -0.11695
+            F4   -0.45800
+            F5   -0.38015
+            F6    0.52740
+
         """
         out = array.array("d")
         for i in range(6):
-            scale = tables.FASGAI[f"scale{i+1}"]
+            scale = tables.FASGAI[f"F{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return out
 
@@ -273,6 +310,20 @@ class Peptide(object):
 
     def st_scales(self):
         """Compute the ST-scales of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, st in enumerate(peptide.st_scales()):
+            ...     print(f"ST{i+1:<3} {st: .5f}")
+            ST1   -0.63760
+            ST2    0.07965
+            ST3    0.05150
+            ST4    0.07135
+            ST5   -0.27905
+            ST6   -0.80995
+            ST7    0.58020
+            ST8    0.54400
+
         """
         out = array.array("d")
         for i in range(8):
@@ -282,6 +333,17 @@ class Peptide(object):
 
     def t_scales(self):
         """Compute the T-scales of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, t in enumerate(peptide.t_scales()):
+            ...     print(f"T{i+1:<3} {t: .4f}")
+            T1   -3.2700
+            T2   -0.0035
+            T3   -0.3855
+            T4   -0.1475
+            T5    0.7585
+
         """
         out = array.array("d")
         for i in range(5):
@@ -291,6 +353,20 @@ class Peptide(object):
 
     def vhse_scales(self):
         """Compute the VHSE-scales of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, vhse in enumerate(peptide.vhse_scales()):
+            ...     print(f"VHSE{i+1:<3} {vhse: .4f}")
+            VHSE1   -0.1150
+            VHSE2    0.0630
+            VHSE3   -0.0055
+            VHSE4    0.7955
+            VHSE5    0.4355
+            VHSE6    0.2485
+            VHSE7    0.1740
+            VHSE8   -0.0960
+
         """
         out = array.array("d")
         for i in range(8):
@@ -300,9 +376,20 @@ class Peptide(object):
 
     def z_scales(self):
         """Compute the Z-scales of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, z in enumerate(peptide.z_scales()):
+            ...     print(f"Z{i+1:<3} {z: .4f}")
+            Z1    0.5520
+            Z2    0.0985
+            Z3    0.0000
+            Z4    0.8130
+            Z5   -0.8285
+
         """
         out = array.array("d")
-        for i in range(8):
+        for i in range(5):
             scale = tables.Z_SCALES[f"Z{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
