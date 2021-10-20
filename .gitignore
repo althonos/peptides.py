@@ -1,6 +1,10 @@
 # Created by https://www.gitignore.io/api/python,c
 # Edit at https://www.gitignore.io/?templates=python,c
 
+### Added manually
+# Build files
+peptides/data/tables.py
+
 ### C ###
 # Prerequisites
 *.d

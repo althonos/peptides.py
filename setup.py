@@ -95,7 +95,13 @@ class codegen(setuptools.Command):
         # generate a Python file containing the constants
         module_node = self._generate_module(tables)
         # write the data sources as Python
-        self._write_module(module_node, os.path.join("peptides", "data", "tables.py"))
+        output_file = os.path.join(self.build_lib, "peptides", "data", "tables.py")
+        self.mkpath(os.path.dirname(output_file))
+        self._write_module(module_node, output_file)
+        # copy if inplace
+        if self.inplace:
+            library_file = os.path.join("peptides", "data", "tables.py")
+            self.copy_file(output_file, library_file)
 
 if __name__ == "__main__":
     setuptools.setup(cmdclass=dict(codegen=codegen))
