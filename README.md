@@ -7,7 +7,7 @@
 [![PyPI](https://img.shields.io/pypi/v/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides)
 [![Wheel](https://img.shields.io/pypi/wheel/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
 [![Python Versions](https://img.shields.io/pypi/pyversions/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
-[![Python Implementations](https://img.shields.io/pypi/implementation/peptides.svg?style=flat-square&maxAge=3600&label=impl)](https://pypi.org/project/peptides/#files)
+[![Python Implementations](https://img.shields.io/badge/impl-universal-success.svg?style=flat-square&maxAge=3600&label=impl)](https://pypi.org/project/peptides/#files)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/peptides.py/)
 [![Mirror](https://img.shields.io/badge/mirror-EMBL-009f4d?style=flat-square&maxAge=2678400)](https://git.embl.de/larralde/peptides.py/)
@@ -59,11 +59,10 @@ Then use the appropriate methods to compute the descriptors you want:
 ```
 
 Methods that return more than one scalar value (for instance, `Peptide.blosum_indices`)
-will return an [`array.array`](https://docs.python.org/3/library/array.html#array.array)
-of double-precision floating point numbers:
+will return a dedicated named tuple:
 ```python
 >>> peptide.ms_whim_scores()
-array('d', [-0.43639..., 0.4916..., -0.4920...])
+MSWHIMScores(mswhim1=-0.436399..., mswhim2=0.4916..., mswhim3=-0.49200...)
 ```
 
 Use the `Peptide.descriptors` method to get a dictionary with every available

@@ -1,6 +1,7 @@
 import array
 import math
 import statistics
+import typing
 
 from . import _utils
 from .data import tables
@@ -16,14 +17,109 @@ Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
 """.strip()
 
 
+class BLOSUMIndices(typing.NamedTuple):
+    blosum1: float
+    blosum2: float
+    blosum3: float
+    blosum4: float
+    blosum5: float
+    blosum6: float
+    blosum7: float
+    blosum8: float
+    blosum9: float
+    blosum10: float
+
+
+class CrucianiProperties(typing.NamedTuple):
+    pp1: float
+    pp2: float
+    pp3: float
+
+
+class FasgaiVectors(typing.NamedTuple):
+    f1: float
+    f2: float
+    f3: float
+    f4: float
+    f5: float
+    f6: float
+
+
+class KideraFactors(typing.NamedTuple):
+    kf1: float
+    kf2: float
+    kf3: float
+    kf4: float
+    kf5: float
+    kf6: float
+    kf7: float
+    kf8: float
+    kf9: float
+    kf10: float
+
+
+class MSWHIMScores(typing.NamedTuple):
+    mswhim1: float
+    mswhim2: float
+    mswhim3: float
+
+
+class ProtFPDescriptors(typing.NamedTuple):
+    protfp1: float
+    protfp2: float
+    protfp3: float
+    protfp4: float
+    protfp5: float
+    protfp6: float
+    protfp7: float
+    protfp8: float
+
+
+class STScales(typing.NamedTuple):
+    st1: float
+    st2: float
+    st3: float
+    st4: float
+    st5: float
+    st6: float
+    st7: float
+    st8: float
+
+
+class TScales(typing.NamedTuple):
+    t1: float
+    t2: float
+    t3: float
+    t4: float
+    t5: float
+
+
+class VHSEScales(typing.NamedTuple):
+    vhse1: float
+    vhse2: float
+    vhse3: float
+    vhse4: float
+    vhse5: float
+    vhse6: float
+    vhse7: float
+    vhse8: float
+
+class ZScales(typing.NamedTuple):
+    z1: float
+    z2: float
+    z3: float
+    z4: float
+    z5: float
+
+
 class Peptide(object):
 
     # --- Magic methods ------------------------------------------------------
 
-    def __init__(self, sequence: str):
-        self.sequence = sequence
+    def __init__(self, sequence: str) -> None:
+        self.sequence: str = sequence
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.sequence)
 
     def __getitem__(self, index):
@@ -31,12 +127,12 @@ class Peptide(object):
             return Peptide(self.sequence[index])
         return self.sequence[index]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.sequence!r})"
 
     # --- Generic methods ----------------------------------------------------
 
-    def descriptors(self):
+    def descriptors(self) -> typing.Dict[str, float]:
         """Create a dictionary containing every protein descriptor available.
 
         Example:
@@ -56,7 +152,7 @@ class Peptide(object):
                     d[f"{method.prefix}{i+1}"] = x
         return d
 
-    def auto_correlation(self, table, lag=1, center=True):
+    def auto_correlation(self, table, lag: int = 1, center: bool = True) -> float:
         """Compute the auto-correlation index of a peptide sequence.
 
         Example:
@@ -81,7 +177,7 @@ class Peptide(object):
         # return correlation
         return s1 / s2
 
-    def auto_covariance(self, table, lag=1, center=True):
+    def auto_covariance(self, table, lag: int = 1, center: bool = True) -> float:
         """Compute the auto-covariance index of a peptide sequence.
 
         Example:
@@ -105,7 +201,7 @@ class Peptide(object):
         # return correlation
         return s / len(self.sequence)
 
-    def cross_covariance(self, table1, table2, lag=1, center=True):
+    def cross_covariance(self, table1, table2, lag: int = 1, center=True) -> float:
         """Compute the cross-covariance index of a peptide sequence.
 
         Example:
@@ -150,7 +246,7 @@ class Peptide(object):
         ile = self.sequence.count("I") / len(self.sequence)
         return (ala + 2.9 * val + 3.9 * (leu + ile)) * 100
 
-    def boman(self):
+    def boman(self) -> float:
         """Compute the Boman (potential peptide interaction) index.
 
         Example:
@@ -203,7 +299,7 @@ class Peptide(object):
 
         return charge
 
-    def hydrophobic_moment(self, angle: int = 100, window: int = 11):
+    def hydrophobic_moment(self, angle: int = 100, window: int = 11) -> float:
         """Compute the maximal hydrophobic moment of a protein sequence.
 
         Example:
@@ -236,7 +332,7 @@ class Peptide(object):
         # return the maximal hydrophobic moment
         return moment
 
-    def hydrophobicity(self, scale: str = "KyteDoolittle"):
+    def hydrophobicity(self, scale: str = "KyteDoolittle") -> float:
         """Compute the hydrophobicity index of a protein sequence.
 
         Example:
@@ -252,7 +348,7 @@ class Peptide(object):
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
         return sum(scale[aa] for aa in self.sequence) / len(self.sequence)
 
-    def instability_index(self):
+    def instability_index(self) -> float:
         """Compute the instability index of a protein sequence.
 
         Example:
@@ -265,7 +361,7 @@ class Peptide(object):
         gp = sum(scale[self.sequence[i:i+2]] for i in range(len(self.sequence) - 1))
         return gp * 10 / (len(self.sequence))
 
-    def isoelectric_point(self, pKscale: str = "EMBOSS"):
+    def isoelectric_point(self, pKscale: str = "EMBOSS") -> float:
           """Compute the isoelectric point of a protein sequence.
 
           The isoelectric point (*pI*), is the *pH* at which a particular
@@ -302,7 +398,7 @@ class Peptide(object):
                   bottom = x
           return x
 
-    def mass_shift(self, aa_shift="silac_13c", monoisotopic=True):
+    def mass_shift(self, aa_shift="silac_13c", monoisotopic: bool = True):
         """Compute the mass difference of modified peptides.
 
         Example:
@@ -341,7 +437,7 @@ class Peptide(object):
         """
         raise NotImplementedError("membrane_position")
 
-    def molecular_weight(self, average="expasy", aa_shift=None):
+    def molecular_weight(self, average: str = "expasy", aa_shift=None):
         """Compute the molecular weight of a protein sequence.
 
         Example:
@@ -368,7 +464,7 @@ class Peptide(object):
 
         return mass
 
-    def mz(self, charge=2, aa_shift=None, cysteins=57.021464):
+    def mz(self, charge: int = 2, aa_shift=None, cysteins: float = 57.021464) -> float:
         """Compute the m/z (mass/charge) ratio for a peptide.
 
         Example:
@@ -398,7 +494,7 @@ class Peptide(object):
     # --- Descriptors --------------------------------------------------------
 
     @_utils.descriptor(prefix="BLOSUM")
-    def blosum_indices(self):
+    def blosum_indices(self) -> BLOSUMIndices:
         """Compute the BLOSUM62-derived indices of a peptide sequence.
 
         Example:
@@ -421,10 +517,10 @@ class Peptide(object):
         for i in range(len(tables.BLOSUM)):
             scale = tables.BLOSUM[f"BLOSUM{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
+        return BLOSUMIndices(*out)
 
     @_utils.descriptor(prefix="PP")
-    def cruciani_properties(self):
+    def cruciani_properties(self) -> CrucianiProperties:
         """Compute the Cruciani properties of protein sequence.
 
         Example:
@@ -440,10 +536,10 @@ class Peptide(object):
         for i in range(len(tables.CRUCIANI)):
             scale = tables.CRUCIANI[f"PP{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
+        return CrucianiProperties(*out)
 
     @_utils.descriptor(prefix="F")
-    def fasgai_vectors(self):
+    def fasgai_vectors(self) -> FasgaiVectors:
         """Compute the FASGAI vectors of a protein sequence.
 
         Example:
@@ -462,10 +558,10 @@ class Peptide(object):
         for i in range(len(tables.FASGAI)):
             scale = tables.FASGAI[f"F{i+1}"]
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
+        return FasgaiVectors(*out)
 
     @_utils.descriptor(prefix="KF")
-    def kidera_factors(self):
+    def kidera_factors(self) -> KideraFactors:
         """Compute the Kidera factors of a protein sequence.
 
         Example:
@@ -488,10 +584,10 @@ class Peptide(object):
         for i in range(len(tables.KIDERA)):
             scale = tables.KIDERA[f"KF{i+1}"]
             out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return KideraFactors(*out)
 
     @_utils.descriptor(prefix="MSWHIM")
-    def ms_whim_scores(self):
+    def ms_whim_scores(self) -> MSWHIMScores:
         """Compute the MS-WHIM scores of a protein sequence.
 
         Example:
@@ -507,10 +603,10 @@ class Peptide(object):
         for i in range(len(tables.MSWHIM)):
             scale = tables.MSWHIM[f"MSWHIM{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return MSWHIMScores(*out)
 
     @_utils.descriptor(prefix="ProtFP")
-    def protfp_descriptors(self):
+    def protfp_descriptors(self) -> ProtFPDescriptors:
         """Compute the protFP descriptors of a protein sequence.
 
         Example:
@@ -531,10 +627,10 @@ class Peptide(object):
         for i in range(len(tables.PROTFP)):
             scale = tables.PROTFP[f"ProtFP{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return ProtFPDescriptors(*out)
 
     @_utils.descriptor(prefix="ST")
-    def st_scales(self):
+    def st_scales(self) -> STScales:
         """Compute the ST-scales of a protein sequence.
 
         Example:
@@ -555,10 +651,10 @@ class Peptide(object):
         for i in range(len(tables.ST_SCALES)):
             scale = tables.ST_SCALES[f"ST{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return STScales(*out)
 
     @_utils.descriptor(prefix="T")
-    def t_scales(self):
+    def t_scales(self) -> TScales:
         """Compute the T-scales of a protein sequence.
 
         Example:
@@ -576,10 +672,10 @@ class Peptide(object):
         for i in range(len(tables.T_SCALES)):
             scale = tables.T_SCALES[f"T{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return TScales(*out)
 
     @_utils.descriptor(prefix="VHSE")
-    def vhse_scales(self):
+    def vhse_scales(self) -> VHSEScales:
         """Compute the VHSE-scales of a protein sequence.
 
         Example:
@@ -600,10 +696,10 @@ class Peptide(object):
         for i in range(len(tables.VHSE)):
             scale = tables.VHSE[f"VHSE{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return VHSEScales(*out)
 
     @_utils.descriptor(prefix="Z")
-    def z_scales(self):
+    def z_scales(self) -> ZScales:
         """Compute the Z-scales of a protein sequence.
 
         Example:
@@ -621,4 +717,4 @@ class Peptide(object):
         for i in range(len(tables.Z_SCALES)):
             scale = tables.Z_SCALES[f"Z{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
+        return ZScales(*out)
