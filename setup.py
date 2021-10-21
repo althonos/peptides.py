@@ -60,6 +60,8 @@ class codegen(setuptools.Command):
         self.announce(f"loading data tables from {self.data!r}", level=2)
         tables = {}
         for group in os.listdir(self.data):
+            if group == "__pycache__":
+                continue
             if not os.path.isdir(os.path.join(self.data, group)):
                 continue
             tables[group] = {}

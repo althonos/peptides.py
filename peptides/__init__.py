@@ -104,6 +104,7 @@ class VHSEScales(typing.NamedTuple):
     vhse7: float
     vhse8: float
 
+
 class ZScales(typing.NamedTuple):
     z1: float
     z2: float
