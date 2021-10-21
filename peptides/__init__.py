@@ -159,7 +159,7 @@ class Peptide(object):
                 d[f"{prefix}{i+1}"] = x
         return d
 
-    def auto_correlation(self, table, lag: int = 1, center: bool = True) -> float:
+    def auto_correlation(self, table: typing.Dict[str, float], lag: int = 1, center: bool = True) -> float:
         """Compute the auto-correlation index of a peptide sequence.
 
         Example:
@@ -184,7 +184,7 @@ class Peptide(object):
         # return correlation
         return s1 / s2
 
-    def auto_covariance(self, table, lag: int = 1, center: bool = True) -> float:
+    def auto_covariance(self, table: typing.Dict[str, float], lag: int = 1, center: bool = True) -> float:
         """Compute the auto-covariance index of a peptide sequence.
 
         Example:
@@ -208,7 +208,7 @@ class Peptide(object):
         # return correlation
         return s / len(self.sequence)
 
-    def cross_covariance(self, table1, table2, lag: int = 1, center=True) -> float:
+    def cross_covariance(self, table1: typing.Dict[str, float], table2: typing.Dict[str, float], lag: int = 1, center: bool =True) -> float:
         """Compute the cross-covariance index of a peptide sequence.
 
         Example:
@@ -390,7 +390,7 @@ class Peptide(object):
 
           """
           # use a simple bissecting loop to minimize the charge function
-          top, bottom, x = 0, 14, 7
+          top, bottom, x = 0.0, 14.0, 7.0
           while not math.isclose(top, bottom):
               x = (top+bottom) / 2
               c = self.charge(pH=x, pKscale=pKscale)
@@ -400,7 +400,7 @@ class Peptide(object):
                   bottom = x
           return x
 
-    def mass_shift(self, aa_shift="silac_13c", monoisotopic: bool = True) -> float:
+    def mass_shift(self, aa_shift: typing.Union[str, typing.Dict[str, float], None]="silac_13c", monoisotopic: bool = True) -> float:
         """Compute the mass difference of modified peptides.
 
         Example:
@@ -424,7 +424,7 @@ class Peptide(object):
                 scale["R"] = table["R"] - 0.078669 * (not monoisotopic)
             elif aa_shift == "15n":
                 for k,v in table.items():
-                    scales[k] = v * 0.997035 - 0.003635 * (not monoisotopic)
+                    scale[k] = v * 0.997035 - 0.003635 * (not monoisotopic)
         elif isinstance(aa_shift, dict):
             scale = aa_shift
         else:
@@ -434,7 +434,7 @@ class Peptide(object):
         s += sum(scale.get(aa, 0.0) for aa in self.sequence)
         return s
 
-    def molecular_weight(self, average: str = "expasy", aa_shift=None) -> float:
+    def molecular_weight(self, average: str = "expasy", aa_shift: typing.Union[str, typing.Dict[str, float], None]=None) -> float:
         """Compute the molecular weight of a protein sequence.
 
         Example:
@@ -452,7 +452,7 @@ class Peptide(object):
             raise ValueError(f"Invalid average weight scale: {average!r}")
 
         # sum the weight of each amino acid
-        mass = sum(scale.get(aa) for aa in self.sequence)
+        mass = sum(scale.get(aa, 0.0) for aa in self.sequence)
         # add weight of water molecules
         mass += scale["H2O"]
         # add mass shift for labeled proteins
@@ -461,7 +461,7 @@ class Peptide(object):
 
         return mass
 
-    def mz(self, charge: int = 2, aa_shift=None, cysteins: float = 57.021464) -> float:
+    def mz(self, charge: int = 2, aa_shift: typing.Union[str, typing.Dict[str, float], None] =None, cysteins: float = 57.021464) -> float:
         """Compute the m/z (mass/charge) ratio for a peptide.
 
         Example:
@@ -490,7 +490,7 @@ class Peptide(object):
 
     # --- Profiles -----------------------------------------------------------
 
-    def hydrophobicity_profile(self, window: int = 11, scale: str = "KyteDoolittle"):
+    def hydrophobicity_profile(self, window: int = 11, scale: str = "KyteDoolittle") -> typing.Sequence[float]:
         """Build a hydrophobicity profile of a sliding window.
 
         Example:
@@ -509,7 +509,7 @@ class Peptide(object):
 
         return profile
 
-    def hydrophobic_moment_profile(self, window: int = 11, angle: int = 100):
+    def hydrophobic_moment_profile(self, window: int = 11, angle: int = 100) -> typing.Sequence[float]:
         """Build a hydrophobic moment profile of a sliding window.
 
         Example:
@@ -525,7 +525,7 @@ class Peptide(object):
 
         return profile
 
-    def membrane_position_profile(self, window: int = 11, angle: int = 100):
+    def membrane_position_profile(self, window: int = 11, angle: int = 100) -> typing.Sequence[str]:
         """Compute the theoretical class of a protein sequence.
 
         Example:
