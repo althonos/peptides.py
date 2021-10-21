@@ -3,7 +3,6 @@ import math
 import statistics
 import typing
 
-from . import _utils
 from .data import tables
 
 __all__ = ["Peptide", "tables"]
@@ -123,7 +122,15 @@ class Peptide(object):
     def __len__(self) -> int:
         return len(self.sequence)
 
-    def __getitem__(self, index):
+    @typing.overload
+    def __getitem__(self, index: slice) -> "Peptide":
+        pass
+
+    @typing.overload
+    def __getitem__(self, index: int) -> str:
+        pass
+
+    def __getitem__(self, index: typing.Union[int, slice]) -> typing.Union[str, "Peptide"]:
         if isinstance(index, slice):
             return Peptide(self.sequence[index])
         return self.sequence[index]
@@ -147,10 +154,9 @@ class Peptide(object):
 
         """
         d = {}
-        for method in vars(Peptide).values():
-            if getattr(method, "descriptor", False) == True:
-                for i,x in enumerate(method(self)):
-                    d[f"{method.prefix}{i+1}"] = x
+        for prefix, method in self.__DESCRIPTORS.items():
+            for i,x in enumerate(method(self)):
+                d[f"{prefix}{i+1}"] = x
         return d
 
     def auto_correlation(self, table, lag: int = 1, center: bool = True) -> float:
@@ -344,10 +350,10 @@ class Peptide(object):
             0.092...
 
         """
-        scale = tables.HYDROPHOBICITY.get(scale)
-        if scale is None:
+        table = tables.HYDROPHOBICITY.get(scale)
+        if table is None:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
-        return sum(scale[aa] for aa in self.sequence) / len(self.sequence)
+        return sum(table[aa] for aa in self.sequence) / len(self.sequence)
 
     def instability_index(self) -> float:
         """Compute the instability index of a protein sequence.
@@ -399,7 +405,7 @@ class Peptide(object):
                   bottom = x
           return x
 
-    def mass_shift(self, aa_shift="silac_13c", monoisotopic: bool = True):
+    def mass_shift(self, aa_shift="silac_13c", monoisotopic: bool = True) -> float:
         """Compute the mass difference of modified peptides.
 
         Example:
@@ -438,7 +444,7 @@ class Peptide(object):
         """
         raise NotImplementedError("membrane_position")
 
-    def molecular_weight(self, average: str = "expasy", aa_shift=None):
+    def molecular_weight(self, average: str = "expasy", aa_shift=None) -> float:
         """Compute the molecular weight of a protein sequence.
 
         Example:
@@ -494,7 +500,6 @@ class Peptide(object):
 
     # --- Descriptors --------------------------------------------------------
 
-    @_utils.descriptor(prefix="BLOSUM")
     def blosum_indices(self) -> BLOSUMIndices:
         """Compute the BLOSUM62-derived indices of a peptide sequence.
 
@@ -520,7 +525,6 @@ class Peptide(object):
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return BLOSUMIndices(*out)
 
-    @_utils.descriptor(prefix="PP")
     def cruciani_properties(self) -> CrucianiProperties:
         """Compute the Cruciani properties of protein sequence.
 
@@ -539,7 +543,6 @@ class Peptide(object):
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return CrucianiProperties(*out)
 
-    @_utils.descriptor(prefix="F")
     def fasgai_vectors(self) -> FasgaiVectors:
         """Compute the FASGAI vectors of a protein sequence.
 
@@ -561,7 +564,6 @@ class Peptide(object):
             out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
         return FasgaiVectors(*out)
 
-    @_utils.descriptor(prefix="KF")
     def kidera_factors(self) -> KideraFactors:
         """Compute the Kidera factors of a protein sequence.
 
@@ -587,7 +589,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
         return KideraFactors(*out)
 
-    @_utils.descriptor(prefix="MSWHIM")
     def ms_whim_scores(self) -> MSWHIMScores:
         """Compute the MS-WHIM scores of a protein sequence.
 
@@ -606,7 +607,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return MSWHIMScores(*out)
 
-    @_utils.descriptor(prefix="ProtFP")
     def protfp_descriptors(self) -> ProtFPDescriptors:
         """Compute the protFP descriptors of a protein sequence.
 
@@ -630,7 +630,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return ProtFPDescriptors(*out)
 
-    @_utils.descriptor(prefix="ST")
     def st_scales(self) -> STScales:
         """Compute the ST-scales of a protein sequence.
 
@@ -654,7 +653,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return STScales(*out)
 
-    @_utils.descriptor(prefix="T")
     def t_scales(self) -> TScales:
         """Compute the T-scales of a protein sequence.
 
@@ -675,7 +673,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return TScales(*out)
 
-    @_utils.descriptor(prefix="VHSE")
     def vhse_scales(self) -> VHSEScales:
         """Compute the VHSE-scales of a protein sequence.
 
@@ -699,7 +696,6 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return VHSEScales(*out)
 
-    @_utils.descriptor(prefix="Z")
     def z_scales(self) -> ZScales:
         """Compute the Z-scales of a protein sequence.
 
@@ -719,3 +715,16 @@ class Peptide(object):
             scale = tables.Z_SCALES[f"Z{i+1}"]
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return ZScales(*out)
+
+    __DESCRIPTORS = {
+        "BLOSUM": blosum_indices,
+        "PP": cruciani_properties,
+        "F": fasgai_vectors,
+        "KF": kidera_factors,
+        "MSWHIM": ms_whim_scores,
+        "ProtFP": protfp_descriptors,
+        "ST": st_scales,
+        "T": t_scales,
+        "VHSE": vhse_scales,
+        "Z": z_scales
+    }
