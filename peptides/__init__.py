@@ -2,7 +2,10 @@ import array
 import math
 import statistics
 
+from . import _utils
 from .data import tables
+
+__all__ = ["Peptide", "tables"]
 
 __version__ = "0.1.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
@@ -14,6 +17,8 @@ Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
 
 
 class Peptide(object):
+
+    # --- Magic methods ------------------------------------------------------
 
     def __init__(self, sequence: str):
         self.sequence = sequence
@@ -29,20 +34,27 @@ class Peptide(object):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.sequence!r})"
 
-    def aliphatic_index(self) -> float:
-        """Compute the aliphatic index of the peptide.
+    # --- Generic methods ----------------------------------------------------
+
+    def descriptors(self):
+        """Create a dictionary containing every protein descriptor available.
 
         Example:
             >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
-            >>> peptide.aliphatic_index()
-            117.0
+            >>> sorted(peptide.descriptors().keys())
+            ['BLOSUM1', ..., 'F1', ..., 'KF1', ..., 'MSWHIM1', ..., 'PP1', ...]
+
+        Hint:
+            Use this method to create a `~pandas.DataFrame` containing the
+            descriptors for several sequences.
 
         """
-        ala = self.sequence.count("A") / len(self.sequence)
-        val = self.sequence.count("V") / len(self.sequence)
-        leu = self.sequence.count("L") / len(self.sequence)
-        ile = self.sequence.count("I") / len(self.sequence)
-        return (ala + 2.9 * val + 3.9 * (leu + ile)) * 100
+        d = {}
+        for method in vars(Peptide).values():
+            if getattr(method, "descriptor", False) == True:
+                for i,x in enumerate(method(self)):
+                    d[f"{method.prefix}{i+1}"] = x
+        return d
 
     def auto_correlation(self, table, lag=1, center=True):
         """Compute the auto-correlation index of a peptide sequence.
@@ -93,30 +105,50 @@ class Peptide(object):
         # return correlation
         return s / len(self.sequence)
 
-    def blosum_indices(self):
-        """Compute the BLOSUM62-derived indices of a peptide sequence.
+    def cross_covariance(self, table1, table2, lag=1, center=True):
+        """Compute the cross-covariance index of a peptide sequence.
 
         Example:
-            >>> peptide = Peptide("KLKLLLLLKLK")
-            >>> for i, b in enumerate(peptide.blosum_indices()):
-            ...     print(f"BLOSUM{i+1:<3} {b: .4f}")
-            BLOSUM1   -0.4827
-            BLOSUM2   -0.5618
-            BLOSUM3   -0.8509
-            BLOSUM4   -0.4173
-            BLOSUM5    0.3173
-            BLOSUM6    0.2527
-            BLOSUM7    0.1464
-            BLOSUM8    0.1427
-            BLOSUM9   -0.2145
-            BLOSUM10  -0.3218
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> table1 = peptides.tables.HYDROPHOBICITY["KyteDoolittle"]
+            >>> table2 = peptides.tables.HYDROPHOBICITY["Eisenberg"]
+            >>> peptide.cross_covariance(table1, table2)
+            -0.3026609...
+            >>> peptide.cross_covariance(table1, table2, lag=5)
+            0.0259803...
 
         """
-        out = array.array("d")
-        for i in range(len(tables.BLOSUM)):
-            scale = tables.BLOSUM[f"BLOSUM{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
+        # center the table if requested
+        if center:
+            mu1 = statistics.mean(table1.values())
+            sigma1 = statistics.stdev(table1.values())
+            table1 = {k:(v-mu1)/sigma1 for k,v in table1.items()}
+            mu2 = statistics.mean(table2.values())
+            sigma2 = statistics.stdev(table2.values())
+            table2 = {k:(v-mu2)/sigma2 for k,v in table2.items()}
+        # compute using Cruciani formula
+        s = 0.0
+        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
+            s += table1.get(aa1, 0.0) * table2.get(aa2, 0.0)
+        # return correlation
+        return s / len(self.sequence)
+
+    # --- Physico-chemical properties ----------------------------------------
+
+    def aliphatic_index(self) -> float:
+        """Compute the aliphatic index of the peptide.
+
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> peptide.aliphatic_index()
+            117.0
+
+        """
+        ala = self.sequence.count("A") / len(self.sequence)
+        val = self.sequence.count("V") / len(self.sequence)
+        leu = self.sequence.count("L") / len(self.sequence)
+        ile = self.sequence.count("I") / len(self.sequence)
+        return (ala + 2.9 * val + 3.9 * (leu + ile)) * 100
 
     def boman(self):
         """Compute the Boman (potential peptide interaction) index.
@@ -170,73 +202,6 @@ class Peptide(object):
         charge += -1.0 / (1.0 + 10**(-1.0 * (pH - scale['cTer'])))
 
         return charge
-
-    def cross_covariance(self, table1, table2, lag=1, center=True):
-        """Compute the cross-covariance index of a peptide sequence.
-
-        Example:
-            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
-            >>> table1 = peptides.tables.HYDROPHOBICITY["KyteDoolittle"]
-            >>> table2 = peptides.tables.HYDROPHOBICITY["Eisenberg"]
-            >>> peptide.cross_covariance(table1, table2)
-            -0.3026609...
-            >>> peptide.cross_covariance(table1, table2, lag=5)
-            0.0259803...
-
-        """
-        # center the table if requested
-        if center:
-            mu1 = statistics.mean(table1.values())
-            sigma1 = statistics.stdev(table1.values())
-            table1 = {k:(v-mu1)/sigma1 for k,v in table1.items()}
-            mu2 = statistics.mean(table2.values())
-            sigma2 = statistics.stdev(table2.values())
-            table2 = {k:(v-mu2)/sigma2 for k,v in table2.items()}
-        # compute using Cruciani formula
-        s = 0.0
-        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
-            s += table1.get(aa1, 0.0) * table2.get(aa2, 0.0)
-        # return correlation
-        return s / len(self.sequence)
-
-    def cruciani_properties(self):
-        """Compute the Cruciani properties of protein sequence.
-
-        Example:
-            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
-            >>> for i, b in enumerate(peptide.cruciani_properties()):
-            ...     print(f"PP{i+1:<3} {b: .4f}")
-            PP1   -0.1130
-            PP2   -0.0220
-            PP3    0.2735
-
-        """
-        out = array.array("d")
-        for i in range(len(tables.CRUCIANI)):
-            scale = tables.CRUCIANI[f"PP{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
-
-    def fasgai_vectors(self):
-        """Compute the FASGAI vectors of a protein sequence.
-
-        Example:
-            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
-            >>> for i, b in enumerate(peptide.fasgai_vectors()):
-            ...     print(f"F{i+1:<3} {b: .5f}")
-            F1   -0.13675
-            F2   -0.45485
-            F3   -0.11695
-            F4   -0.45800
-            F5   -0.38015
-            F6    0.52740
-
-        """
-        out = array.array("d")
-        for i in range(len(tables.FASGAI)):
-            scale = tables.FASGAI[f"F{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
-        return out
 
     def hydrophobic_moment(self, angle: int = 100, window: int = 11):
         """Compute the maximal hydrophobic moment of a protein sequence.
@@ -300,30 +265,42 @@ class Peptide(object):
         gp = sum(scale[self.sequence[i:i+2]] for i in range(len(self.sequence) - 1))
         return gp * 10 / (len(self.sequence))
 
-    def kidera_factors(self):
-        """Compute the Kidera factors of a protein sequence.
+    def isoelectric_point(self, pKscale: str = "EMBOSS"):
+          """Compute the isoelectric point of a protein sequence.
 
-        Example:
-            >>> peptide = Peptide("KLKLLLLLKLK")
-            >>> for i, kf in enumerate(peptide.kidera_factors()):
-            ...     print(f"KF{i+1:<3} {kf: .4f}")
-            KF1   -0.7855
-            KF2    0.2982
-            KF3   -0.2364
-            KF4   -0.0818
-            KF5    0.2100
-            KF6   -1.8936
-            KF7    1.0291
-            KF8   -0.5127
-            KF9    0.1118
-            KF10   0.8100
+          The isoelectric point (*pI*), is the *pH* at which a particular
+          molecule or surface carries no net electrical charge.
 
-        """
-        out = array.array("d")
-        for i in range(len(tables.KIDERA)):
-            scale = tables.KIDERA[f"KF{i+1}"]
-            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
-        return out
+          Example:
+              >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+              >>> peptide.isoelectric_point(pKscale="EMBOSS")
+              9.71...
+              >>> peptide.isoelectric_point(pKscale="Murray")
+              9.81...
+              >>> peptide.isoelectric_point(pKscale="Sillero")
+              9.89...
+              >>> peptide.isoelectric_point(pKscale="Solomon")
+              9.58...
+              >>> peptide.isoelectric_point(pKscale="Stryer")
+              9.62...
+              >>> peptide.isoelectric_point(pKscale="Lehninger")
+              9.93...
+              >>> peptide.isoelectric_point(pKscale="Dawson")
+              9.56...
+              >>> peptide.isoelectric_point(pKscale="Rodwell")
+              9.71...
+
+          """
+          # use a simple bissecting loop to minimize the charge function
+          top, bottom, x = 0, 14, 7
+          while not math.isclose(top, bottom):
+              x = (top+bottom) / 2
+              c = self.charge(pH=x, pKscale=pKscale)
+              if c >= 0:
+                  top = x
+              if c <= 0:
+                  bottom = x
+          return x
 
     def mass_shift(self, aa_shift="silac_13c", monoisotopic=True):
         """Compute the mass difference of modified peptides.
@@ -363,24 +340,6 @@ class Peptide(object):
         """Compute the theoretical class of a protein sequence.
         """
         raise NotImplementedError("membrane_position")
-
-    def ms_whim_scores(self):
-        """Compute the MS-WHIM scores of a protein sequence.
-
-        Example:
-            >>> peptide = Peptide("KLKLLLLLKLK")
-            >>> for i, mw in enumerate(peptide.ms_whim_scores()):
-            ...     print(f"MSWHIM{i+1:<3} {mw: .4f}")
-            MSWHIM1   -0.6564
-            MSWHIM2    0.4873
-            MSWHIM3    0.1164
-
-        """
-        out = array.array("d")
-        for i in range(len(tables.MSWHIM)):
-            scale = tables.MSWHIM[f"MSWHIM{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
-        return out
 
     def molecular_weight(self, average="expasy", aa_shift=None):
         """Compute the molecular weight of a protein sequence.
@@ -436,43 +395,121 @@ class Peptide(object):
 
         return mass
 
-    def isoelectric_point(self, pKscale: str = "EMBOSS"):
-          """Compute the isoelectric point of a protein sequence.
+    # --- Descriptors --------------------------------------------------------
 
-          The isoelectric point (*pI*), is the *pH* at which a particular
-          molecule or surface carries no net electrical charge.
+    @_utils.descriptor(prefix="BLOSUM")
+    def blosum_indices(self):
+        """Compute the BLOSUM62-derived indices of a peptide sequence.
 
-          Example:
-              >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
-              >>> peptide.isoelectric_point(pKscale="EMBOSS")
-              9.71...
-              >>> peptide.isoelectric_point(pKscale="Murray")
-              9.81...
-              >>> peptide.isoelectric_point(pKscale="Sillero")
-              9.89...
-              >>> peptide.isoelectric_point(pKscale="Solomon")
-              9.58...
-              >>> peptide.isoelectric_point(pKscale="Stryer")
-              9.62...
-              >>> peptide.isoelectric_point(pKscale="Lehninger")
-              9.93...
-              >>> peptide.isoelectric_point(pKscale="Dawson")
-              9.56...
-              >>> peptide.isoelectric_point(pKscale="Rodwell")
-              9.71...
+        Example:
+            >>> peptide = Peptide("KLKLLLLLKLK")
+            >>> for i, b in enumerate(peptide.blosum_indices()):
+            ...     print(f"BLOSUM{i+1:<3} {b: .4f}")
+            BLOSUM1   -0.4827
+            BLOSUM2   -0.5618
+            BLOSUM3   -0.8509
+            BLOSUM4   -0.4173
+            BLOSUM5    0.3173
+            BLOSUM6    0.2527
+            BLOSUM7    0.1464
+            BLOSUM8    0.1427
+            BLOSUM9   -0.2145
+            BLOSUM10  -0.3218
 
-          """
-          # use a simple bissecting loop to minimize the charge function
-          top, bottom, x = 0, 14, 7
-          while not math.isclose(top, bottom):
-              x = (top+bottom) / 2
-              c = self.charge(pH=x, pKscale=pKscale)
-              if c >= 0:
-                  top = x
-              if c <= 0:
-                  bottom = x
-          return x
+        """
+        out = array.array("d")
+        for i in range(len(tables.BLOSUM)):
+            scale = tables.BLOSUM[f"BLOSUM{i+1}"]
+            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+        return out
 
+    @_utils.descriptor(prefix="PP")
+    def cruciani_properties(self):
+        """Compute the Cruciani properties of protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, b in enumerate(peptide.cruciani_properties()):
+            ...     print(f"PP{i+1:<3} {b: .4f}")
+            PP1   -0.1130
+            PP2   -0.0220
+            PP3    0.2735
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.CRUCIANI)):
+            scale = tables.CRUCIANI[f"PP{i+1}"]
+            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+        return out
+
+    @_utils.descriptor(prefix="F")
+    def fasgai_vectors(self):
+        """Compute the FASGAI vectors of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, b in enumerate(peptide.fasgai_vectors()):
+            ...     print(f"F{i+1:<3} {b: .5f}")
+            F1   -0.13675
+            F2   -0.45485
+            F3   -0.11695
+            F4   -0.45800
+            F5   -0.38015
+            F6    0.52740
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.FASGAI)):
+            scale = tables.FASGAI[f"F{i+1}"]
+            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+        return out
+
+    @_utils.descriptor(prefix="KF")
+    def kidera_factors(self):
+        """Compute the Kidera factors of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("KLKLLLLLKLK")
+            >>> for i, kf in enumerate(peptide.kidera_factors()):
+            ...     print(f"KF{i+1:<3} {kf: .4f}")
+            KF1   -0.7855
+            KF2    0.2982
+            KF3   -0.2364
+            KF4   -0.0818
+            KF5    0.2100
+            KF6   -1.8936
+            KF7    1.0291
+            KF8   -0.5127
+            KF9    0.1118
+            KF10   0.8100
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.KIDERA)):
+            scale = tables.KIDERA[f"KF{i+1}"]
+            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
+        return out
+
+    @_utils.descriptor(prefix="MSWHIM")
+    def ms_whim_scores(self):
+        """Compute the MS-WHIM scores of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("KLKLLLLLKLK")
+            >>> for i, mw in enumerate(peptide.ms_whim_scores()):
+            ...     print(f"MSWHIM{i+1:<3} {mw: .4f}")
+            MSWHIM1   -0.6564
+            MSWHIM2    0.4873
+            MSWHIM3    0.1164
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.MSWHIM)):
+            scale = tables.MSWHIM[f"MSWHIM{i+1}"]
+            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+        return out
+
+    @_utils.descriptor(prefix="ProtFP")
     def protfp_descriptors(self):
         """Compute the protFP descriptors of a protein sequence.
 
@@ -496,6 +533,7 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
 
+    @_utils.descriptor(prefix="ST")
     def st_scales(self):
         """Compute the ST-scales of a protein sequence.
 
@@ -519,6 +557,7 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
 
+    @_utils.descriptor(prefix="T")
     def t_scales(self):
         """Compute the T-scales of a protein sequence.
 
@@ -539,6 +578,7 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
 
+    @_utils.descriptor(prefix="VHSE")
     def vhse_scales(self):
         """Compute the VHSE-scales of a protein sequence.
 
@@ -562,6 +602,7 @@ class Peptide(object):
             out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
         return out
 
+    @_utils.descriptor(prefix="Z")
     def z_scales(self):
         """Compute the Z-scales of a protein sequence.
 
