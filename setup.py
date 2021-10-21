@@ -3,17 +3,35 @@
 
 import ast
 import csv
+import configparser
 import glob
 import math
 import os
 
 import setuptools
-from distutils.command.build import build as _build
+from setuptools.command.sdist import sdist as _sdist
+from setuptools.command.build_py import build_py as _build_py
 
 try:
     import astor
 except ImportError as err:
     astor = err
+
+
+class sdist(_sdist):
+    """A `sdist` that generates a `pyproject.toml` on the fly.
+    """
+
+    def run(self):
+        # build `pyproject.toml` from `setup.cfg`
+        c = configparser.ConfigParser()
+        c.add_section("build-system")
+        c.set("build-system", "requires", str(self.distribution.setup_requires))
+        c.set("build-system", 'build-backend', '"setuptools.build_meta"')
+        with open("pyproject.toml", "w") as pyproject:
+            c.write(pyproject)
+        # run the rest of the packaging
+        _sdist.run(self)
 
 
 class codegen(setuptools.Command):
@@ -103,5 +121,20 @@ class codegen(setuptools.Command):
             library_file = os.path.join("peptides", "data", "tables.py")
             self.copy_file(output_file, library_file)
 
+
+class build_py(_build_py):
+    """A hacked `build_py` command that will also run `codegen`.
+    """
+
+    def run(self):
+        # generate tables if needed
+        if not self.distribution.have_run.get("codegen", False):
+            _codegen = self.get_finalized_command("codegen")
+            _codegen.force = self.force
+            _codegen.run()
+        # build rest as normal
+        _build_py.run(self)
+
+
 if __name__ == "__main__":
-    setuptools.setup(cmdclass=dict(codegen=codegen))
+    setuptools.setup(cmdclass=dict(build_py=build_py, codegen=codegen))
