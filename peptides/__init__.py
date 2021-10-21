@@ -317,14 +317,11 @@ class Peptide(object):
             0.270590...
 
         """
-        moment = 0.0
-        # load the hydrophobicity scale
         scale = tables.HYDROPHOBICITY["Eisenberg"]
-        # create a vector of angles
         angles = [(angle*i)%360 for i in range(window)]
+        moment = 0.0
 
-        # compute the moment using a sliding window
-        for i in range(len(self.sequence) - window):
+        for i in range(len(self.sequence) - window + 1):
             # compute sin and cos of angles
             sumsin = sumcos = 0.0
             for aa, theta in zip(self.sequence[i:i+window], angles):
@@ -332,11 +329,9 @@ class Peptide(object):
                 sumcos += scale[aa] * math.cos(math.radians(theta))
             # compute hydrophobic moment of window
             hm = math.sqrt(sumsin**2 + sumcos**2) / window
-            # record if maximum
             if hm > moment:
                 moment = hm
 
-        # return the maximal hydrophobic moment
         return moment
 
     def hydrophobicity(self, scale: str = "KyteDoolittle") -> float:
@@ -439,11 +434,6 @@ class Peptide(object):
         s += sum(scale.get(aa, 0.0) for aa in self.sequence)
         return s
 
-    def membrane_position(self):
-        """Compute the theoretical class of a protein sequence.
-        """
-        raise NotImplementedError("membrane_position")
-
     def molecular_weight(self, average: str = "expasy", aa_shift=None) -> float:
         """Compute the molecular weight of a protein sequence.
 
@@ -497,6 +487,71 @@ class Peptide(object):
             mass /= charge            # divide by charge state
 
         return mass
+
+    # --- Profiles -----------------------------------------------------------
+
+    def hydrophobicity_profile(self, window: int = 11, scale: str = "KyteDoolittle"):
+        """Build a hydrophobicity profile of a sliding window.
+
+        Example:
+            >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
+            >>> h = peptide.hydrophobicity_profile(window=12, scale="Eisenberg")
+            >>> [round(x, 3) for x in h]
+            [0.083, 0.147, 0.446, 0.632, 0.802, 0.955, 0.955, 0.944, 0.944]
+
+        """
+        if scale not in tables.HYDROPHOBICITY:
+            raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
+
+        profile = array.array("d")
+        for i in range(len(self.sequence) - window + 1):
+            profile.append(self[i:i+window].hydrophobicity(scale=scale))
+
+        return profile
+
+    def hydrophobic_moment_profile(self, window: int = 11, angle: int = 100):
+        """Build a hydrophobic moment profile of a sliding window.
+
+        Example:
+            >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
+            >>> uH = peptide.hydrophobic_moment_profile(window=12, angle=100)
+            >>> [round(x, 3) for x in uH]
+            [0.353, 0.317, 0.274, 0.274, 0.253, 0.113, 0.113, 0.108, 0.132]
+
+        """
+        profile = array.array("d")
+        for i in range(len(self.sequence) - window + 1):
+            profile.append(self[i:i+window].hydrophobic_moment(window=window-1, angle=angle))
+
+        return profile
+
+    def membrane_position_profile(self, window: int = 11, angle: int = 100):
+        """Compute the theoretical class of a protein sequence.
+
+        Example:
+            >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
+            >>> peptide.membrane_position_profile(window=12, angle=100)
+            ['G', 'G', 'G', 'T', 'S', 'T', 'T', 'T', 'T']
+            >>> peptide.membrane_position_profile(window=12, angle=160)
+            ['G', 'G', 'G', 'S', 'S', 'S', 'S', 'S', 'S']
+
+        """
+        profile_H = self.hydrophobicity_profile(window=window, scale="Eisenberg")
+        profile_uH = self.hydrophobic_moment_profile(window=window, angle=angle)
+
+        profile = []
+        for h, uh in zip(profile_H, profile_uH):
+            m = h * -0.421 + 0.579
+            if uh <= m and h >= 0.5:
+                profile.append("T")
+            elif uh <= m and h <= 0.5:
+                profile.append("G")
+            elif uh >= m:
+                profile.append("S")
+            else:
+                profile.append("?")
+
+        return profile
 
     # --- Descriptors --------------------------------------------------------
 
