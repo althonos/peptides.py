@@ -130,7 +130,9 @@ class Peptide(object):
     def __getitem__(self, index: int) -> str:
         pass
 
-    def __getitem__(self, index: typing.Union[int, slice]) -> typing.Union[str, "Peptide"]:
+    def __getitem__(
+        self, index: typing.Union[int, slice]
+    ) -> typing.Union[str, "Peptide"]:
         if isinstance(index, slice):
             return Peptide(self.sequence[index])
         return self.sequence[index]
@@ -155,11 +157,13 @@ class Peptide(object):
         """
         d = {}
         for prefix, method in self.__DESCRIPTORS.items():
-            for i,x in enumerate(method(self)):
+            for i, x in enumerate(method(self)):
                 d[f"{prefix}{i+1}"] = x
         return d
 
-    def auto_correlation(self, table: typing.Dict[str, float], lag: int = 1, center: bool = True) -> float:
+    def auto_correlation(
+        self, table: typing.Dict[str, float], lag: int = 1, center: bool = True
+    ) -> float:
         """Compute the auto-correlation index of a peptide sequence.
 
         Example:
@@ -175,7 +179,7 @@ class Peptide(object):
         if center:
             mu = statistics.mean(table.values())
             sigma = statistics.stdev(table.values())
-            table = {k:(v-mu)/sigma for k,v in table.items()}
+            table = {k: (v - mu) / sigma for k, v in table.items()}
         # compute using Cruciani formula
         s1 = s2 = 0.0
         for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
@@ -184,7 +188,9 @@ class Peptide(object):
         # return correlation
         return s1 / s2
 
-    def auto_covariance(self, table: typing.Dict[str, float], lag: int = 1, center: bool = True) -> float:
+    def auto_covariance(
+        self, table: typing.Dict[str, float], lag: int = 1, center: bool = True
+    ) -> float:
         """Compute the auto-covariance index of a peptide sequence.
 
         Example:
@@ -200,7 +206,7 @@ class Peptide(object):
         if center:
             mu = statistics.mean(table.values())
             sigma = statistics.stdev(table.values())
-            table = {k:(v-mu)/sigma for k,v in table.items()}
+            table = {k: (v - mu) / sigma for k, v in table.items()}
         # compute using Cruciani formula
         s = 0.0
         for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
@@ -208,7 +214,13 @@ class Peptide(object):
         # return correlation
         return s / len(self.sequence)
 
-    def cross_covariance(self, table1: typing.Dict[str, float], table2: typing.Dict[str, float], lag: int = 1, center: bool =True) -> float:
+    def cross_covariance(
+        self,
+        table1: typing.Dict[str, float],
+        table2: typing.Dict[str, float],
+        lag: int = 1,
+        center: bool = True,
+    ) -> float:
         """Compute the cross-covariance index of a peptide sequence.
 
         Example:
@@ -225,10 +237,10 @@ class Peptide(object):
         if center:
             mu1 = statistics.mean(table1.values())
             sigma1 = statistics.stdev(table1.values())
-            table1 = {k:(v-mu1)/sigma1 for k,v in table1.items()}
+            table1 = {k: (v - mu1) / sigma1 for k, v in table1.items()}
             mu2 = statistics.mean(table2.values())
             sigma2 = statistics.stdev(table2.values())
-            table2 = {k:(v-mu2)/sigma2 for k,v in table2.items()}
+            table2 = {k: (v - mu2) / sigma2 for k, v in table2.items()}
         # compute using Cruciani formula
         s = 0.0
         for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
@@ -296,13 +308,13 @@ class Peptide(object):
             raise ValueError(f"Invalid pK scale: {scale!r}")
 
         # nterm
-        charge = 1.0 / (1.0 + 10**(1.0 * (pH - scale['nTer'])))
+        charge = 1.0 / (1.0 + 10 ** (1.0 * (pH - scale["nTer"])))
         # aa
         for aa in self.sequence:
             sign = sign_scale.get(aa, 0)
-            charge += sign / (1 + 10**(sign * (pH - scale.get(aa, 0))))
+            charge += sign / (1 + 10 ** (sign * (pH - scale.get(aa, 0))))
         # cterm
-        charge += -1.0 / (1.0 + 10**(-1.0 * (pH - scale['cTer'])))
+        charge += -1.0 / (1.0 + 10 ** (-1.0 * (pH - scale["cTer"])))
 
         return charge
 
@@ -318,17 +330,17 @@ class Peptide(object):
 
         """
         scale = tables.HYDROPHOBICITY["Eisenberg"]
-        angles = [(angle*i)%360 for i in range(window)]
+        angles = [(angle * i) % 360 for i in range(window)]
         moment = 0.0
 
         for i in range(len(self.sequence) - window + 1):
             # compute sin and cos of angles
             sumsin = sumcos = 0.0
-            for aa, theta in zip(self.sequence[i:i+window], angles):
+            for aa, theta in zip(self.sequence[i : i + window], angles):
                 sumsin += scale[aa] * math.sin(math.radians(theta))
                 sumcos += scale[aa] * math.cos(math.radians(theta))
             # compute hydrophobic moment of window
-            hm = math.sqrt(sumsin**2 + sumcos**2) / window
+            hm = math.sqrt(sumsin ** 2 + sumcos ** 2) / window
             if hm > moment:
                 moment = hm
 
@@ -360,47 +372,51 @@ class Peptide(object):
 
         """
         scale = tables.INSTABILITY["Guruprasad"]
-        gp = sum(scale[self.sequence[i:i+2]] for i in range(len(self.sequence) - 1))
+        gp = sum(scale[self.sequence[i : i + 2]] for i in range(len(self.sequence) - 1))
         return gp * 10 / (len(self.sequence))
 
     def isoelectric_point(self, pKscale: str = "EMBOSS") -> float:
-          """Compute the isoelectric point of a protein sequence.
+        """Compute the isoelectric point of a protein sequence.
 
-          The isoelectric point (*pI*), is the *pH* at which a particular
-          molecule or surface carries no net electrical charge.
+        The isoelectric point (*pI*), is the *pH* at which a particular
+        molecule or surface carries no net electrical charge.
 
-          Example:
-              >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
-              >>> peptide.isoelectric_point(pKscale="EMBOSS")
-              9.71...
-              >>> peptide.isoelectric_point(pKscale="Murray")
-              9.81...
-              >>> peptide.isoelectric_point(pKscale="Sillero")
-              9.89...
-              >>> peptide.isoelectric_point(pKscale="Solomon")
-              9.58...
-              >>> peptide.isoelectric_point(pKscale="Stryer")
-              9.62...
-              >>> peptide.isoelectric_point(pKscale="Lehninger")
-              9.93...
-              >>> peptide.isoelectric_point(pKscale="Dawson")
-              9.56...
-              >>> peptide.isoelectric_point(pKscale="Rodwell")
-              9.71...
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> peptide.isoelectric_point(pKscale="EMBOSS")
+            9.71...
+            >>> peptide.isoelectric_point(pKscale="Murray")
+            9.81...
+            >>> peptide.isoelectric_point(pKscale="Sillero")
+            9.89...
+            >>> peptide.isoelectric_point(pKscale="Solomon")
+            9.58...
+            >>> peptide.isoelectric_point(pKscale="Stryer")
+            9.62...
+            >>> peptide.isoelectric_point(pKscale="Lehninger")
+            9.93...
+            >>> peptide.isoelectric_point(pKscale="Dawson")
+            9.56...
+            >>> peptide.isoelectric_point(pKscale="Rodwell")
+            9.71...
 
-          """
-          # use a simple bissecting loop to minimize the charge function
-          top, bottom, x = 0.0, 14.0, 7.0
-          while not math.isclose(top, bottom):
-              x = (top+bottom) / 2
-              c = self.charge(pH=x, pKscale=pKscale)
-              if c >= 0:
-                  top = x
-              if c <= 0:
-                  bottom = x
-          return x
+        """
+        # use a simple bissecting loop to minimize the charge function
+        top, bottom, x = 0.0, 14.0, 7.0
+        while not math.isclose(top, bottom):
+            x = (top + bottom) / 2
+            c = self.charge(pH=x, pKscale=pKscale)
+            if c >= 0:
+                top = x
+            if c <= 0:
+                bottom = x
+        return x
 
-    def mass_shift(self, aa_shift: typing.Union[str, typing.Dict[str, float], None]="silac_13c", monoisotopic: bool = True) -> float:
+    def mass_shift(
+        self,
+        aa_shift: typing.Union[str, typing.Dict[str, float], None] = "silac_13c",
+        monoisotopic: bool = True,
+    ) -> float:
         """Compute the mass difference of modified peptides.
 
         Example:
@@ -423,18 +439,24 @@ class Peptide(object):
                 scale["K"] = table["K"] - 0.071499 * (not monoisotopic)
                 scale["R"] = table["R"] - 0.078669 * (not monoisotopic)
             elif aa_shift == "15n":
-                for k,v in table.items():
+                for k, v in table.items():
                     scale[k] = v * 0.997035 - 0.003635 * (not monoisotopic)
         elif isinstance(aa_shift, dict):
             scale = aa_shift
         else:
-            raise TypeError(f"Expected str or dict, found {aa_shift.__class__.__name__}")
+            raise TypeError(
+                f"Expected str or dict, found {aa_shift.__class__.__name__}"
+            )
 
         s = scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
         s += sum(scale.get(aa, 0.0) for aa in self.sequence)
         return s
 
-    def molecular_weight(self, average: str = "expasy", aa_shift: typing.Union[str, typing.Dict[str, float], None]=None) -> float:
+    def molecular_weight(
+        self,
+        average: str = "expasy",
+        aa_shift: typing.Union[str, typing.Dict[str, float], None] = None,
+    ) -> float:
         """Compute the molecular weight of a protein sequence.
 
         Example:
@@ -457,11 +479,18 @@ class Peptide(object):
         mass += scale["H2O"]
         # add mass shift for labeled proteins
         if aa_shift is not None:
-            mass += self.mass_shift(aa_shift=aa_shift, monoisotopic=average=="monoisotopic")
+            mass += self.mass_shift(
+                aa_shift=aa_shift, monoisotopic=average == "monoisotopic"
+            )
 
         return mass
 
-    def mz(self, charge: int = 2, aa_shift: typing.Union[str, typing.Dict[str, float], None] =None, cysteins: float = 57.021464) -> float:
+    def mz(
+        self,
+        charge: int = 2,
+        aa_shift: typing.Union[str, typing.Dict[str, float], None] = None,
+        cysteins: float = 57.021464,
+    ) -> float:
         """Compute the m/z (mass/charge) ratio for a peptide.
 
         Example:
@@ -483,14 +512,16 @@ class Peptide(object):
         mass += self.sequence.count("C") * cysteins
         # modify for charged peptides
         if charge >= 0:
-            mass += charge * 1.007276 # weights of H+1 ions
-            mass /= charge            # divide by charge state
+            mass += charge * 1.007276  # weights of H+1 ions
+            mass /= charge  # divide by charge state
 
         return mass
 
     # --- Profiles -----------------------------------------------------------
 
-    def hydrophobicity_profile(self, window: int = 11, scale: str = "KyteDoolittle") -> typing.Sequence[float]:
+    def hydrophobicity_profile(
+        self, window: int = 11, scale: str = "KyteDoolittle"
+    ) -> typing.Sequence[float]:
         """Build a hydrophobicity profile of a sliding window.
 
         Example:
@@ -505,11 +536,13 @@ class Peptide(object):
 
         profile = array.array("d")
         for i in range(len(self.sequence) - window + 1):
-            profile.append(self[i:i+window].hydrophobicity(scale=scale))
+            profile.append(self[i : i + window].hydrophobicity(scale=scale))
 
         return profile
 
-    def hydrophobic_moment_profile(self, window: int = 11, angle: int = 100) -> typing.Sequence[float]:
+    def hydrophobic_moment_profile(
+        self, window: int = 11, angle: int = 100
+    ) -> typing.Sequence[float]:
         """Build a hydrophobic moment profile of a sliding window.
 
         Example:
@@ -521,11 +554,15 @@ class Peptide(object):
         """
         profile = array.array("d")
         for i in range(len(self.sequence) - window + 1):
-            profile.append(self[i:i+window].hydrophobic_moment(window=window-1, angle=angle))
+            profile.append(
+                self[i : i + window].hydrophobic_moment(window=window - 1, angle=angle)
+            )
 
         return profile
 
-    def membrane_position_profile(self, window: int = 11, angle: int = 100) -> typing.Sequence[str]:
+    def membrane_position_profile(
+        self, window: int = 11, angle: int = 100
+    ) -> typing.Sequence[str]:
         """Compute the theoretical class of a protein sequence.
 
         Example:
@@ -641,7 +678,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.KIDERA)):
             scale = tables.KIDERA[f"KF{i+1}"]
-            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence)
+            )
         return KideraFactors(*out)
 
     def ms_whim_scores(self) -> MSWHIMScores:
@@ -659,7 +698,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.MSWHIM)):
             scale = tables.MSWHIM[f"MSWHIM{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return MSWHIMScores(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
@@ -682,7 +723,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.PROTFP)):
             scale = tables.PROTFP[f"ProtFP{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return ProtFPDescriptors(*out)
 
     def st_scales(self) -> STScales:
@@ -705,7 +748,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.ST_SCALES)):
             scale = tables.ST_SCALES[f"ST{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return STScales(*out)
 
     def t_scales(self) -> TScales:
@@ -725,7 +770,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.T_SCALES)):
             scale = tables.T_SCALES[f"T{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return TScales(*out)
 
     def vhse_scales(self) -> VHSEScales:
@@ -748,7 +795,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.VHSE)):
             scale = tables.VHSE[f"VHSE{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return VHSEScales(*out)
 
     def z_scales(self) -> ZScales:
@@ -768,7 +817,9 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.Z_SCALES)):
             scale = tables.Z_SCALES[f"Z{i+1}"]
-            out.append(sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence))
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
         return ZScales(*out)
 
     __DESCRIPTORS = {
@@ -781,5 +832,5 @@ class Peptide(object):
         "ST": st_scales,
         "T": t_scales,
         "VHSE": vhse_scales,
-        "Z": z_scales
+        "Z": z_scales,
     }
