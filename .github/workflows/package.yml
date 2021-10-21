@@ -15,10 +15,10 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: true
-    - name: Setup Python 3.9
+    - name: Setup Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: "3.10"
     - name: Install build requirements
       run: python -m pip install -r .github/workflows/requirements.txt
     - name: Build wheel
@@ -37,10 +37,10 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: true
-    - name: Set up Python 3.9
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: "3.10"
     - name: Install build requirements
       run: python -m pip install -r .github/workflows/requirements.txt
     - name: Build wheel distribution
@@ -57,8 +57,7 @@ jobs:
     name: Upload
     needs:
     - sdist
-    - wheel-linux
-    - wheel-osx
+    - wheel
     steps:
     - name: Download built distributions
       uses: actions/download-artifact@v2
@@ -72,5 +71,3 @@ jobs:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
         skip_existing: false
-
-  

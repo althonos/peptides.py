@@ -7,4 +7,5 @@ coverage ~=5.0
 codecov ~=2.0
 
 # deployment dependencies
+wheel
 auditwheel
