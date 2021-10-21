@@ -3,5 +3,6 @@ include           CHANGELOG.md
 include           COPYING
 include           pyproject.toml
 recursive-include peptides/data             *.csv *.py
+include           peptides/py.typed
 exclude           peptides/data/tables.py
 prune             tests
