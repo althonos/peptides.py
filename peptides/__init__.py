@@ -416,6 +416,11 @@ class Peptide(object):
             >>> peptide.hydrophobic_moment(angle=160)
             0.270590...
 
+        See Also:
+            The `~Peptide.hydrophobic_moment_profile` method, which builds
+            a profile for each amino acid position instead of simply
+            extracting the global maximum.
+
         References:
             - Eisenberg, D., R. M. Weiss, and T. C. Terwilliger.
               *The Hydrophobic Moment Detects Periodicity in Protein
@@ -765,6 +770,12 @@ class Peptide(object):
             equal to the pI of the protein, it tends to precipitate and lose
             its biological function.
 
+        References:
+            - Rice, P., I. Longden, and A. Bleasby.
+              *EMBOSS: The European Molecular Biology Open Software Suite*.
+              Trends in Genetics. June 2000;16(6):276–77.
+              doi:10.1016/s0168-9525(00)02024-2. PMID:10827456
+
         """
         # use a simple bissecting loop to minimize the charge function
         top, bottom, x = 0.0, 14.0, 7.0
@@ -976,11 +987,21 @@ class Peptide(object):
     ) -> typing.Sequence[float]:
         """Build a hydrophobic moment profile of a sliding window.
 
+        This function builds a profile computing the hydrophobic moment of
+        a section of the peptide based on the primary sequecne.
+
+        Arguments:
+
+
         Example:
             >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
             >>> uH = peptide.hydrophobic_moment_profile(window=12, angle=100)
             >>> [round(x, 3) for x in uH]
             [0.353, 0.317, 0.274, 0.274, 0.253, 0.113, 0.113, 0.108, 0.132]
+
+        See Also:
+            The `~Peptide.hydrophobic_moment` method, which computes the
+            maximal hydrophobic moment instead of building a profile.
 
         """
         profile = array.array("d")
@@ -993,8 +1014,25 @@ class Peptide(object):
 
     def membrane_position_profile(
         self, window: int = 11, angle: int = 100
-    ) -> typing.Sequence[str]:
+    ) -> typing.List[str]:
         """Compute the theoretical class of a protein sequence.
+
+        This function builds a profile predicting the theoretical class
+        of a section of the peptide based on the relationship between the
+        hydrophobic moment and hydrophobicity scale as proposed by
+        Eisenberg (1984).
+
+        Arguments:
+            window (`int`): The window size to consider when building the
+                profile.
+            angle (`int`): The protein rotational angle, in **degrees**, for
+                which to compute the hydrophobic moment profile. Usual
+                values are *100* for α-helix, and *160* for β-sheet.
+
+        Returns:
+            `list` of `str`: A list containing a one-character code for
+            each window starting position: either `'G'` for globular,
+            `'T'` for transmembrane, or `'S'` for surface.
 
         Example:
             >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
@@ -1002,6 +1040,21 @@ class Peptide(object):
             ['G', 'G', 'G', 'T', 'S', 'T', 'T', 'T', 'T']
             >>> peptide.membrane_position_profile(window=12, angle=160)
             ['G', 'G', 'G', 'S', 'S', 'S', 'S', 'S', 'S']
+
+        References:
+            - Eisenberg, D.
+              *Three-Dimensional Structure of Membrane and Surface Proteins*.
+              Annual Review of Biochemistry. July 1984;53:595–623.
+              doi:10.1146/annurev.bi.53.070184.003115. PMID:6383201.
+            - Eisenberg, D., E. Schwarz, M. Komaromy, and R. Wall.
+              *Analysis of Membrane and Surface Protein Sequences with
+              the Hydrophobic Moment Plot*.
+              Journal of Molecular Biology. Oct 1984;179(1):125–42.
+              doi:10.1016/0022-2836(84)90309-7. PMID:6502707.
+            - Eisenberg, D., R. M. Weiss, and T. C. Terwilliger.
+              *The Helical Hydrophobic Moment: A Measure of the
+              Amphiphilicity of a Helix*. Nature. Sep 1982;299(5881):371–74.
+              doi:10.1038/299371a0. PMID:7110359
 
         """
         profile_H = self.hydrophobicity_profile(window=window, scale="Eisenberg")
@@ -1026,6 +1079,14 @@ class Peptide(object):
     def blosum_indices(self) -> BLOSUMIndices:
         """Compute the BLOSUM62-derived indices of a peptide sequence.
 
+        BLOSUM indices were derived of physicochemical properties that have
+        been subjected to a VARIMAX analysis and an alignment matrix of the
+        20 natural AAs using the BLOSUM62 matrix.
+
+        Returns:
+            `peptides.BLOSUMIndices`: The computed average BLOSUM indices
+            for all the amino acids in the peptide.
+
         Example:
             >>> peptide = Peptide("KLKLLLLLKLK")
             >>> for i, b in enumerate(peptide.blosum_indices()):
@@ -1041,6 +1102,12 @@ class Peptide(object):
             BLOSUM9   -0.2145
             BLOSUM10  -0.3218
 
+        References:
+            - Georgiev, A. G.
+              *Interpretable Numerical Descriptors of Amino Acid Space*.
+              Journal of Computational Biology. May 2009;16(5):703–23.
+              doi:10.1089/cmb.2008.0173. PMID:19432540.
+
         """
         out = array.array("d")
         for i in range(len(tables.BLOSUM)):
@@ -1051,6 +1118,17 @@ class Peptide(object):
     def cruciani_properties(self) -> CrucianiProperties:
         """Compute the Cruciani properties of protein sequence.
 
+        The Cruciani properties are a collection of scaled principal
+        component scores that summarize a broad set of descriptors
+        calculated based on the interaction of each amino acid residue with
+        several chemical groups (or "probes"), such as charged ions, methyl,
+        hydroxyl groups, and so forth.
+
+        Returns:
+            `peptides.CrucianiProperties`: The computed average Cruciani
+            properties of all the amino acids in the corresponding peptide
+            sequence.
+
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, b in enumerate(peptide.cruciani_properties()):
@@ -1058,6 +1136,14 @@ class Peptide(object):
             PP1   -0.1130
             PP2   -0.0220
             PP3    0.2735
+
+        References:
+            - Cruciani, G., M. Baroni, E. Carosati, M. Clementi, R. Valigi,
+              and S. Clementi.
+              *Peptide Studies by Means of Principal Properties of Amino
+              Acids Derived from MIF Descriptors*.
+              Journal of Chemometrics. 2004;18(3-4):146–55.
+              doi:10.1002/cem.856.
 
         """
         out = array.array("d")
@@ -1068,6 +1154,17 @@ class Peptide(object):
 
     def fasgai_vectors(self) -> FasgaiVectors:
         """Compute the FASGAI vectors of a protein sequence.
+
+        The FASGAI vectors (Factor Analysis Scales of Generalized Amino
+        Acid Information) is a set of amino acid descriptors, that reflects
+        hydrophobicity, alpha and turn propensities, bulky properties,
+        compositional characteristics, local flexibility, and electronic
+        properties, that can be utilized to represent the sequence
+        structural features of peptides or protein motifs.
+
+        Returns:
+            `peptides.FasgaiVectors`: The computed average FASGAI vectors
+            for all the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1080,6 +1177,14 @@ class Peptide(object):
             F5   -0.38015
             F6    0.52740
 
+        References:
+            - Liang, G., G. Chen, W. Niu, and Z. Li.
+              *Factor Analysis Scales of Generalized Amino Acid Information
+              as Applied in Predicting Interactions between the Human
+              Amphiphysin-1 SH3 Domains and Their Peptide Ligands*.
+              Chemical Biology & Drug Design. Apr 2008;71(4):345–51.
+              doi:10.1111/j.1747-0285.2008.00641.x. PMID:18318694.
+
         """
         out = array.array("d")
         for i in range(len(tables.FASGAI)):
@@ -1089,6 +1194,19 @@ class Peptide(object):
 
     def kidera_factors(self) -> KideraFactors:
         """Compute the Kidera factors of a protein sequence.
+
+        The Kidera Factors were originally derived by applying multivariate
+        analysis to 188 physical properties of the 20 amino acids and using
+        dimension reduction techniques.
+
+        Returns:
+            `peptides.KideraFactors`: The compute average of Kidera factors
+            for all the amino acids in the peptide. *KF1* models helix/bend
+            preference, *KF2* the side-chain size, *KF3* the extended
+            structure preference, *KF5* the double-bend preference, *KF6*
+            the partial specific volume, *KF7* the flat extended preference,
+            *KF8* the occurence in alpha regions, *KF9* the pK-C, *KF10*
+            the surrounding hydrophobicity.
 
         Example:
             >>> peptide = Peptide("KLKLLLLLKLK")
@@ -1105,6 +1223,13 @@ class Peptide(object):
             KF9    0.1118
             KF10   0.8100
 
+        References:
+            - Kidera, A., Y. Konishi, M. Oka, T. Ooi, and H. A. Scheraga.
+              *Statistical Analysis of the Physical Properties of the 20
+              Naturally Occurring Amino Acids*.
+              Journal of Protein Chemistry. Feb 1985;4(1):23–55.
+              doi:10.1007/BF01025492.
+
         """
         out = array.array("d")
         for i in range(len(tables.KIDERA)):
@@ -1117,6 +1242,14 @@ class Peptide(object):
     def ms_whim_scores(self) -> MSWHIMScores:
         """Compute the MS-WHIM scores of a protein sequence.
 
+        MS-WHIM scores were derived from 36 electrostatic potential
+        properties derived from the three-dimensional structure of the
+        20 natural amino acids.
+
+        Returns:
+            `peptides.MSWHIMScores`: The compute average of MS-WHIM scores
+            of all the amino acids in the peptide.
+
         Example:
             >>> peptide = Peptide("KLKLLLLLKLK")
             >>> for i, mw in enumerate(peptide.ms_whim_scores()):
@@ -1124,6 +1257,24 @@ class Peptide(object):
             MSWHIM1   -0.6564
             MSWHIM2    0.4873
             MSWHIM3    0.1164
+
+        References:
+            - Bravi, G., E. Gancia, P. Mascagni, M. Pegna, R. Todeschini,
+              and A. Zaliani.
+              *MS-WHIM, New 3D Theoretical Descriptors Derived from
+              Molecular Surface Properties: A Comparative 3D QSAR Study in a
+              Series of Steroids*. Journal of Computer-Aided Molecular
+              Design. Jan 1997;11(1):79-92.
+              doi:10.1023/a:1008079512289. PMID:9139115
+            - Gancia, E., G. Bravi, P. Mascagni, and A. Zaliani.
+              *Global 3D-QSAR Methods: MS-WHIM and Autocorrelation*. Journal
+              of Computer-Aided Molecular Design. Mar 2000;14(3):293–306.
+              doi:10.1023/a:1008142124682. PMID:10756483.
+            - Zaliani, A., and E. Gancia.
+              *MS-WHIM Scores for Amino Acids: A New 3D-Description for
+              Peptide QSAR and QSPR Studies*. Journal of Chemical
+              Information and Computer Sciences. May 1999;39(3):525–33.
+              doi:10.1021/ci980211b.
 
         """
         out = array.array("d")
@@ -1135,7 +1286,16 @@ class Peptide(object):
         return MSWHIMScores(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
-        """Compute the protFP descriptors of a protein sequence.
+        """Compute the ProtFP descriptors of a protein sequence.
+
+        The ProtFP descriptor set was constructed from a large initial
+        selection of indices obtained from the
+        `AAindex <https://www.genome.jp/aaindex/>`_ database for all 20
+        naturally occurring amino acids.
+
+        Returns:
+            `peptides.ProtFPDescriptors`: The computed average of ProtFP
+            descriptors of all the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1150,6 +1310,21 @@ class Peptide(object):
             ProtFP7    0.1715
             ProtFP8    0.1135
 
+        References:
+            - van Westen, G. J., R. F. Swier, J. K. Wegner, A. P. Ijzerman,
+              H. W. van Vlijmen, and A. Bender.
+              *Benchmarking of Protein Descriptor Sets in Proteochemometric
+              Modeling (Part 1): Comparative Study of 13 Amino Acid
+              Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):41.
+              doi:10.1186/1758-2946-5-41. PMID:24059694.
+            - van Westen, G. J., R. F. Swier, I. Cortes-Ciriano,
+              J. K. Wegner, J. P. Overington, A. P. Ijzerman,
+              H. W. van Vlijmen, and A. Bender.
+              *Benchmarking of Protein Descriptor Sets in Proteochemometric
+              Modeling (Part 2): Modeling Performance of 13 Amino Acid
+              Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):42.
+              doi:10.1186/1758-2946-5-42. PMID:24059743.
+
         """
         out = array.array("d")
         for i in range(len(tables.PROTFP)):
@@ -1161,6 +1336,15 @@ class Peptide(object):
 
     def st_scales(self) -> STScales:
         """Compute the ST-scales of a protein sequence.
+
+        The ST-scales were proposed in Yang *et al* (2010), taking 827
+        properties into account which are mainly constitutional,
+        topological, geometrical, hydrophobic, electronic, and steric
+        properties of a total set of 167 amino acids.
+
+        Returns:
+            `peptides.STScales`: The computed average of ST-scales of all
+            the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1175,6 +1359,13 @@ class Peptide(object):
             ST7    0.58020
             ST8    0.54400
 
+        References:
+            - Yang, L., M. Shu, K. Ma, H. Mei, Y. Jiang, and Z. Li.
+              *ST-Scale as a Novel Amino Acid Descriptor and Its Application
+              in QSAM of Peptides and Analogues*.
+              Amino Acids. Mar 2010;38(3):805–16.
+              doi:10.1007/s00726-009-0287-y. PMID:19373543.
+
         """
         out = array.array("d")
         for i in range(len(tables.ST_SCALES)):
@@ -1187,6 +1378,15 @@ class Peptide(object):
     def t_scales(self) -> TScales:
         """Compute the T-scales of a protein sequence.
 
+        The T-scales are based on 67 common topological descriptors of 135
+        amino acids. These topological descriptors are based on the
+        connectivity table of amino acids alone, and to not explicitly
+        consider 3D properties of each structure.
+
+        Returns:
+            `peptides.TScales`: The computed average of T-scales of all the
+            amino acids in the peptide.
+
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, t in enumerate(peptide.t_scales()):
@@ -1196,6 +1396,13 @@ class Peptide(object):
             T3   -0.3855
             T4   -0.1475
             T5    0.7585
+
+        References:
+            - Tian, F., P. Zhou, and Z. Li.
+              *T-Scale as a Novel Vector of Topological Descriptors for
+              Amino Acids and Its Application in QSARs of Peptides*.
+              Journal of Molecular Structure. Mar 2007;830(1):106–15.
+              doi:10.1016/j.molstruc.2006.07.004.
 
         """
         out = array.array("d")
@@ -1208,6 +1415,20 @@ class Peptide(object):
 
     def vhse_scales(self) -> VHSEScales:
         """Compute the VHSE-scales of a protein sequence.
+
+        The VHSE-scales (principal components score Vectors of Hydrophobic,
+        Steric, and Electronic properties), are derived from principal
+        components analysis (PCA) on independent families of 18 hydrophobic
+        properties, 17 steric properties, and 15 electronic properties,
+        respectively, which are included in total 50 physicochemical
+        variables of 20 coded amino acids.
+
+        Returns:
+            `peptides.VHSEScales`: The computed average of VHSE-scales of
+            the amino acids in the peptide. *VHSE1* and *VHSE2* represent
+            hydrophobic properties, *VHSE3* and *VHSE4* represent steric
+            properties, while *VHSE5*, *VHSE6*, *VHSE7* and *VHSE8*
+            represent electronic properties.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1222,6 +1443,12 @@ class Peptide(object):
             VHSE7    0.1740
             VHSE8   -0.0960
 
+        References:
+            - Mei, H., Z. H. Liao, Y. Zhou, and S. Z. Li. *A New Set of
+              Amino Acid Descriptors and Its Application in Peptide QSARs*.
+              Biopolymers. 2005;80(6):775-86.
+              doi:10.1002/bip.20296. PMID:15895431.
+
         """
         out = array.array("d")
         for i in range(len(tables.VHSE)):
@@ -1234,6 +1461,11 @@ class Peptide(object):
     def z_scales(self) -> ZScales:
         """Compute the Z-scales of a protein sequence.
 
+        The Z-scales were proposed in Sandberg *et al* (1998) based on
+        physicochemical properties of proteogenic and non-proteogenic
+        amino acids, including NMR data and thin-layer chromatography
+        (TLC) data.
+
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, z in enumerate(peptide.z_scales()):
@@ -1243,6 +1475,23 @@ class Peptide(object):
             Z3    0.0000
             Z4    0.8130
             Z5   -0.8285
+
+        Returns:
+            `peptides.ZScales`: The computed average of Z-scales of all
+            the amino acid in the peptide. *Z1* quantifies lipophilicity,
+            *Z2* models steric properties (like steric bulk and
+            polarizability), *Z3* quantifies electronic properties (like
+            polarity and charge) while *Z4* and *Z5* relate
+            electronegativity, heat of formation, electrophilicity, and
+            hardness.
+
+        References:
+            - Sandberg, M., L. Eriksson, J. Jonsson, M. Sjöström, and
+              S. Wold. *New Chemical Descriptors Relevant for the Design of
+              Biologically Active Peptides. A Multivariate Characterization
+              of 87 Amino Acids*.
+              Journal of Medicinal Chemistry. Jul 1998;41(14):2481–91.
+              doi:10.1021/jm9700575. PMID:9651153.
 
         """
         out = array.array("d")

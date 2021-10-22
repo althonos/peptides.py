@@ -18,7 +18,7 @@
 ## 🗺️ Overview
 
 `peptides.py` is a pure-Python package to compute common descriptors for
-protein sequences. It is a port of `Peptides`, the R package written by
+protein sequences. It is a port of [`Peptides`](https://cran.r-project.org/web/packages/Peptides/index.html), the R package written by
 [Daniel Osorio](https://orcid.org/0000-0003-4424-8422) for the same purpose.
 This library has no external dependency and is available for all modern Python
 versions (3.6+).
