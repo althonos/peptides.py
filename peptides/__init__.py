@@ -497,8 +497,8 @@ class Peptide(object):
             # compute sin and cos of angles
             sumsin = sumcos = 0.0
             for aa, theta in zip(self.sequence[i : i + window], angles):
-                sumsin += scale[aa] * math.sin(math.radians(theta))
-                sumcos += scale[aa] * math.cos(math.radians(theta))
+                sumsin += scale.get(aa, 0.0) * math.sin(math.radians(theta))
+                sumcos += scale.get(aa, 0.0) * math.cos(math.radians(theta))
             # compute hydrophobic moment of window
             hm = math.sqrt(sumsin ** 2 + sumcos ** 2) / window
             if hm > moment:
@@ -759,7 +759,7 @@ class Peptide(object):
         table = tables.HYDROPHOBICITY.get(scale)
         if table is None:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
-        return sum(table[aa] for aa in self.sequence) / len(self.sequence)
+        return sum(table.get(aa, 0.0) for aa in self.sequence) / len(self.sequence)
 
     def instability_index(self) -> float:
         """Compute the instability index of a protein sequence.
@@ -788,7 +788,7 @@ class Peptide(object):
 
         """
         scale = tables.INSTABILITY["Guruprasad"]
-        gp = sum(scale[self.sequence[i : i + 2]] for i in range(len(self.sequence) - 1))
+        gp = sum(scale.get(self.sequence[i : i + 2], 1.0) for i in range(len(self.sequence) - 1))
         return gp * 10 / (len(self.sequence))
 
     def isoelectric_point(self, pKscale: str = "EMBOSS") -> float:
@@ -1172,7 +1172,7 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.BLOSUM)):
             scale = tables.BLOSUM[f"BLOSUM{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
         return BLOSUMIndices(*out)
 
     def cruciani_properties(self) -> CrucianiProperties:
@@ -1209,7 +1209,7 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.CRUCIANI)):
             scale = tables.CRUCIANI[f"PP{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
         return CrucianiProperties(*out)
 
     def fasgai_vectors(self) -> FasgaiVectors:
@@ -1249,7 +1249,7 @@ class Peptide(object):
         out = array.array("d")
         for i in range(len(tables.FASGAI)):
             scale = tables.FASGAI[f"F{i+1}"]
-            out.append(sum(scale[aa] for aa in self.sequence) / len(self.sequence))
+            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
         return FasgaiVectors(*out)
 
     def kidera_factors(self) -> KideraFactors:
