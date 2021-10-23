@@ -18,6 +18,7 @@ __license__ = "GPLv3"
 __credits__ = """
 Daniel Osorio, Paola Rondón-Villarreal and Rodrigo Torres for ``Peptides``.
 Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
+Dong-Sheng Cao, Nan Xiao, Qing-Song Xu, and Alex F. Chen for ``Rcpi``.
 """.strip()
 
 
@@ -1473,13 +1474,13 @@ class Peptide(typing.Sequence[str]):
             E5   -0.1059
 
         References:
-            - Venkatarajan, M. S., and W. Braun.
+            - Mathura, V. S., and W. Braun.
               *New Quantitative Descriptors of Amino Acids Based on
               Multidimensional Scaling of a Large Number of
               Physical–Chemical Properties*.
               Molecular Modeling Annual. Dec 2001;7(12):445–53.
               doi:10.1007/s00894-001-0058-5.
-            - Venkatarajan, M. S., D. Paris, and M. J. Mullan.
+            - Mathura, V. S., D. Paris, and M. J. Mullan.
               *A Novel Physico-Chemical Property Based Model for Studying
               the Effects of Mutation on the Aggregation of Peptides*.
               Protein and Peptide Letters. 2009;16(8):991–98.

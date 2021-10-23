@@ -57,9 +57,12 @@ Overview
 --------
 
 ``peptides.py`` is a pure-Python package to compute common descriptors for
-protein sequences. It is a port of `Peptides <https://cran.r-project.org/web/packages/Peptides/index.html>`_,
+protein sequences. It started as a port of `Peptides <https://cran.r-project.org/web/packages/Peptides/index.html>`_,
 the R package written by `Daniel Osorio <https://orcid.org/0000-0003-4424-8422>`_
-for the same purpose. This library has no external dependency and is
+for the same purpose, but now also provides some more features from
+`EMBOSS <http://emboss.bioinformatics.nl/cgi-bin/emboss/>`_,
+`ExPASy Protein Identification and Analysis Tools <https://web.expasy.org/protparam/>`_,
+and `Rcpi <https://bioconductor.org/packages/release/bioc/html/Rcpi.html>`_. This library has no external dependency and is
 available for all modern Python versions (3.6+).
 
 A non-exhaustive list of available features:
@@ -76,6 +79,7 @@ A non-exhaustive list of available features:
   - `FASGAI vectors <https://doi.org/10.1111/j.1747-0285.2008.00641.x>`_
   - `Kidera factors <https://doi.org/10.1007/BF01025492>`_
   - `MS-WHIM scores <https://doi.org/10.1021/ci980211b>`_
+  - `PCP descriptors <https://doi.org/10.1007/s00894-001-0058-5>`_.
   - `ProtFP descriptors <https://doi.org/10.1186/1758-2946-5-41>`_
   - `ST-scales <https://doi.org/10.1007/s00726-009-0287-y>`_
   - `T-scales <https://doi.org/10.1016/j.molstruc.2006.07.004>`_
@@ -124,7 +128,7 @@ This library is provided under the `GNU General Public License v3.0 <https://cho
 The original R `Peptides` package was written by `Daniel Osorio <https://orcid.org/0000-0003-4424-8422>`_,
 `Paola Rondón-Villarreal <https://orcid.org/0000-0001-8209-3885>`_ and
 `Rodrigo Torres <https://orcid.org/0000-0003-1113-3020>`_, and is licensed under
-the terms of the `GPLv2 <https://choosealicense.com/licenses/gpl-2.0/>`_.
+the terms of the `GNU General Public License v2.0 <https://choosealicense.com/licenses/gpl-2.0/>`_.
 
 *This project is in no way not affiliated, sponsored, or otherwise endorsed
 by the original* `Peptides`_ *authors. It was developed by*
