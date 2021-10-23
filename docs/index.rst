@@ -79,8 +79,9 @@ A non-exhaustive list of available features:
   - `FASGAI vectors <https://doi.org/10.1111/j.1747-0285.2008.00641.x>`_
   - `Kidera factors <https://doi.org/10.1007/BF01025492>`_
   - `MS-WHIM scores <https://doi.org/10.1021/ci980211b>`_
-  - `PCP descriptors <https://doi.org/10.1007/s00894-001-0058-5>`_.
+  - `PCP descriptors <https://doi.org/10.1007/s00894-001-0058-5>`_
   - `ProtFP descriptors <https://doi.org/10.1186/1758-2946-5-41>`_
+  - `Sneath vectors <10.1016/0022-5193(66)90112-3>`_
   - `ST-scales <https://doi.org/10.1007/s00726-009-0287-y>`_
   - `T-scales <https://doi.org/10.1016/j.molstruc.2006.07.004>`_
   - `VHSE-scales <https://doi.org/10.1002/bip.20296>`_

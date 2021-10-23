@@ -93,6 +93,13 @@ class ProtFPDescriptors(typing.NamedTuple):
     protfp8: float
 
 
+class SneathVectors(typing.NamedTuple):
+    sv1: float
+    sv2: float
+    sv3: float
+    sv4: float
+
+
 class STScales(typing.NamedTuple):
     st1: float
     st2: float
@@ -1601,6 +1608,48 @@ class Peptide(typing.Sequence[str]):
             )
         return ProtFPDescriptors(*out)
 
+    def sneath_vectors(self) -> SneathVectors:
+        """Compute the Sneath vectors for a protein sequence.
+
+        These vectors were obtained in Sneath (1996) by running PCA on the
+        `ϕ coefficient <https://en.wikipedia.org/wiki/Phi_coefficient>`_
+        to explain the dissimilarity between the 20 natural amino acids
+        based on binary state encoding of 134 physical and chemical
+        properties (such as presence/absence of a —CH₃ group, step-wise
+        optical rotation, etc.).
+
+        Returns:
+            `peptides.SneathVectors`: The computed average of Sneath vectors
+            of all the amino acids in the peptide. *SV1* appears to
+            represent mainly aliphatic properties, *SV2* may model the
+            number of reactive groups, *SV3* the aromatic properties, but
+            *SV4* has no certain interpretation.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, fp in enumerate(peptide.sneath_vectors()):
+            ...     print(f"SV{i+1:<3} {fp: .4f}")
+            SV1    0.1962
+            SV2    0.0466
+            SV3    0.0405
+            SV4    0.0277
+
+        References:
+            - Sneath, P. H. A.
+              *Relations between Chemical Structure and Biological Activity
+              in Peptides*.
+              Journal of Theoretical Biology. Nov 1996;12(2):157–95.
+              doi:10.1016/0022-5193(66)90112-3. PMID:4291386.
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.SNEATH)):
+            scale = tables.SNEATH[f"SV{i+1}"]
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
+        return SneathVectors(*out)
+
     def st_scales(self) -> STScales:
         """Compute the ST-scales of a protein sequence.
 
@@ -1775,7 +1824,9 @@ class Peptide(typing.Sequence[str]):
         "F": fasgai_vectors,
         "KF": kidera_factors,
         "MSWHIM": ms_whim_scores,
+        "E": pcp_descriptors,
         "ProtFP": protfp_descriptors,
+        "SV": sneath_vectors,
         "ST": st_scales,
         "T": t_scales,
         "VHSE": vhse_scales,
