@@ -4,29 +4,30 @@ API Reference
 Peptide
 -------
 
-.. autoclass:: peptides.Peptide(Sequence[str])
+.. autoclass:: peptides.Peptide(typing.Sequence[str])
    :special-members: __init__
    :members:
+
 
 Descriptors
 -----------
 
-.. autoclass:: peptides.BLOSUMIndices
+.. autoclass:: peptides.BLOSUMIndices(typing.NamedTuple)
 
-.. autoclass:: peptides.CrucianiProperties
+.. autoclass:: peptides.CrucianiProperties(typing.NamedTuple)
 
-.. autoclass:: peptides.FasgaiVectors
+.. autoclass:: peptides.FasgaiVectors(typing.NamedTuple)
 
-.. autoclass:: peptides.KideraFactors
+.. autoclass:: peptides.KideraFactors(typing.NamedTuple)
 
-.. autoclass:: peptides.MSWHIMScores
+.. autoclass:: peptides.MSWHIMScores(typing.NamedTuple)
 
-.. autoclass:: peptides.ProtFPDescriptors
+.. autoclass:: peptides.ProtFPDescriptors(typing.NamedTuple)
 
-.. autoclass:: peptides.STScales
+.. autoclass:: peptides.STScales(typing.NamedTuple)
 
-.. autoclass:: peptides.TScales
+.. autoclass:: peptides.TScales(typing.NamedTuple)
 
-.. autoclass:: peptides.VHSEScales
+.. autoclass:: peptides.VHSEScales(typing.NamedTuple)
 
-.. autoclass:: peptides.ZScales
+.. autoclass:: peptides.ZScales(typing.NamedTuple)
