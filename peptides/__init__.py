@@ -313,17 +313,37 @@ class Peptide(object):
     def aliphatic_index(self) -> float:
         """Compute the aliphatic index of the peptide.
 
+        The aliphatic index of a protein was proposed in Ikai (1980). It is
+        defined as the relative volume occupied by aliphatic side chains
+        (Alanine, Valine, Isoleucine, and Leucine). It may be regarded as
+        a positive factor for the increase of thermostability of globular
+        proteins.
+
+        Returns:
+            `float`: The computed aliphatic index for the peptide sequence,
+            between *0* and *100*.
+
         Example:
             >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
             >>> peptide.aliphatic_index()
             117.0
 
+        References:
+            - Ikai, A.
+              *Thermostability and Aliphatic Index of Globular Proteins*.
+              Journal of Biochemistry. Dec 1980;88(6):1895–98.
+              PMID:7462208.
+
         """
+        # count aliphatic residues
         ala = self.sequence.count("A") / len(self.sequence)
         val = self.sequence.count("V") / len(self.sequence)
         leu = self.sequence.count("L") / len(self.sequence)
         ile = self.sequence.count("I") / len(self.sequence)
-        return (ala + 2.9 * val + 3.9 * (leu + ile)) * 100
+        # support unknown Leu/Ile residues
+        xle = self.sequence.count("J") / len(self.sequence)
+        # return aliphatic index
+        return (ala + 2.9 * val + 3.9 * (leu + ile + xle)) * 100
 
     def boman(self) -> float:
         """Compute the Boman (potential peptide interaction) index.
