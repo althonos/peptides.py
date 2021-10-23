@@ -1,4 +1,5 @@
 import array
+import collections
 import math
 import random
 import statistics
@@ -114,6 +115,23 @@ class ZScales(typing.NamedTuple):
 
 
 class Peptide(object):
+
+    # --- Class constants ----------------------------------------------------
+
+    # fmt: off
+    _CODE1 = [
+        "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F",
+        "P", "O", "S", "U", "T", "W", "Y", "V", "B", "Z", "X", "J",
+    ]
+
+    # fmt: off
+    _CODE3 = [
+        "Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly", "His", "Ile",
+        "Leu", "Lys", "Met", "Phe", "Pro", "Pyl", "Ser", "Sec", "Thr", "Trp",
+        "Tyr", "Val", "Asx", "Glx", "Xaa", "Xle",
+    ]
+
+    # --- Class methods ------------------------------------------------------
 
     @classmethod
     def sample(
@@ -307,6 +325,46 @@ class Peptide(object):
         return s / len(self.sequence)
 
     # --- Sequence properties -----------------------------------------------
+
+    def counts(self) -> typing.Dict[str, int]:
+        """Return a table of amino-acid counts in the peptide.
+
+        Returns:
+            `dict`: A dictionary mapping each amino-acid code to the number
+            of times it occurs in the peptide sequence.
+
+        Example:
+            >>> p = Peptide("SDKEVDEVDAALS")
+            >>> {k:v for k,v in p.counts().items() if v != 0}
+            {'A': 2, 'D': 3, 'E': 2, 'L': 1, 'K': 1, 'S': 2, 'V': 2}
+
+        """
+        # NB: This is consistently faster than using a `collections.Counter`
+        #     because `str.count` has a fast C implementation based on
+        #     `memchr` while `collections.Counter` has to iterate, which has
+        #     some overhead.
+        return {
+            aa: self.sequence.count(aa)
+            for aa in self._CODE1
+        }
+
+    def frequencies(self) -> typing.Dict[str, float]:
+        """Return a table of amino-acid frequencies in the peptide.
+
+        Returns:
+            `dict`: A dictionary mapping each amino-acid code to its
+            frequency in the peptide sequence.
+
+        Example:
+            >>> p = Peptide("AALS")
+            >>> {k:v for k,v in p.frequencies().items() if v != 0}
+            {'A': 0.5, 'L': 0.25, 'S': 0.25}
+
+        """
+        return {
+            aa:count/len(self.sequence)
+            for aa,count in self.counts().items()
+        }
 
     # --- Physico-chemical properties ----------------------------------------
 
@@ -1069,9 +1127,6 @@ class Peptide(object):
 
         This function builds a profile computing the hydrophobic moment of
         a section of the peptide based on the primary sequecne.
-
-        Arguments:
-
 
         Example:
             >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
