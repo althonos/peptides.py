@@ -530,7 +530,7 @@ class Peptide(object):
 
         return charge
 
-    def hydrophobic_moment(self, angle: int = 100, window: int = 11) -> float:
+    def hydrophobic_moment(self, window: int = 11, angle: int = 100) -> float:
         """Compute the maximal hydrophobic moment of a protein sequence.
 
         This function computes the hydrophobic moment based on Eisenberg
@@ -1128,6 +1128,12 @@ class Peptide(object):
         This function builds a profile computing the hydrophobic moment of
         a section of the peptide based on the primary sequecne.
 
+        Arguments:
+            window (`int`): The size of the sliding window for which to
+                compute the local hydrophobic moment.
+            angle (`int`): A protein rotational angle, in **degrees**.
+                Usual values are *100* for α-helix, and *160* for β-sheet.
+
         Example:
             >>> peptide = Peptide("ARQQNLFINFCLILIFLLLI")
             >>> uH = peptide.hydrophobic_moment_profile(window=12, angle=100)
@@ -1198,14 +1204,13 @@ class Peptide(object):
         profile = []
         for h, uh in zip(profile_H, profile_uH):
             m = h * -0.421 + 0.579
-            if uh <= m and h >= 0.5:
-                profile.append("T")
-            elif uh <= m and h <= 0.5:
-                profile.append("G")
-            elif uh >= m:
-                profile.append("S")
+            if uh <= m:
+                if h >= 0.5:
+                    profile.append("T")
+                else:
+                    profile.append("G")
             else:
-                profile.append("?")
+                profile.append("S")
 
         return profile
 
