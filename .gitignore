@@ -4,6 +4,7 @@
 ### Added manually
 # Build files
 peptides/data/tables.py
+peptides/data/lut.py
 
 ### C ###
 # Prerequisites
