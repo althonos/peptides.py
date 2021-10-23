@@ -68,6 +68,14 @@ class MSWHIMScores(typing.NamedTuple):
     mswhim3: float
 
 
+class PCPDescriptors(typing.NamedTuple):
+    e1: float
+    e2: float
+    e3: float
+    e4: float
+    e5: float
+
+
 class ProtFPDescriptors(typing.NamedTuple):
     protfp1: float
     protfp2: float
@@ -1443,6 +1451,48 @@ class Peptide(typing.Sequence[str]):
                 sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
             )
         return MSWHIMScores(*out)
+
+    def pcp_descriptors(self) -> PCPDescriptors:
+        """Compute the Physical-Chemical Properties of a protein sequence.
+
+        The PCP descriptors were constructed by performing multidimensional
+        scaling of 237 physical-chemical properties.
+
+        Returns:
+            `peptides.PCPDescriptors`: The computed average of PCP
+            descriptors descriptors of all the amino acids in the peptide.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, pcp in enumerate(peptide.pcp_descriptors()):
+            ...     print(f"E{i+1:<3} {pcp: .4f}")
+            E1    0.0109
+            E2    0.0381
+            E3    0.1250
+            E4    0.0409
+            E5   -0.1059
+
+        References:
+            - Venkatarajan, M. S., and W. Braun.
+              *New Quantitative Descriptors of Amino Acids Based on
+              Multidimensional Scaling of a Large Number of
+              Physical–Chemical Properties*.
+              Molecular Modeling Annual. Dec 2001;7(12):445–53.
+              doi:10.1007/s00894-001-0058-5.
+            - Venkatarajan, M. S., D. Paris, and M. J. Mullan.
+              *A Novel Physico-Chemical Property Based Model for Studying
+              the Effects of Mutation on the Aggregation of Peptides*.
+              Protein and Peptide Letters. 2009;16(8):991–98.
+              doi:10.2174/092986609788923220. PMID:19689427.
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.PCP_DESCRIPTORS)):
+            scale = tables.PCP_DESCRIPTORS[f"E{i+1}"]
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
+        return PCPDescriptors(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
         """Compute the ProtFP descriptors of a protein sequence.
