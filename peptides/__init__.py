@@ -1,5 +1,6 @@
 import array
 import math
+import random
 import statistics
 import typing
 
@@ -113,6 +114,63 @@ class ZScales(typing.NamedTuple):
 
 
 class Peptide(object):
+
+    @classmethod
+    def sample(
+        cls,
+        length: int,
+        frequencies: str = "SwissProt2021",
+    ) -> "Peptide":
+        """Generate a peptide with the given amino-acid frequencies.
+
+        This method is useful for testing, but using amino-acid frequencies
+        to generate a peptide is not a biologically accurate method, instead
+        consider sampling based on dipeptide frequencies in a particular
+        organism, or using k-mer shuffling.
+
+        Arguments:
+          length (`int`): The desired length for the generated peptide.
+          frequencies (`str`): The name of the amino-acid frequency table
+              to use: either *KingJukes* to use the amino-acid frequencies
+              for vertebrate organisms reported in King & Jukes (1969),
+              or *SwissProt2021* to use the amino-acid frequencies in all
+              the proteins from the January 2021 release of SwissProt.
+
+        Returns:
+            `~peptides.Peptide`: A new peptide. The first amino-acid will
+            always be a Methionine for biological accuracy.
+
+        References:
+        - King, J. L., and T. H. Jukes.
+          *Non-Darwinian Evolution*.
+          Science. May 1969;164(3881):788–98.
+          doi:10.1126/science.164.3881.788. PMID:5767777.
+        - The UniProt Consortium.
+          *UniProt: The Universal Protein Knowledgebase in 2021*.
+          Nucleic Acids Research. Jan 2021;49(D1):D480–89.
+          doi:10.1093/nar/gkaa1100. PMID:33237286.
+
+        """
+        table = tables.AA_FREQUENCIES.get(frequencies)
+        if table is None:
+            raise ValueError(f"Invalid amino acid frequencies: {frequencies!r}")
+
+        if length == 0:
+            return cls("")
+
+        cumfreq = 0
+        cumulative_frequencies = {}
+        for k,v in table.items():
+            cumfreq += v
+            cumulative_frequencies[k] = cumfreq
+
+        residues = ["M"]
+        for i in range(1, length):
+            x = random.random()
+            r = next((k for k,v in cumulative_frequencies.items() if x <= v), "X")
+            residues.append(r)
+
+        return cls("".join(residues))
 
     # --- Magic methods ------------------------------------------------------
 
@@ -247,6 +305,8 @@ class Peptide(object):
             s += table1.get(aa1, 0.0) * table2.get(aa2, 0.0)
         # return correlation
         return s / len(self.sequence)
+
+    # --- Sequence properties -----------------------------------------------
 
     # --- Physico-chemical properties ----------------------------------------
 
