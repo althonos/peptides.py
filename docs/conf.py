@@ -10,6 +10,7 @@ import configparser
 import datetime
 import os
 import sys
+import types
 import re
 import shutil
 import semantic_version
@@ -25,6 +26,11 @@ docssrc_dir = os.path.dirname(os.path.abspath(__file__))
 project_dir = os.path.dirname(docssrc_dir)
 sys.path.insert(0, project_dir)
 
+# Mock dynamically generated Python files so that we can build the documentation
+# without having build these files first (e.g on ReadTheDocs)
+
+sys.modules['peptides.data.tables'] = types.ModuleType('peptides.data.tables')
+sys.modules['peptides.data.lut'] = types.ModuleType('peptides.data.lut')
 
 # -- Sphinx Setup ------------------------------------------------------------
 
@@ -36,6 +42,7 @@ def setup(app):
 
 
 # -- Project information -----------------------------------------------------
+
 
 import peptides
 

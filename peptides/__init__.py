@@ -117,7 +117,7 @@ class ZScales(typing.NamedTuple):
     z5: float
 
 
-class Peptide(object):
+class Peptide(typing.Sequence[str]):
 
     # --- Class constants ----------------------------------------------------
 
@@ -150,26 +150,26 @@ class Peptide(object):
         organism, or using k-mer shuffling.
 
         Arguments:
-          length (`int`): The desired length for the generated peptide.
-          frequencies (`str`): The name of the amino-acid frequency table
-              to use: either *KingJukes* to use the amino-acid frequencies
-              for vertebrate organisms reported in King & Jukes (1969),
-              or *SwissProt2021* to use the amino-acid frequencies in all
-              the proteins from the January 2021 release of SwissProt.
+            length (`int`): The desired length for the generated peptide.
+            frequencies (`str`): The name of the amino-acid frequency table
+                to use: either *KingJukes* to use the amino-acid frequencies
+                for vertebrate organisms reported in King & Jukes (1969),
+                or *SwissProt2021* to use the amino-acid frequencies in all
+                the proteins from the January 2021 release of SwissProt.
 
         Returns:
             `~peptides.Peptide`: A new peptide. The first amino-acid will
             always be a Methionine for biological accuracy.
 
         References:
-        - King, J. L., and T. H. Jukes.
-          *Non-Darwinian Evolution*.
-          Science. May 1969;164(3881):788–98.
-          doi:10.1126/science.164.3881.788. PMID:5767777.
-        - The UniProt Consortium.
-          *UniProt: The Universal Protein Knowledgebase in 2021*.
-          Nucleic Acids Research. Jan 2021;49(D1):D480–89.
-          doi:10.1093/nar/gkaa1100. PMID:33237286.
+            - King, J. L., and T. H. Jukes.
+              *Non-Darwinian Evolution*.
+              Science. May 1969;164(3881):788–98.
+              doi:10.1126/science.164.3881.788. PMID:5767777.
+            - The UniProt Consortium.
+              *UniProt: The Universal Protein Knowledgebase in 2021*.
+              Nucleic Acids Research. Jan 2021;49(D1):D480–89.
+              doi:10.1093/nar/gkaa1100. PMID:33237286.
 
         """
         table = tables.AA_FREQUENCIES.get(frequencies)
