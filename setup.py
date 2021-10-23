@@ -94,7 +94,7 @@ class codegen(setuptools.Command):
             and expr.targets[0].id == "_CODE1"
         )
 
-        return "".join(x.value for x in code1.value.elts)
+        return "".join(x.s for x in code1.value.elts)
 
     def _generate_tables_module(self, tables):
         n = sum(map(len, tables.values()))
@@ -122,7 +122,7 @@ class codegen(setuptools.Command):
         n = sum(map(len, tables.values()))
         self.announce(f"building Python AST for {n!r} look-up tables", level=2)
         body = [
-            ast.ImportFrom(module='array', names=[ast.alias(name='array')], level=0)
+            ast.ImportFrom(module='array', names=[ast.alias(name='array', asname=None)], level=0)
         ]
         for name, table in tables.items():
             stub = name.upper().replace(".", "_")
