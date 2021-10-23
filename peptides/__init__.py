@@ -118,6 +118,13 @@ class ZScales(typing.NamedTuple):
 
 
 class Peptide(typing.Sequence[str]):
+    """A sequence of amino acids.
+
+    Attributes:
+        sequence (`str`): The peptide primary sequence, encoded in the IUPAC
+            one-letter code.
+
+    """
 
     # --- Class constants ----------------------------------------------------
 
@@ -196,6 +203,15 @@ class Peptide(typing.Sequence[str]):
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, sequence: str) -> None:
+        """Create a new peptide object with the given sequence.
+
+        Arguments:
+            sequence (`str`): A sequence of amino acids encoded with the
+            IUPAC one-letter code. Non-standard (*B*, *Z*, *J*) and
+            unknown (*X*) residues are supported in some methods, but
+            not all of them.
+
+        """
         self.sequence: str = sequence
 
     def __len__(self) -> int:
