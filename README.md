@@ -1,6 +1,6 @@
 # `peptides.py` [![Stars](https://img.shields.io/github/stars/althonos/peptides.py.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/peptides.py/stargazers)
 
-*Physicochemical properties and indices for amino-acid sequences.*
+*Physicochemical properties, indices and descriptors for amino-acid sequences.*
 
 [![Actions](https://img.shields.io/github/workflow/status/althonos/peptides.py/Test/main?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/peptides.py/actions)
 [![Coverage](https://img.shields.io/codecov/c/gh/althonos/peptides.py?style=flat-square&maxAge=3600)](https://codecov.io/gh/althonos/peptides.py/)
@@ -36,7 +36,7 @@ $ pip install peptides
 ```
 
 <!--
-Otherwise, Pyrodigal is also available as a [Bioconda](https://bioconda.github.io/)
+Otherwise, `peptides.py` is also available as a [Bioconda](https://bioconda.github.io/)
 package:
 ```console
 $ conda install -c bioconda peptides-py

@@ -9,7 +9,7 @@
 .. |Stars| image:: https://img.shields.io/github/stars/althonos/peptides.py.svg?style=social&maxAge=3600&label=Star
    :target: https://github.com/althonos/peptides.py/stargazers
 
-*Physicochemical properties and indices for amino-acid sequences.*
+*Physicochemical properties, indices and descriptors for amino-acid sequences.*
 
 |Actions| |Coverage| |PyPI| |Wheel| |Versions| |Implementations| |License| |Source| |Mirror| |Issues| |Docs| |Changelog| |Downloads|
 
@@ -88,7 +88,7 @@ A non-exhaustive list of available features:
 
 - Sequence profiles:
 
-  - Hydrophobicity profile using one of 38 proposed scales.
+  - Hydrophobicity profile using one of 39 proposed scales.
   - Hydrophobic moment profile based on `Eisenberg, Weiss and Terwilliger (1984) <https://doi.org/10.1073/pnas.81.1.140>`_.
   - Membrane position based on `Eisenberg (1984) <https://doi.org/10.1146/annurev.bi.53.070184.003115>`_.
 

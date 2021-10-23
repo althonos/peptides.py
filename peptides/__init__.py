@@ -69,6 +69,11 @@ class MSWHIMScores(typing.NamedTuple):
     mswhim3: float
 
 
+class PhysicalDescriptors(typing.NamedTuple):
+    pd1: float
+    pd2: float
+
+
 class PCPDescriptors(typing.NamedTuple):
     e1: float
     e2: float
@@ -617,7 +622,7 @@ class Peptide(typing.Sequence[str]):
 
         This function calculates the hydrophobicity index of an amino
         acid sequence by averaging the hydrophobicity values of each residue
-        using one of the 38 scales from different sources.
+        using one of the 39 scales from different sources.
 
         Arguments:
             scale (`str`): The name of the hydrophobicity scale to be used.
@@ -654,10 +659,15 @@ class Peptide(typing.Sequence[str]):
               *Structural Prediction of Membrane-Bound Proteins*.
               European Journal of Biochemistry. Nov 1982;128(2–3):565–75.
               doi:10.1111/j.1432-1033.1982.tb07002.x. PMID:7151796.
+            - Barley, M. H., N. J. Turner, and R. Goodacre.
+              *Improved Descriptors for the Quantitative Structure–Activity
+              Relationship Modeling of Peptides and Proteins*. Journal of
+              Chemical Information and Modeling. Feb 2018;58(2):234–43.
+              doi:10.1021/acs.jcim.7b00488. PMID:29338232.
             - Black, S. D., and D. R. Mould.
               *Development of Hydrophobicity Parameters to Analyze Proteins
               Which Bear Post- or Cotranslational Modifications*.
-              Analytical Biochemistry. Feb 1991;193(1):72-82.
+              Analytical Biochemistry. Feb 1991;193(1):72–82.
               doi:10.1016/0003-2697(91)90045-u. PMID:2042744.
             - Bull, H. B., and K. Breese.
               *Surface Tension of Amino Acid Solutions: A Hydrophobicity
@@ -1461,7 +1471,7 @@ class Peptide(typing.Sequence[str]):
 
         Returns:
             `peptides.PCPDescriptors`: The computed average of PCP
-            descriptors descriptors of all the amino acids in the peptide.
+            descriptors of all the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1494,6 +1504,53 @@ class Peptide(typing.Sequence[str]):
                 sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
             )
         return PCPDescriptors(*out)
+
+    def physical_descriptors(self) -> PhysicalDescriptors:
+        """Compute the Physical Descriptors of a protein sequence.
+
+        The PP descriptors were constructed by improving on existing
+        PCA-derived descriptors (Z-scales, MS-WHIM and T-scales) after
+        correcting for the hydrophilicity of Methionine, Asparagine and
+        Tryptophan based on Feng *et al*.
+
+        Returns:
+            `peptides.PhyiscalDescriptors`: The computed average of Physical
+            Descriptors of all the amino acids in the peptide. *PD1* is
+            related to volume while *PD2* is related to hydrophilicity.
+
+        Example:
+            >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
+            >>> for i, pd in enumerate(peptide.physical_descriptors()):
+            ...     print(f"PD{i+1:<3} {pd: .4f}")
+            PD1    0.1190
+            PD2    0.2825
+
+        Note:
+            Barley *et al* insisted on maintaining a minimal number of
+            descriptors as a way to reduce the chances of finding spurious
+            QSAM models that would be affected by mutation between
+            interaction sites.
+
+        References:
+          - Barley, M. H., N. J. Turner, and R. Goodacre.
+            *Improved Descriptors for the Quantitative Structure–Activity
+            Relationship Modeling of Peptides and Proteins*. Journal of
+            Chemical Information and Modeling. Feb 2018;58(2):234–43.
+            doi:10.1021/acs.jcim.7b00488. PMID:29338232.
+          - Feng, X., J. Sanchis, M. T. Reetz, and H. Rabitz.
+            *Enhancing the Efficiency of Directed Evolution in Focused
+            Enzyme Libraries by the Adaptive Substituent Reordering
+            Algorithm*. Chemistry. Apr 2012;18(18):5646–54.
+            doi:10.1002/chem.201103811. PMID:22434591.
+
+        """
+        out = array.array("d")
+        for i in range(len(tables.PHYSICAL_DESCRIPTORS)):
+            scale = tables.PHYSICAL_DESCRIPTORS[f"PD{i+1}"]
+            out.append(
+                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
+            )
+        return PhysicalDescriptors(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
         """Compute the ProtFP descriptors of a protein sequence.
