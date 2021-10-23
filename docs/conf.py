@@ -36,7 +36,7 @@ sys.modules['peptides.data.lut'] = types.ModuleType('peptides.data.lut')
 
 def setup(app):
     # Add custom stylesheet
-    app.add_css_file("css/main.css")
+    app.add_css_file(os.path.join("_static/css/main.css"))
     # app.add_js_file("js/apitoc.js")
     # app.add_js_file("js/example-admonition.js")
 
