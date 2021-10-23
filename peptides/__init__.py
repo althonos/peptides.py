@@ -1,3 +1,6 @@
+"""Physicochemical properties and indices for amino-acid sequences.
+"""
+
 import array
 import collections
 import math

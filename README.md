@@ -12,6 +12,7 @@
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/peptides.py/)
 [![Mirror](https://img.shields.io/badge/mirror-EMBL-009f4d?style=flat-square&maxAge=2678400)](https://git.embl.de/larralde/peptides.py/)
 [![GitHub issues](https://img.shields.io/github/issues/althonos/peptides.py.svg?style=flat-square&maxAge=600)](https://github.com/althonos/peptides.py/issues)
+[![Docs](https://img.shields.io/readthedocs/peptides/latest?style=flat-square&maxAge=600)](https://peptides.readthedocs.io)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/peptides.py/blob/master/CHANGELOG.md)
 [![Downloads](https://img.shields.io/badge/dynamic/json?style=flat-square&color=303f9f&maxAge=86400&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Fpeptides)](https://pepy.tech/project/peptides)
 
@@ -102,7 +103,7 @@ This library is provided under the [GNU General Public License v3.0](https://cho
 The original R `Peptides` package was written by [Daniel Osorio](https://orcid.org/0000-0003-4424-8422),
 [Paola Rondón-Villarreal](https://orcid.org/0000-0001-8209-3885) and
 [Rodrigo Torres](https://orcid.org/0000-0003-1113-3020), and is licensed under
-the terms of the GPLv2.
+the terms of the [GNU General Public License v2.0](https://choosealicense.com/licenses/gpl-2.0/).
 
 *This project is in no way not affiliated, sponsored, or otherwise endorsed
 by the [original `Peptides` authors](https://github.com/dosorio). It was developed
