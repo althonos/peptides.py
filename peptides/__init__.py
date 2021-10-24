@@ -8,6 +8,11 @@ import random
 import statistics
 import typing
 
+try:
+    from numpy import prod
+except ImportError:
+    from ._npcompat import prod
+
 from . import tables, datasets
 
 __all__ = ["Peptide", "tables", "datasets"]
@@ -1282,7 +1287,7 @@ class Peptide(typing.Sequence[str]):
                 centroids. Use `"Chou"` to load the frequencies of the 64
                 proteins analyzed in Chou (1989), `"Nakashima"` to use
                 the normalized frequencies of the 135 proteins analyzed in
-                Nakashima *et al* (1986) and Zhang & Chou (1995), or
+                Nakashima *et al.* (1986) and Zhang & Chou (1995), or
                 `"ChouZhang"` to load the frequencies of 120 proteins used
                 in Chou & Zhang (1995).
             distance (`str`): The distance metric to use in the 20-D space
@@ -1291,8 +1296,10 @@ class Peptide(typing.Sequence[str]):
                 the Manhattan distance like in Chou (1989), `"euclidean"`
                 to use the Euclidean distance like in Nakashima *et al*
                 (1986), `"correlation"` to use the correlation distance
-                like in Chou & Zhang (1992), or `"mahalanobis"` to use
-                the Mahalanobis distance like in Chou & Zhang (1995).
+                like in Chou & Zhang (1992), `"mahalanobis"` to use
+                the Mahalanobis distance like in Chou & Zhang (1995),
+                or `"discriminant"` to use the Bayes discriminant like in
+                Chou *et al.* (1998).
 
         Returns:
             `str`: The structural class the protein most likely belongs to.
@@ -1353,6 +1360,10 @@ class Peptide(typing.Sequence[str]):
                 'zeta'
 
         References:
+            - Chou, K-C., W-M. Liu, G. M. Maggiora, and C-T. Zhang.
+              *Prediction and Classification of Domain Structural Classes*.
+              Proteins: Structure, Function, and Genetics.
+              Apr 1998;31(1):97–103. PMID:9552161.
             - Chou, K-C., and C-T. Zhang.
               *Prediction of Protein Structural Classes*. Critical Reviews
               in Biochemistry and Molecular Biology. Feb 1995;30:275–349.
@@ -1428,7 +1439,7 @@ class Peptide(typing.Sequence[str]):
                 table = tables["mean"]
                 s = sum((pep_frequencies[x]-table[x])**2 for x in table)
                 distances[name] = math.sqrt(s)
-        elif distance == "mahalanobis":
+        elif distance == "mahalanobis" or distance == "discriminant":
             x = [pep_frequencies[aa]*100 for aa in sorted(self._CODE1[:20])]
             for name,tables in dataset.items():
                 if name == "all":
@@ -1447,6 +1458,10 @@ class Peptide(typing.Sequence[str]):
                     for i in range(20)
                 ]
                 distances[name] = sum(y[i]**2 / eivals[i] for i in range(1, 20))
+                # if Bayes discriminant is requested, add the logarithm of
+                # the product of all non-null eigenvalues
+                if distance == "discriminant":
+                    distances[name] += math.log(prod(einvals[1:]))
             if not distances:
                 raise ValueError(
                     f"Cannot use {frequencies!r} frequencies with "
@@ -1456,7 +1471,6 @@ class Peptide(typing.Sequence[str]):
             raise ValueError(f"Invalid distance: {distance!r}")
 
         # find the most likely structural class based on the distance
-        # print(distances)
         return min(distances, key=distances.get)
 
     # --- Descriptors --------------------------------------------------------
