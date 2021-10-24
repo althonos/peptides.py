@@ -42,38 +42,91 @@ class codegen(setuptools.Command):
     user_options = [
         ("force", "f", "force rebuilding the files even if they are not outdated"),
         ("inplace", "i", "copy the build files to the source directory when done"),
-        ("data",  "d", "the path to the data folder containing the CSV tables")
+        ("tables",  "t", "the path to the data folder containing the CSV tables"),
+        ("datasets",  "d", "the path to the data folder containing the datasets"),
     ]
 
     def initialize_options(self):
         self.force = False
         self.inplace = False
-        self.data = None
+        self.tables = None
+        self.datasets = None
 
     def finalize_options(self):
         _build_py = self.get_finalized_command("build_py")
         self.build_lib = _build_py.build_lib
-        if self.data is None:
-            self.data = os.path.relpath(os.path.join(__file__, "..", "peptides", "tables"))
+        if self.tables is None:
+            self.tables = os.path.relpath(os.path.join(__file__, "..", "peptides", "tables"))
+        if self.datasets is None:
+            self.datasets = os.path.relpath(os.path.join(__file__, "..", "peptides", "datasets"))
 
-    def _load_tables(self):
-        self.announce(f"loading data tables from {self.data!r}", level=2)
-        tables = {}
-        for group in os.listdir(self.data):
-            if group == "__pycache__":
-                continue
-            if not os.path.isdir(os.path.join(self.data, group)):
-                continue
-            tables[group] = {}
-            for filename in glob.glob(os.path.join(self.data, group, "*.csv")):
-                member, _ = os.path.splitext(os.path.basename(filename))
-                tables[group][member] = self._load_csv(filename)
-        return tables
+    # ----------------------------
 
     def _load_csv(self, filename):
         self.announce(f"loading {filename!r}", level=1)
         with open(filename, "r") as f:
             return {row[0]:float(row[1]) for row in csv.reader(f)}
+
+    def _load_matrix(self, filename):
+        self.announce(f"loading {filename!r}", level=1)
+        with open(filename, "r") as f:
+            return [
+                [float(x) for x in line.split()]
+                for line in f
+                if not line.startswith("#")
+            ]
+
+    def _load_tables(self, path):
+        self.announce(f"loading data tables from {path!r}", level=2)
+        tables = {}
+        for group in os.listdir(path):
+            if group == "__pycache__":
+                continue
+            if not os.path.isdir(os.path.join(path, group)):
+                continue
+            tables[group] = {}
+            for filename in glob.iglob(os.path.join(path, group, "*.csv")):
+                member, _ = os.path.splitext(os.path.basename(filename))
+                tables[group][member] = self._load_csv(filename)
+        return tables
+
+    def _load_dataset(self, path):
+        dataset = self._load_tables(path)
+        for group in os.listdir(path):
+            for filename in glob.iglob(os.path.join(path, group, "eigen.txt")):
+                eigenmatrix = self._load_matrix(filename)
+                dataset[group]["eigenvalues"] = [m[0] for m in eigenmatrix]
+                dataset[group]["eigenvectors"] = [m[1:] for m in eigenmatrix]
+        return dataset
+
+    def _load_datasets(self, path):
+        self.announce(f"loading datasets from {path!r}", level=2)
+        datasets = {}
+        for dataset in os.listdir(path):
+            if dataset == "__pycache__":
+                continue
+            if not os.path.isdir(os.path.join(path, dataset)):
+                continue
+            datasets[dataset] = self._load_dataset(os.path.join(self.datasets, dataset))
+        return datasets
+
+
+    # ----------------------------
+
+    def _make_literal(self, value):
+        if isinstance(value, (int, float, str)):
+            return ast.Constant(value)
+        elif isinstance(value, dict):
+            return ast.Dict(
+                keys=[self._make_literal(x) for x in value.keys()],
+                values=[self._make_literal(x) for x in value.values()]
+            )
+        elif isinstance(value, list):
+            return ast.List(
+                elts=[self._make_literal(x) for x in value]
+            )
+        else:
+            raise TypeError(f"cannot make literal for {value!r}")
 
     def _generate_tables_module(self, tables):
         n = sum(map(len, tables.values()))
@@ -81,20 +134,22 @@ class codegen(setuptools.Command):
         body = []
         for name, table in tables.items():
             stub = name.upper().replace(".", "_")
-            assign_node = ast.Assign(
+            body.append(ast.Assign(
                 targets=[ast.Name(id=stub, ctx=ast.Store())],
-                value=ast.Dict(
-                    keys=list(map(ast.Constant, table.keys())),
-                    values=[
-                        ast.Dict(
-                            keys=list(map(ast.Constant, subtable.keys())),
-                            values=list(map(ast.Constant, subtable.values())),
-                        )
-                        for subtable in table.values()
-                    ]
-                )
-            )
-            body.append(assign_node)
+                value=self._make_literal(table)
+            ))
+        return ast.Module(body=body)
+
+    def _generate_datasets_module(self, datasets):
+        body = []
+        for name, dataset in datasets.items():
+            n = sum(map(len, dataset.values()))
+            self.announce(f"building Python AST for the {n!r} data tables of the {name!r} dataset", level=2)
+            stub = name.upper().replace(".", "_")
+            body.append(ast.Assign(
+                targets=[ast.Name(id=stub, ctx=ast.Store())],
+                value=self._make_literal(dataset)
+            ))
         return ast.Module(body=body)
 
     def _write_module(self, module, filename):
@@ -105,23 +160,28 @@ class codegen(setuptools.Command):
             f.write("# DO NOT EDIT MANUALLY!\n")
             f.write(astor.to_source(module))
             f.write("\n")
+        if self.inplace:
+            localpath = os.path.relpath(filename, start=self.build_lib)
+            self.copy_file(filename, localpath)
 
     def run(self):
         # check astor is available
         if isinstance(astor, ImportError):
             raise RuntimeError("`astor` package is required for the `codegen` command") from astor
-        # load data tables from R-formatted data file
-        tables = self._load_tables()
-        # generate a Python file containing the constants
+
+        # generate a Python file containing the constants tables
+        tables = self._load_tables(self.tables)
         tables_module = self._generate_tables_module(tables)
-        # write the data sources as Python
         table_file = os.path.join(self.build_lib, "peptides", "tables", "__init__.py")
         self.mkpath(os.path.dirname(table_file))
         self._write_module(tables_module, table_file)
-        # copy if inplace
-        if self.inplace:
-            library_table_file = os.path.join("peptides", "tables", "__init__.py")
-            self.copy_file(table_file, library_table_file)
+
+        # generate a Python file containing some datasets with nested / diverse data
+        datasets = self._load_datasets(self.datasets)
+        datasets_module = self._generate_datasets_module(datasets)
+        datasets_file = os.path.join(self.build_lib, "peptides", "datasets", "__init__.py")
+        self.mkpath(os.path.dirname(datasets_file))
+        self._write_module(datasets_module, datasets_file)
 
 
 class build_py(_build_py):
