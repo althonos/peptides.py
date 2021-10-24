@@ -101,6 +101,13 @@ A non-exhaustive list of available features:
   - Isoelectric point using one of 8 pKa scales.
   - Molecular weight, taking into account isotope labelling, using one of 3 average weight tables.
 
+- Biological properties:
+
+  - Structural class using methods and reference data from either
+    `Nakashima, Nishikawa & Ooi (1985) <https://doi.org/10.1093/oxfordjournals.jbchem.a135454>`_,
+    `Chou (1989) <10.1007/978-1-4613-1571-1>`_,
+    or `Chou & Zhang (1992) <10.1111/j.1432-1033.1992.tb17067.x>`_.
+
 
 Setup
 -----

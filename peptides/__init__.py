@@ -1259,6 +1259,132 @@ class Peptide(typing.Sequence[str]):
 
         return profile
 
+    # --- Structural class ---------------------------------------------------
+
+    def structural_class(
+        self,
+        frequencies: str = "Chou",
+        distance: str = "correlation",
+    ) -> str:
+        """Predict the structural class of the peptide from its sequence.
+
+        The structural class of a protein, as defined in Levitt and Chothia
+        (1976), can be either α, β, α+β, or α/β, with ζ being later defined
+        for irregular proteins. It depends on the secondary structure of the
+        protein. Several methods have been proposed to elucidate the
+        structural class from the amino acid sequence, all based on
+        similarity with proteins which structures have been elucidated.
+
+        Chou and Zhang (1992) proposed a correlation-coefficient method
+        to predict the structural class of a protein based on its amino
+        acid compositions.
+
+        Arguments:
+            frequencies (`str`): The frequencies of the amino acids in
+                proteins of different structural classes to use as reference
+                centroids. Use `"Chou"` to load the frequencies of the 64
+                proteins analyzed in Chou (1989), or `"Nakashima"` to use
+                the normalized frequencies of the 135 proteins analyzed in
+                Nakashima *et al* (1986).
+            distance (`str`): The distance metric to use in the 20-D space
+                formed by the 20 usual amino acid to find the nearest
+                structural class for the peptide. Use `"cityblock"` to use
+                the Manhattan distance like in Chou (1989), `"euclidean"`
+                to use the Euclidean distance like in Nakashima *et al*
+                (1986), or `"correlation"` to use the correlation distance
+                like in Chou & Zhang (1992).
+
+        Returns:
+            `str`: The predicted protein class.
+
+        Example:
+            >>> cytochrome_c = Peptide(
+            ...     "MGDVAKGKKTFVQKCAQCHTVENGGKHKVGPNLWGLFGRKTGQAEGYSYT"
+            ...     "DANKSKGIVWNENTLMEYLENPKKYIPGTKMIFAGIKKKGERQDLVAYLK"
+            ...     "SATS"
+            ... )
+            >>> cytochrome_c.structural_class()
+            'alpha'
+            >>> cytochrome_c.structural_class(frequencies="Nakashima")
+            'alpha'
+            >>> erabutoxin_b = Peptide(
+            ...     "MKTLLLTLVVVTIVCLDLGYTRICFNHQSSQPQTTKTCSPGESSCYHKQW"
+            ...     "SDFRGTIIERGCGCPTVKPGIKLSCCESEVCNN"
+            ... )
+            >>> erabutoxin_b.structural_class()
+            'beta'
+            >>> erabutoxin_b.structural_class(distance="cityblock")
+            'beta'
+            >>> ferredoxin = Peptide(
+            ...     "MATYKVTLINEAEGINETIDCDDDTYILDAAEEAGLDLPYSCRAGACSTC"
+            ...     "AGTITSGTIDQSDQSFLDDDQIEAGYVLTCVAYPTSDCTIKTHQEEGLY"
+            ... )
+            >>> ferredoxin.structural_class("Nakashima", "euclidean")
+            'zeta'
+
+        References:
+            - Chou, K-C., and C-T. Zhang.
+              *A Correlation-Coefficient Method to Predicting
+              Protein-Structural Classes from Amino Acid Compositions*.
+              European Journal of Biochemistry. 1992;207(2):429–33.
+              doi:10.1111/j.1432-1033.1992.tb17067.x. PMID:1633801.
+            - Chou, P. Y.
+              *Prediction of Protein Structural Classes from Amino Acid
+              Compositions*. In Prediction of Protein Structure and the
+              Principles of Protein Conformation, edited by G. D. Fasman.
+              Springer US. 1989:549–86.
+              doi:10.1007/978-1-4613-1571-1. ISBN:978-0-306-43131-9.
+            - Nakashima, H., K. Nishikawa, and T. Ooi.
+              *The Folding Type of a Protein Is Relevant to the Amino Acid
+              Composition*. Journal of Biochemistry. Jan 1986;99(1):153–62.
+              doi:10.1093/oxfordjournals.jbchem.a135454. PMID:3957893.
+
+        """
+        # get peptide frequencies
+        pep_frequencies = self.frequencies()
+        # get reference frequencies
+        if frequencies == "Chou":
+            ref_frequencies = {
+                "alpha": tables.AA_FREQUENCIES["Chou_alpha"],
+                "beta": tables.AA_FREQUENCIES["Chou_beta"],
+                "alpha+beta": tables.AA_FREQUENCIES["Chou_alpha+beta"],
+                "alpha_beta": tables.AA_FREQUENCIES["Chou_alpha_beta"],
+            }
+        elif frequencies == "Nakashima":
+            ref_frequencies = {
+                "alpha": tables.AA_FREQUENCIES["Nakashima_alpha"],
+                "beta": tables.AA_FREQUENCIES["Nakashima_beta"],
+                "alpha+beta": tables.AA_FREQUENCIES["Nakashima_alpha+beta"],
+                "alpha_beta": tables.AA_FREQUENCIES["Nakashima_alpha_beta"],
+                "zeta": tables.AA_FREQUENCIES["Nakashima_zeta"],
+            }
+            # Nakashima frequencies are normalized, so we must normalize
+            # the peptide frequencies too in that case
+            mean = tables.AA_FREQUENCIES["Nakashima"]
+            sd = tables.AA_FREQUENCIES["Nakashima_sd"]
+            pep_frequencies = {
+                aa:(pep_frequencies[aa]-mean[aa])/sd[aa] for aa in mean
+            }
+        else:
+            raise ValueError(f"Invalid amino acid frequencies: {frequencies!r}")
+
+        distances = {}
+        if distance == "correlation":
+            for name,table in ref_frequencies.items():
+                s1 = sum(pep_frequencies[x]*table[x] for x in table)
+                s2 = sum(pep_frequencies[x]**2 for x in table)
+                s3 = sum(table[x]**2 for x in table)
+                distances[name] = 1 - s1 / math.sqrt(s2*s3)
+        elif distance == "cityblock":
+            for name,table in ref_frequencies.items():
+                s = sum(abs(pep_frequencies[x]-table[x]) for x in table)
+                distances[name] = s
+        elif distance == "euclidean":
+            for name,table in ref_frequencies.items():
+                s = sum((pep_frequencies[x]-table[x])**2 for x in table)
+                distances[name] = math.sqrt(s)
+        return min(distances, key=distances.get)
+
     # --- Descriptors --------------------------------------------------------
 
     def blosum_indices(self) -> BLOSUMIndices:
