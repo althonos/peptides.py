@@ -8,9 +8,9 @@ import random
 import statistics
 import typing
 
-from . import tables
+from . import tables, datasets
 
-__all__ = ["Peptide", "tables"]
+__all__ = ["Peptide", "tables", "datasets"]
 
 __version__ = "0.1.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
@@ -152,7 +152,7 @@ class Peptide(typing.Sequence[str]):
     # fmt: off
     _CODE1 = [
         "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F",
-        "P", "O", "S", "U", "T", "W", "Y", "V", "B", "Z", "X", "J",
+        "P", "S", "T", "W", "Y", "V", "O", "U", "B", "Z", "J", "X"
     ]
 
     # fmt: off
@@ -1263,8 +1263,8 @@ class Peptide(typing.Sequence[str]):
 
     def structural_class(
         self,
-        frequencies: str = "Chou",
-        distance: str = "correlation",
+        frequencies: str = "ChouZhang",
+        distance: str = "mahalanobis",
     ) -> str:
         """Predict the structural class of the peptide from its sequence.
 
@@ -1275,56 +1275,81 @@ class Peptide(typing.Sequence[str]):
         structural class from the amino acid sequence, all based on
         similarity with proteins which structures have been elucidated.
 
-        Chou and Zhang (1992) proposed a correlation-coefficient method
-        to predict the structural class of a protein based on its amino
-        acid compositions.
-
         Arguments:
             frequencies (`str`): The frequencies of the amino acids in
                 proteins of different structural classes to use as reference
                 centroids. Use `"Chou"` to load the frequencies of the 64
-                proteins analyzed in Chou (1989), or `"Nakashima"` to use
+                proteins analyzed in Chou (1989), `"Nakashima"` to use
                 the normalized frequencies of the 135 proteins analyzed in
-                Nakashima *et al* (1986).
+                Nakashima *et al* (1986), or `"ChouZhang"` to load the
+                frequencies of 120 proteins used in Chou & Zhang (1995).
             distance (`str`): The distance metric to use in the 20-D space
                 formed by the 20 usual amino acid to find the nearest
                 structural class for the peptide. Use `"cityblock"` to use
                 the Manhattan distance like in Chou (1989), `"euclidean"`
                 to use the Euclidean distance like in Nakashima *et al*
-                (1986), or `"correlation"` to use the correlation distance
-                like in Chou & Zhang (1992).
+                (1986), `"correlation"` to use the correlation distance
+                like in Chou & Zhang (1992), or `"mahalanobis"` to use
+                the Mahalanobis distance like in Chou & Zhang (1995).
 
         Returns:
-            `str`: The predicted protein class.
+            `str`: The structural class the protein most likely belongs to.
+            Note that some classes may not be predictable, depending on the
+            refernce frequencies being used (at the moment, only
+            *Nakashima* supports the ζ class).
 
         Example:
-            >>> cytochrome_c = Peptide(
-            ...     "MGDVAKGKKTFVQKCAQCHTVENGGKHKVGPNLWGLFGRKTGQAEGYSYT"
-            ...     "DANKSKGIVWNENTLMEYLENPKKYIPGTKMIFAGIKKKGERQDLVAYLK"
-            ...     "SATS"
-            ... )
-            >>> cytochrome_c.structural_class()
-            'alpha'
-            >>> cytochrome_c.structural_class(frequencies="Nakashima")
-            'alpha'
-            >>> erabutoxin_b = Peptide(
-            ...     "MKTLLLTLVVVTIVCLDLGYTRICFNHQSSQPQTTKTCSPGESSCYHKQW"
-            ...     "SDFRGTIIERGCGCPTVKPGIKLSCCESEVCNN"
-            ... )
-            >>> erabutoxin_b.structural_class()
-            'beta'
-            >>> erabutoxin_b.structural_class(distance="cityblock")
-            'beta'
-            >>> ferredoxin = Peptide(
-            ...     "MATYKVTLINEAEGINETIDCDDDTYILDAAEEAGLDLPYSCRAGACSTC"
-            ...     "AGTITSGTIDQSDQSFLDDDQIEAGYVLTCVAYPTSDCTIKTHQEEGLY"
-            ... )
-            >>> ferredoxin.structural_class("Nakashima", "euclidean")
-            'zeta'
+            Predict the structural class of the skipjack tuna Cytochrome C,
+            (`P0025 <https://www.uniprot.org/uniprot/P00025>`_), an α
+            protein ::
 
-        To-Do:
-            - Implement the structural class prediction method from
-              Chou & Zhang (1995), which uses the Mahalanobis distance.
+                >>> p = Peptide(
+                ...     "MGDVAKGKKTFVQKCAQCHTVENGGKHKVGPNLWGLFGRKTGQAEGYSYT"
+                ...     "DANKSKGIVWNENTLMEYLENPKKYIPGTKMIFAGIKKKGERQDLVAYLK"
+                ...     "SATS"
+                ... )
+                >>> p.structural_class("ChouZhang", distance="mahalanobis")
+                'beta'
+                >>> p.structural_class("Chou", distance="correlation")
+                'alpha'
+                >>> p.structural_class("Nakashima", distance="euclidean")
+                'alpha'
+                >>> p.structural_class("Chou", distance="cityblock")
+                'alpha+beta'
+
+            Predict the structural class of the sea krait Erabutoxin B
+            (`Q90VW1 <https://www.uniprot.org/uniprot/Q90VW1>`_), a β
+            protein::
+
+                >>> p = Peptide(
+                ...     "MKTLLLTLVVVTIVCLDLGYTRICFNHQSSQPQTTKTCSPGESSCYHKQW"
+                ...     "SDFRGTIIERGCGCPTVKPGIKLSCCESEVCNN"
+                ... )
+                >>> p.structural_class("ChouZhang", distance="mahalanobis")
+                'alpha+beta'
+                >>> p.structural_class("Chou", distance="correlation")
+                'beta'
+                >>> p.structural_class("Nakashima", distance="euclidean")
+                'zeta'
+                >>> p.structural_class("Chou", distance="cityblock")
+                'beta'
+
+            Predict the structural class of the *Arthrospira platensis*
+            Ferredoxin (`P00246 <https://www.uniprot.org/uniprot/P00246>`_),
+            a ζ protein::
+
+                >>> p = Peptide(
+                ...     "MATYKVTLINEAEGINETIDCDDDTYILDAAEEAGLDLPYSCRAGACSTC"
+                ...     "AGTITSGTIDQSDQSFLDDDQIEAGYVLTCVAYPTSDCTIKTHQEEGLY"
+                ... )
+                >>> p.structural_class("ChouZhang", distance="mahalanobis")
+                'alpha'
+                >>> p.structural_class("Chou", distance="correlation")
+                'alpha+beta'
+                >>> p.structural_class("Nakashima", distance="euclidean")
+                'zeta'
+                >>> p.structural_class("Chou", distance="cityblock")
+                'alpha+beta'
 
         References:
             - Chou, K-C., and C-T. Zhang.
@@ -1346,51 +1371,83 @@ class Peptide(typing.Sequence[str]):
               *The Folding Type of a Protein Is Relevant to the Amino Acid
               Composition*. Journal of Biochemistry. Jan 1986;99(1):153–62.
               doi:10.1093/oxfordjournals.jbchem.a135454. PMID:3957893.
+            - Zhou, G.P., and N. Assa-Munt.
+              *Some Insights into Protein Structural Class Prediction*.
+              Proteins: Structure, Function, and Bioinformatics.
+              2001;44(1):57–59. doi:10.1002/prot.1071. PMID:11354006.
 
         """
         # get peptide frequencies
         pep_frequencies = self.frequencies()
+
         # get reference frequencies
         if frequencies == "Chou":
-            ref_frequencies = {
-                "alpha": tables.AA_FREQUENCIES["Chou_alpha"],
-                "beta": tables.AA_FREQUENCIES["Chou_beta"],
-                "alpha+beta": tables.AA_FREQUENCIES["Chou_alpha+beta"],
-                "alpha_beta": tables.AA_FREQUENCIES["Chou_alpha_beta"],
-            }
+            dataset = datasets.CHOU1989
         elif frequencies == "Nakashima":
-            ref_frequencies = {
-                "alpha": tables.AA_FREQUENCIES["Nakashima_alpha"],
-                "beta": tables.AA_FREQUENCIES["Nakashima_beta"],
-                "alpha+beta": tables.AA_FREQUENCIES["Nakashima_alpha+beta"],
-                "alpha_beta": tables.AA_FREQUENCIES["Nakashima_alpha_beta"],
-                "zeta": tables.AA_FREQUENCIES["Nakashima_zeta"],
-            }
+            dataset = datasets.NAKASHIMA1986
             # Nakashima frequencies are normalized, so we must normalize
             # the peptide frequencies too in that case
-            mean = tables.AA_FREQUENCIES["Nakashima"]
-            sd = tables.AA_FREQUENCIES["Nakashima_sd"]
+            mean = datasets.NAKASHIMA1986["all"]["mean"]
+            sd = datasets.NAKASHIMA1986["all"]["sd"]
             pep_frequencies = {
                 aa:(pep_frequencies[aa]-mean[aa])/sd[aa] for aa in mean
             }
+        elif frequencies == "ChouZhang":
+            dataset = datasets.CHOUZHANG1995
         else:
             raise ValueError(f"Invalid amino acid frequencies: {frequencies!r}")
 
+        # get distances to each structural class centroids
         distances = {}
         if distance == "correlation":
-            for name,table in ref_frequencies.items():
-                s1 = sum(pep_frequencies[x]*table[x] for x in table)
-                s2 = sum(pep_frequencies[x]**2 for x in table)
-                s3 = sum(table[x]**2 for x in table)
+            for name,tables in dataset.items():
+                if name == "all":
+                    continue
+                mean = tables["mean"]
+                s1 = sum(pep_frequencies[x]*mean[x] for x in mean)
+                s2 = sum(pep_frequencies[x]**2 for x in mean)
+                s3 = sum(mean[x]**2 for x in mean)
                 distances[name] = 1 - s1 / math.sqrt(s2*s3)
         elif distance == "cityblock":
-            for name,table in ref_frequencies.items():
+            for name,tables in dataset.items():
+                if name == "all":
+                    continue
+                table = tables["mean"]
                 s = sum(abs(pep_frequencies[x]-table[x]) for x in table)
                 distances[name] = s
         elif distance == "euclidean":
-            for name,table in ref_frequencies.items():
+            for name,tables in dataset.items():
+                if name == "all":
+                    continue
+                table = tables["mean"]
                 s = sum((pep_frequencies[x]-table[x])**2 for x in table)
                 distances[name] = math.sqrt(s)
+        elif distance == "mahalanobis":
+            x = [pep_frequencies[aa] for aa in sorted(self._CODE1[:20])]
+            for name,tables in dataset.items():
+                if name == "all":
+                    continue
+                # load parameters
+                mean = tables["mean"]
+                eivals = tables.get("eigenvalues")
+                eivecs = tables.get("eigenvectors")
+                if eivals is None or eivecs is None:
+                    raise ValueError(
+                        f"Cannot use {frequencies!r} frequencies with "
+                        f"{distance!r} distance (no eigendecomposition available)"
+                    )
+                # compute Mahalanobis distance using the components of
+                # the eigendecomposition
+                xm = [mean[aa] for aa in sorted(self._CODE1[:20])]
+                y = [
+                    sum(eivecs[i][j] * (x[j] - xm[j]) for j in range(20))
+                    for i in range(20)
+                ]
+                distances[name] = sum(y[i]**2 / eivals[i] for i in range(1, 20))
+        else:
+            raise ValueError(f"Invalid distance: {distance!r}")
+
+        # find the most likely structural class based on the distance
         return min(distances, key=distances.get)
 
     # --- Descriptors --------------------------------------------------------
