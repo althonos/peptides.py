@@ -1322,7 +1322,15 @@ class Peptide(typing.Sequence[str]):
             >>> ferredoxin.structural_class("Nakashima", "euclidean")
             'zeta'
 
+        To-Do:
+            Implement the structural class prediction method from
+            Chou & Zhang (1995), which uses the Mahalanobis distance.
+
         References:
+            - Chou, K-C., and C-T. Zhang.
+              *Prediction of Protein Structural Classes*. Critical Reviews
+              in Biochemistry and Molecular Biology. Feb 1995;30:275–349.
+              doi:10.3109/10409239509083488. PMID:7587280.
             - Chou, K-C., and C-T. Zhang.
               *A Correlation-Coefficient Method to Predicting
               Protein-Structural Classes from Amino Acid Compositions*.
