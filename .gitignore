@@ -4,6 +4,7 @@
 ### Added manually
 # Build files
 peptides/tables/__init__.py
+peptides/datasets/__init__.py
 
 ### C ###
 # Prerequisites

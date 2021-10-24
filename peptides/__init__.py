@@ -151,15 +151,16 @@ class Peptide(typing.Sequence[str]):
 
     # fmt: off
     _CODE1 = [
-        "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F",
-        "P", "S", "T", "W", "Y", "V", "O", "U", "B", "Z", "J", "X"
+        "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I",
+        "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V",
+        "O", "U", "B", "Z", "J", "X"
     ]
 
     # fmt: off
     _CODE3 = [
         "Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly", "His", "Ile",
-        "Leu", "Lys", "Met", "Phe", "Pro", "Pyl", "Ser", "Sec", "Thr", "Trp",
-        "Tyr", "Val", "Asx", "Glx", "Xaa", "Xle",
+        "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp", "Tyr", "Val",
+        "Pyl", "Sec", "Asx", "Glx", "Xle", "Xaa"
     ]
 
     # --- Class methods ------------------------------------------------------
@@ -1263,7 +1264,7 @@ class Peptide(typing.Sequence[str]):
 
     def structural_class(
         self,
-        frequencies: str = "ChouZhang",
+        frequencies: str = "Nakashima",
         distance: str = "mahalanobis",
     ) -> str:
         """Predict the structural class of the peptide from its sequence.
@@ -1281,8 +1282,9 @@ class Peptide(typing.Sequence[str]):
                 centroids. Use `"Chou"` to load the frequencies of the 64
                 proteins analyzed in Chou (1989), `"Nakashima"` to use
                 the normalized frequencies of the 135 proteins analyzed in
-                Nakashima *et al* (1986), or `"ChouZhang"` to load the
-                frequencies of 120 proteins used in Chou & Zhang (1995).
+                Nakashima *et al* (1986) and Zhang & Chou (1995), or
+                `"ChouZhang"` to load the frequencies of 120 proteins used
+                in Chou & Zhang (1995).
             distance (`str`): The distance metric to use in the 20-D space
                 formed by the 20 usual amino acid to find the nearest
                 structural class for the peptide. Use `"cityblock"` to use
@@ -1295,8 +1297,9 @@ class Peptide(typing.Sequence[str]):
         Returns:
             `str`: The structural class the protein most likely belongs to.
             Note that some classes may not be predictable, depending on the
-            refernce frequencies being used (at the moment, only
-            *Nakashima* supports the ζ class).
+            reference frequencies being used (at the moment, the ζ class
+            can only be predicted from the *Nakashima* frequencies with
+            *euclidean* or *manhattan* distances).
 
         Example:
             Predict the structural class of the skipjack tuna Cytochrome C,
@@ -1308,6 +1311,8 @@ class Peptide(typing.Sequence[str]):
                 ...     "DANKSKGIVWNENTLMEYLENPKKYIPGTKMIFAGIKKKGERQDLVAYLK"
                 ...     "SATS"
                 ... )
+                >>> p.structural_class("Nakashima", distance="mahalanobis")
+                'alpha'
                 >>> p.structural_class("ChouZhang", distance="mahalanobis")
                 'beta'
                 >>> p.structural_class("Chou", distance="correlation")
@@ -1325,6 +1330,8 @@ class Peptide(typing.Sequence[str]):
                 ...     "MKTLLLTLVVVTIVCLDLGYTRICFNHQSSQPQTTKTCSPGESSCYHKQW"
                 ...     "SDFRGTIIERGCGCPTVKPGIKLSCCESEVCNN"
                 ... )
+                >>> p.structural_class("Nakashima", distance="mahalanobis")
+                'beta'
                 >>> p.structural_class("ChouZhang", distance="mahalanobis")
                 'alpha+beta'
                 >>> p.structural_class("Chou", distance="correlation")
@@ -1342,14 +1349,8 @@ class Peptide(typing.Sequence[str]):
                 ...     "MATYKVTLINEAEGINETIDCDDDTYILDAAEEAGLDLPYSCRAGACSTC"
                 ...     "AGTITSGTIDQSDQSFLDDDQIEAGYVLTCVAYPTSDCTIKTHQEEGLY"
                 ... )
-                >>> p.structural_class("ChouZhang", distance="mahalanobis")
-                'alpha'
-                >>> p.structural_class("Chou", distance="correlation")
-                'alpha+beta'
                 >>> p.structural_class("Nakashima", distance="euclidean")
                 'zeta'
-                >>> p.structural_class("Chou", distance="cityblock")
-                'alpha+beta'
 
         References:
             - Chou, K-C., and C-T. Zhang.
@@ -1371,6 +1372,11 @@ class Peptide(typing.Sequence[str]):
               *The Folding Type of a Protein Is Relevant to the Amino Acid
               Composition*. Journal of Biochemistry. Jan 1986;99(1):153–62.
               doi:10.1093/oxfordjournals.jbchem.a135454. PMID:3957893.
+            - Zhang, Chun-Ting, and Kuo-Chen Chou.
+              *An Eigenvalue-Eigenvector Approach to Predicting Protein
+              Folding Types*.
+              Journal of Protein Chemistry. Jul 1995;14(5):309–26.
+              doi:10.1007/BF01886788. PMID:8590599.
             - Zhou, G.P., and N. Assa-Munt.
               *Some Insights into Protein Structural Class Prediction*.
               Proteins: Structure, Function, and Bioinformatics.
@@ -1423,7 +1429,7 @@ class Peptide(typing.Sequence[str]):
                 s = sum((pep_frequencies[x]-table[x])**2 for x in table)
                 distances[name] = math.sqrt(s)
         elif distance == "mahalanobis":
-            x = [pep_frequencies[aa] for aa in sorted(self._CODE1[:20])]
+            x = [pep_frequencies[aa]*100 for aa in sorted(self._CODE1[:20])]
             for name,tables in dataset.items():
                 if name == "all":
                     continue
@@ -1432,22 +1438,25 @@ class Peptide(typing.Sequence[str]):
                 eivals = tables.get("eigenvalues")
                 eivecs = tables.get("eigenvectors")
                 if eivals is None or eivecs is None:
-                    raise ValueError(
-                        f"Cannot use {frequencies!r} frequencies with "
-                        f"{distance!r} distance (no eigendecomposition available)"
-                    )
+                    continue
                 # compute Mahalanobis distance using the components of
                 # the eigendecomposition
-                xm = [mean[aa] for aa in sorted(self._CODE1[:20])]
+                xm = [mean[aa]*100 for aa in sorted(self._CODE1[:20])]
                 y = [
                     sum(eivecs[i][j] * (x[j] - xm[j]) for j in range(20))
                     for i in range(20)
                 ]
                 distances[name] = sum(y[i]**2 / eivals[i] for i in range(1, 20))
+            if not distances:
+                raise ValueError(
+                    f"Cannot use {frequencies!r} frequencies with "
+                    f"{distance!r} distance (no eigendecomposition available)"
+                )
         else:
             raise ValueError(f"Invalid distance: {distance!r}")
 
         # find the most likely structural class based on the distance
+        # print(distances)
         return min(distances, key=distances.get)
 
     # --- Descriptors --------------------------------------------------------

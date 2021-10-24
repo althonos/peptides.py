@@ -12,3 +12,8 @@ Nakashima, H., K. Nishikawa, and T. Ooi.
 *The Folding Type of a Protein Is Relevant to the Amino Acid Composition*.
 Journal of Biochemistry. Jan 1986;99(1):158, Table II.
 doi:10.1093/oxfordjournals.jbchem.a135454. PMID:3957893.
+
+Chou, K-C., and C-T. Zhang.
+*Prediction of Protein Structural Classes*.
+Critical Reviews in Biochemistry and Molecular Biology. Feb 1995;30:275–349. Appendix C.
+doi:10.3109/10409239509083488. PMID:7587280.
