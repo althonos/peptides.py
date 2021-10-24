@@ -29,8 +29,7 @@ sys.path.insert(0, project_dir)
 # Mock dynamically generated Python files so that we can build the documentation
 # without having build these files first (e.g on ReadTheDocs)
 
-sys.modules['peptides.data.tables'] = types.ModuleType('peptides.data.tables')
-sys.modules['peptides.data.lut'] = types.ModuleType('peptides.data.lut')
+sys.modules['peptides.tables'] = types.ModuleType('peptides.tables')
 
 # -- Sphinx Setup ------------------------------------------------------------
 

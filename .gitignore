@@ -3,8 +3,7 @@
 
 ### Added manually
 # Build files
-peptides/data/tables.py
-peptides/data/lut.py
+peptides/tables/__init__.py
 
 ### C ###
 # Prerequisites

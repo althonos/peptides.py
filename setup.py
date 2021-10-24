@@ -54,7 +54,7 @@ class codegen(setuptools.Command):
         _build_py = self.get_finalized_command("build_py")
         self.build_lib = _build_py.build_lib
         if self.data is None:
-            self.data = os.path.relpath(os.path.join(__file__, "..", "peptides", "data"))
+            self.data = os.path.relpath(os.path.join(__file__, "..", "peptides", "tables"))
 
     def _load_tables(self):
         self.announce(f"loading data tables from {self.data!r}", level=2)
@@ -74,27 +74,6 @@ class codegen(setuptools.Command):
         self.announce(f"loading {filename!r}", level=1)
         with open(filename, "r") as f:
             return {row[0]:float(row[1]) for row in csv.reader(f)}
-
-    def _load_code_1(self):
-        filename = os.path.realpath(os.path.join(__file__, "..", "peptides", "__init__.py"))
-        with open(filename) as f:
-            contents = f.read()
-
-        peptides_module = ast.parse(contents, filename)
-        peptide_class = next(
-            expr
-            for expr in peptides_module.body
-            if isinstance(expr, ast.ClassDef)
-            and expr.name == "Peptide"
-        )
-        code1 = next(
-            expr
-            for expr in peptide_class.body
-            if isinstance(expr, ast.Assign)
-            and expr.targets[0].id == "_CODE1"
-        )
-
-        return "".join(x.s for x in code1.value.elts)
 
     def _generate_tables_module(self, tables):
         n = sum(map(len, tables.values()))
@@ -118,44 +97,6 @@ class codegen(setuptools.Command):
             body.append(assign_node)
         return ast.Module(body=body)
 
-    def _generate_lut_module(self, tables, code1):
-        n = sum(map(len, tables.values()))
-        self.announce(f"building Python AST for {n!r} look-up tables", level=2)
-        body = [
-            ast.ImportFrom(module='array', names=[ast.alias(name='array', asname=None)], level=0)
-        ]
-        for name, table in tables.items():
-            stub = name.upper().replace(".", "_")
-            assign_node = ast.Assign(
-                targets=[ast.Name(id=stub, ctx=ast.Store())],
-                value=ast.Dict(
-                    keys=list(map(ast.Constant, table.keys())),
-                    values=[
-                        ast.Call(
-                            func=ast.Name(id='array', ctx=ast.Load()),
-                            args=[
-                                ast.Constant(value='d'),
-                                ast.List(
-                                    elts=[
-                                        ast.Constant(value=subtable.get(aa, 0.0))
-                                        for aa in code1
-                                    ]
-                                )
-                            ],
-                            keywords=[],
-                        )
-                        #
-                        # ast.Dict(
-                        #     keys=list(map(ast.Constant, subtable.keys())),
-                        #     values=list(map(ast.Constant, subtable.values())),
-                        # )
-                        for subtable in table.values()
-                    ]
-                )
-            )
-            body.append(assign_node)
-        return ast.Module(body=body)
-
     def _write_module(self, module, filename):
         self.announce(f"writing Python source to {filename!r}", level=2)
         with open(filename, "w") as f:
@@ -169,30 +110,18 @@ class codegen(setuptools.Command):
         # check astor is available
         if isinstance(astor, ImportError):
             raise RuntimeError("`astor` package is required for the `codegen` command") from astor
-        # load 1-letter code
-        code1 = self._load_code_1()
         # load data tables from R-formatted data file
         tables = self._load_tables()
         # generate a Python file containing the constants
         tables_module = self._generate_tables_module(tables)
-        lut_module = self._generate_lut_module(tables, code1)
-
         # write the data sources as Python
-        table_file = os.path.join(self.build_lib, "peptides", "data", "tables.py")
+        table_file = os.path.join(self.build_lib, "peptides", "tables", "__init__.py")
         self.mkpath(os.path.dirname(table_file))
         self._write_module(tables_module, table_file)
-
-        # write the data sources as Python
-        lut_file = os.path.join(self.build_lib, "peptides", "data", "lut.py")
-        self.mkpath(os.path.dirname(lut_file))
-        self._write_module(lut_module, lut_file)
-
         # copy if inplace
         if self.inplace:
-            library_table_file = os.path.join("peptides", "data", "tables.py")
+            library_table_file = os.path.join("peptides", "tables", "__init__.py")
             self.copy_file(table_file, library_table_file)
-            library_lut_file = os.path.join("peptides", "data", "lut.py")
-            self.copy_file(lut_file, library_lut_file)
 
 
 class build_py(_build_py):

@@ -8,7 +8,7 @@ import random
 import statistics
 import typing
 
-from .data import tables
+from . import tables
 
 __all__ = ["Peptide", "tables"]
 
@@ -1323,8 +1323,8 @@ class Peptide(typing.Sequence[str]):
             'zeta'
 
         To-Do:
-            Implement the structural class prediction method from
-            Chou & Zhang (1995), which uses the Mahalanobis distance.
+            - Implement the structural class prediction method from
+              Chou & Zhang (1995), which uses the Mahalanobis distance.
 
         References:
             - Chou, K-C., and C-T. Zhang.
