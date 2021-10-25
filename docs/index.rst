@@ -23,13 +23,13 @@
    :target: https://pypi.python.org/pypi/peptides
 
 .. |Wheel| image:: https://img.shields.io/pypi/wheel/peptides?style=flat-square&maxAge=3600
-   :target: https://pypi.org/project/peptides.py/#files
+   :target: https://pypi.org/project/peptides/#files
 
 .. |Versions| image:: https://img.shields.io/pypi/pyversions/peptides.svg?style=flat-square&maxAge=3600
-   :target: https://pypi.org/project/peptides.py/#files
+   :target: https://pypi.org/project/peptides/#files
 
 .. |Implementations| image:: https://img.shields.io/badge/impl-universal-success.svg?style=flat-square&maxAge=3600&label=impl
-   :target: https://pypi.org/project/peptides.py/#files
+   :target: https://pypi.org/project/peptides/#files
 
 .. |License| image:: https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=3600
    :target: https://choosealicense.com/licenses/gpl-3.0/
@@ -81,7 +81,7 @@ A non-exhaustive list of available features:
   - `MS-WHIM scores <https://doi.org/10.1021/ci980211b>`_
   - `PCP descriptors <https://doi.org/10.1007/s00894-001-0058-5>`_
   - `ProtFP descriptors <https://doi.org/10.1186/1758-2946-5-41>`_
-  - `Sneath vectors <10.1016/0022-5193(66)90112-3>`_
+  - `Sneath vectors <https://doi.org/10.1016/0022-5193(66)90112-3>`_
   - `ST-scales <https://doi.org/10.1007/s00726-009-0287-y>`_
   - `T-scales <https://doi.org/10.1016/j.molstruc.2006.07.004>`_
   - `VHSE-scales <https://doi.org/10.1002/bip.20296>`_
@@ -105,8 +105,9 @@ A non-exhaustive list of available features:
 
   - Structural class using methods and reference data from either
     `Nakashima, Nishikawa & Ooi (1985) <https://doi.org/10.1093/oxfordjournals.jbchem.a135454>`_,
-    `Chou (1989) <10.1007/978-1-4613-1571-1>`_,
-    or `Chou & Zhang (1992) <10.1111/j.1432-1033.1992.tb17067.x>`_.
+    `Chou (1989) <https://doi.org/10.1007/978-1-4613-1571-1>`_,
+    `Chou & Zhang (1992) <https://doi.org/10.1111/j.1432-1033.1992.tb17067.x>`_,
+    or `Chou, Liu, Maggiora & Zhang <https://pubmed.ncbi.nlm.nih.gov/9552161/>`_.
 
 
 Setup

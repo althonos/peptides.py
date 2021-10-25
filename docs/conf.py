@@ -33,37 +33,7 @@ sys.modules['peptides.tables'] = types.ModuleType('peptides.tables')
 
 # -- Sphinx Setup ------------------------------------------------------------
 
-# import docutils.nodes
-# import docutils.utils
-# import sphinx.transforms
-#
-# def doi_role(role, rawtext, text, lineno, inliner, options=None, content=None):
-#     node = docutils.nodes.reference(
-#         rawtext,
-#         "doi:{}".format(docutils.utils.unescape(text)),
-#         refuri="https://doi.org/{}".format(text),
-#     )
-#     return [node], []
-#
-# def pmid_role(row, rawtext, text, lineno, inliner, options=None, content=None):
-#     try:
-#         pmid = int(text)
-#     except ValueError:
-#         msg = inliner.reporter.error("Invalid PMID: {!r}".format(text), line=lineno)
-#         prb = inliner.problematic(rawtext, rawtext, msg)
-#         return [prb], [msg]
-#     node = docutils.nodes.reference(
-#         rawtext,
-#         "PMID:{}".format(pmid),
-#         refuri="https://pubmed.ncbi.nlm.nih.gov/{}".format(pmid),
-#     )
-#     return [node], []
-#
-
 def setup(app):
-    # Add roles for DOI and PMID
-    # app.add_role("doi", doi_role)
-    # app.add_role("pmid", pmid_role)
     # Add custom stylesheet
     app.add_css_file(os.path.join("_static/css/main.css"))
     # app.add_js_file("js/apitoc.js")
@@ -105,6 +75,10 @@ if "See Also:" in doc_lines:
 
 
 # -- General configuration ---------------------------------------------------
+
+# mock User-Agent for linkcheck builder (some publishers disallow robots,
+# so link check of DOI-resolved publications may fail).
+user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
