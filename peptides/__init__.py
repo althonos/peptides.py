@@ -8,15 +8,24 @@ import random
 import statistics
 import typing
 
-try:
-    from numpy import prod, sum
-except ImportError:
-    from ._npcompat import prod
-
 from . import tables, datasets
 
-__all__ = ["Peptide", "tables", "datasets"]
+try:
+    import numpy
+    from numpy import array, prod, sum, take, zeros
 
+    def sumtake(a, indices):
+        return numpy.sum(numpy.take(a, indices))
+
+except ImportError:
+    numpy = None
+    from ._npcompat import array, prod, take, zeros
+
+    def sumtake(a, indices):
+        return sum(map(a.__getitem__, indices))
+
+
+__all__ = ["Peptide", "tables", "datasets"]
 __version__ = "0.1.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
 __license__ = "GPLv3"
@@ -239,7 +248,13 @@ class Peptide(typing.Sequence[str]):
                 in some methods, but not all of them.
 
         """
+        # store the sequence in text format
         self.sequence: str = sequence
+        # store an encoded version of the sequence as an array of indices
+        encoder = {aa:i for i,aa in enumerate(self._CODE1)}
+        self.encoded: array = zeros(len(sequence), dtype='B')
+        for i, aa in enumerate(sequence):
+            self.encoded[i] = encoder.get(aa, encoder["X"])
 
     def __len__(self) -> int:
         return len(self.sequence)
@@ -479,8 +494,8 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1046/j.1365-2796.2003.01228.x`. :pmid:`12930229`.
 
         """
-        scale = tables.BOMAN["Boman"]
-        return -sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence)
+        lut = array([tables.BOMAN["Boman"].get(aa, 0.0) for aa in self._CODE1])
+        return -sumtake(lut, self.encoded) / len(self.sequence)
 
     def charge(self, pH: float = 7, pKscale: str = "Lehninger") -> float:
         """Compute the theoretical net charge of a peptide sequence.
@@ -1002,9 +1017,9 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("EGVNDNECEGFFSAR")
             >>> peptide.mass_shift(aa_shift="silac_13c")
-            6.020129
+            6.020129...
             >>> peptide.mass_shift(aa_shift=dict(R=10.00827))
-            10.00827
+            10.00827...
 
         References:
             - Ong, S-E., I. Kratchmarova, and M. Mann.
@@ -1040,9 +1055,8 @@ class Peptide(typing.Sequence[str]):
                 f"Expected str or dict, found {aa_shift.__class__.__name__}"
             )
 
-        s = scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
-        s += sum(scale.get(aa, 0.0) for aa in self.sequence)
-        return s
+        lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+        return sumtake(lut, self.encoded) + scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
 
     def molecular_weight(
         self,
@@ -1088,8 +1102,10 @@ class Peptide(typing.Sequence[str]):
         if scale is None:
             raise ValueError(f"Invalid average weight scale: {average!r}")
 
+        # build a look-up table
+        lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
         # sum the weight of each amino acid
-        mass = sum(scale.get(aa, 0.0) for aa in self.sequence)
+        mass = sumtake(lut, self.encoded)
         # add weight of water molecules
         mass += scale["H2O"]
         # add mass shift for labeled proteins
@@ -1165,9 +1181,9 @@ class Peptide(typing.Sequence[str]):
         if scale not in tables.HYDROPHOBICITY:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
 
-        profile = array.array("d")
-        for i in range(len(self.sequence) - window + 1):
-            profile.append(self[i : i + window].hydrophobicity(scale=scale))
+        profile = zeros(len(self.sequence) - window + 1)
+        for i in range(len(profile)):
+            profile[i] = self[i : i + window].hydrophobicity(scale=scale)
 
         return profile
 
@@ -1196,9 +1212,9 @@ class Peptide(typing.Sequence[str]):
             maximal hydrophobic moment instead of building a profile.
 
         """
-        profile = array.array("d")
-        for i in range(len(self.sequence) - window + 1):
-            profile.append(
+        profile = zeros(len(self.sequence) - window + 1)
+        for i in range(len(profile)):
+            profile[i] = (
                 self[i : i + window].hydrophobic_moment(window=window - 1, angle=angle)
             )
 
@@ -1508,10 +1524,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1089/cmb.2008.0173`. :pmid:`19432540`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.BLOSUM)):
+            # build a look-up table
             scale = tables.BLOSUM[f"BLOSUM{i+1}"]
-            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return BLOSUMIndices(*out)
 
     def cruciani_properties(self) -> CrucianiProperties:
@@ -1545,10 +1564,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1002/cem.856`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.CRUCIANI)):
+            # build a look-up table
             scale = tables.CRUCIANI[f"PP{i+1}"]
-            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return CrucianiProperties(*out)
 
     def fasgai_vectors(self) -> FasgaiVectors:
@@ -1585,10 +1607,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1111/j.1747-0285.2008.00641.x`. :pmid:`18318694`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.FASGAI)):
+            # build a look-up table
             scale = tables.FASGAI[f"F{i+1}"]
-            out.append(sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence))
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return FasgaiVectors(*out)
 
     def kidera_factors(self) -> KideraFactors:
@@ -1630,12 +1655,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1007/BF01025492`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.KIDERA)):
+            # build a look-up table
             scale = tables.KIDERA[f"KF{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0.0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return KideraFactors(*out)
 
     def ms_whim_scores(self) -> MSWHIMScores:
@@ -1676,12 +1702,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1021/ci980211b`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.MSWHIM)):
+            # build a look-up table
             scale = tables.MSWHIM[f"MSWHIM{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return MSWHIMScores(*out)
 
     def pcp_descriptors(self) -> PCPDescriptors:
@@ -1697,12 +1724,12 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, pcp in enumerate(peptide.pcp_descriptors()):
-            ...     print(f"E{i+1:<3} {pcp: .4f}")
-            E1    0.0109
-            E2    0.0381
-            E3    0.1250
-            E4    0.0409
-            E5   -0.1059
+            ...     print(f"E{i+1:<3} {pcp: .5f}")
+            E1    0.01090
+            E2    0.03810
+            E3    0.12505
+            E4    0.04095
+            E5   -0.10595
 
         References:
             - Mathura, V. S., and W. Braun.
@@ -1718,12 +1745,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.2174/092986609788923220`. :pmid:`19689427`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.PCP_DESCRIPTORS)):
+            # build a look-up table
             scale = tables.PCP_DESCRIPTORS[f"E{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return PCPDescriptors(*out)
 
     def physical_descriptors(self) -> PhysicalDescriptors:
@@ -1765,12 +1793,13 @@ class Peptide(typing.Sequence[str]):
             :doi:`10.1002/chem.201103811`. :pmid:`22434591`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.PHYSICAL_DESCRIPTORS)):
+            # build a look-up table
             scale = tables.PHYSICAL_DESCRIPTORS[f"PD{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return PhysicalDescriptors(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
@@ -1814,12 +1843,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1186/1758-2946-5-42`. :pmid:`24059743`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.PROTFP)):
+            # build a look-up table
             scale = tables.PROTFP[f"ProtFP{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return ProtFPDescriptors(*out)
 
     def sneath_vectors(self) -> SneathVectors:
@@ -1846,7 +1876,7 @@ class Peptide(typing.Sequence[str]):
             SV1    0.1962
             SV2    0.0466
             SV3    0.0405
-            SV4    0.0277
+            SV4    0.0278
 
         References:
             - Sneath, P. H. A.
@@ -1856,12 +1886,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1016/0022-5193(66)90112-3`. :pmid:`4291386`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.SNEATH)):
+            # build a look-up table
             scale = tables.SNEATH[f"SV{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return SneathVectors(*out)
 
     def st_scales(self) -> STScales:
@@ -1897,12 +1928,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1007/s00726-009-0287-y`. :pmid:`19373543`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.ST_SCALES)):
+            # build a look-up table
             scale = tables.ST_SCALES[f"ST{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return STScales(*out)
 
     def t_scales(self) -> TScales:
@@ -1935,12 +1967,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1016/j.molstruc.2006.07.004`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.T_SCALES)):
+            # build a look-up table
             scale = tables.T_SCALES[f"T{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return TScales(*out)
 
     def vhse_scales(self) -> VHSEScales:
@@ -1980,12 +2013,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1002/bip.20296`. :pmid:`15895431`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.VHSE)):
+            # build a look-up table
             scale = tables.VHSE[f"VHSE{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return VHSEScales(*out)
 
     def z_scales(self) -> ZScales:
@@ -1999,7 +2033,7 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, z in enumerate(peptide.z_scales()):
-            ...     print(f"Z{i+1:<3} {z: .4f}")
+            ...     print(f"Z{i+1:<3} {0.0+round(z,5): .4f}")
             Z1    0.5520
             Z2    0.0985
             Z3    0.0000
@@ -2024,12 +2058,13 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1021/jm9700575`. :pmid:`9651153`.
 
         """
-        out = array.array("d")
+        out = []
         for i in range(len(tables.Z_SCALES)):
+            # build a look-up table
             scale = tables.Z_SCALES[f"Z{i+1}"]
-            out.append(
-                sum(scale.get(aa, 0) for aa in self.sequence) / len(self.sequence)
-            )
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            # average the weight of each amino acid
+            out.append(sumtake(lut, self.encoded) / len(self))
         return ZScales(*out)
 
     __DESCRIPTORS = {
