@@ -11,6 +11,16 @@ class array(array.array):
     def __new__(cls, values, dtype='f'):
         return super().__new__(cls, dtype, values)
 
+    def __mul__(self, other):
+        if not isinstance(other, array):
+            return NotImplemented
+        if len(self) != len(other):
+            raise ValueError("Cannot pairwise multiply arrays of different lengths")
+        return array(
+            [x1 * x2 for x1, x2 in zip(self, other)],
+            dtype=self.typecode
+        )
+
 
 def take(a, indices):
     """Take elements from an array.

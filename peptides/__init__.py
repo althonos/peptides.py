@@ -344,12 +344,12 @@ class Peptide(typing.Sequence[str]):
             mu = statistics.mean(table.values())
             sigma = statistics.stdev(table.values())
             table = {k: (v - mu) / sigma for k, v in table.items()}
-        # compute using Cruciani formula
-        s = 0.0
-        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
-            s += table.get(aa1, 0.0) * table.get(aa2, 0.0)
-        # return correlation
-        return s / len(self.sequence)
+        # build the lookup table
+        lut = array([table.get(aa, 0.0) for aa in self._CODE1])
+        # compute correlation using Cruciani formula
+        v1 = take(lut, self.encoded[:-lag])
+        v2 = take(lut, self.encoded[lag:])
+        return sum(v1 * v2) / len(self.sequence)
 
     def cross_covariance(
         self,
@@ -903,7 +903,8 @@ class Peptide(typing.Sequence[str]):
         table = tables.HYDROPHOBICITY.get(scale)
         if table is None:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
-        return sum(table.get(aa, 0.0) for aa in self.sequence) / len(self.sequence)
+        lut = array([table.get(aa, 0.0) for aa in self._CODE1], dtype="d")
+        return sumtake(lut, self.encoded) / len(self.sequence)
 
     def instability_index(self) -> float:
         """Compute the instability index of a protein sequence.

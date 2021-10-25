@@ -53,17 +53,12 @@ def load_tests(loader, tests, ignore):
     if sys.argv[0].endswith("green"):
         return tests
 
-    # doctests require `numpy` to run, which may not be available because
-    # it is a pain to get to work out-of-the-box on OSX
-    # if numpy is None:
-    #     return tests
-
     # recursively traverse all library submodules and load tests from them
     packages = [None, peptides]
 
     for pkg in iter(packages.pop, None):
         # import the base module and add it to the tests
-        globs = dict(numpy=numpy, peptides=peptides, **pkg.__dict__)
+        globs = dict(peptides=peptides, **pkg.__dict__)
         tests.addTests(
             doctest.DocTestSuite(
                 pkg,
