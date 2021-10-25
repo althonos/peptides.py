@@ -9,7 +9,7 @@ import statistics
 import typing
 
 try:
-    from numpy import prod
+    from numpy import prod, sum
 except ImportError:
     from ._npcompat import prod
 
@@ -199,11 +199,11 @@ class Peptide(typing.Sequence[str]):
             - King, J. L., and T. H. Jukes.
               *Non-Darwinian Evolution*.
               Science. May 1969;164(3881):788–98.
-              doi:10.1126/science.164.3881.788. PMID:5767777.
+              :doi:`10.1126/science.164.3881.788`. :pmid:`5767777`.
             - The UniProt Consortium.
               *UniProt: The Universal Protein Knowledgebase in 2021*.
               Nucleic Acids Research. Jan 2021;49(D1):D480–89.
-              doi:10.1093/nar/gkaa1100. PMID:33237286.
+              :doi:`10.1093/nar/gkaa1100`. :pmid:`33237286`.
 
         """
         table = tables.AA_FREQUENCIES.get(frequencies)
@@ -234,9 +234,9 @@ class Peptide(typing.Sequence[str]):
 
         Arguments:
             sequence (`str`): A sequence of amino acids encoded with the
-            IUPAC one-letter code. Non-standard (*B*, *Z*, *J*) and
-            unknown (*X*) residues are supported in some methods, but
-            not all of them.
+                IUPAC one-letter code. Non-standard (*O*, *U*), ambiguous
+                (*B*, *Z*, *J*) and unknown (*X*) residues are supported
+                in some methods, but not all of them.
 
         """
         self.sequence: str = sequence
@@ -436,7 +436,7 @@ class Peptide(typing.Sequence[str]):
             - Ikai, A.
               *Thermostability and Aliphatic Index of Globular Proteins*.
               Journal of Biochemistry. Dec 1980;88(6):1895–98.
-              PMID:7462208.
+              :pmid:`7462208`.
 
         """
         # count aliphatic residues
@@ -476,7 +476,7 @@ class Peptide(typing.Sequence[str]):
             - Boman, H. G.
               *Antibacterial Peptides: Basic Facts and Emerging Concepts*.
               Journal of Internal Medicine. 2003 Sep;254(3):197–215.
-              doi:10.1046/j.1365-2796.2003.01228.x. PMID:12930229.
+              :doi:`10.1046/j.1365-2796.2003.01228.x`. :pmid:`12930229`.
 
         """
         scale = tables.BOMAN["Boman"]
@@ -526,7 +526,7 @@ class Peptide(typing.Sequence[str]):
               *The Focusing Positions of Polypeptides in Immobilized pH
               Gradients Can Be Predicted from Their Amino Acid Sequences.*
               Electrophoresis. 1993 Oct;14(10):1023–31.
-              doi:10.1002/elps.11501401163. PMID:8125050.
+              :doi:`10.1002/elps.11501401163`. :pmid:`8125050`.
             - Dawson, R. M. C. and D. C. Elliott.
               *Data for Biochemical Research.*
               Oxford: Clarendon Press. 2002;3:592.
@@ -546,12 +546,12 @@ class Peptide(typing.Sequence[str]):
             - Rodwell, J.D.
               *Heterogeneity of Component Bands in Isoelectric Focusing
               Patterns*. Analytical Biochemistry. 1982 Jan;119(2):440-49.
-              doi:10.1016/0003-2697(82)90611-x. PMID:7072964.
+              :doi:`10.1016/0003-2697(82)90611-x`. :pmid:`7072964`.
             - Sillero, A., and A. Maldonado.
               *Isoelectric Point Determination of Proteins and Other
               Macromolecules: Oscillating Method*.
               Computers in Biology and Medicine. 2006 Feb;36(2): 157–66.
-              doi:10.1016/j.compbiomed.2004.09.006. PMID:16389075.
+              :doi:`10.1016/j.compbiomed.2004.09.006`. :pmid:`16389075`.
             - Solomons, T. W. G.
               *Fundamentals of Organic Chemistry*. New York: Wiley. 1997;5.
               ISBN:978-0-471-28298-3.
@@ -610,7 +610,7 @@ class Peptide(typing.Sequence[str]):
               *The Hydrophobic Moment Detects Periodicity in Protein
               Hydrophobicity*. Proceedings of the National Academy of
               Sciences of the United States of America. 1984 Jan;81(1):140–44.
-              doi:10.1073/pnas.81.1.140. PMID:6582470.
+              :doi:`10.1073/pnas.81.1.140`. :pmid:`6582470`.
 
         """
         scale = tables.HYDROPHOBICITY["Eisenberg"]
@@ -662,64 +662,64 @@ class Peptide(typing.Sequence[str]):
               *An Empirical Hydrophobicity Scale for α-Amino-Acids and Some
               of Its Applications*.
               International Journal of Biochemistry. 1971 Oct;2(11):537–44.
-              doi:10.1016/0020-711X(71)90023-1.
+              :doi:`10.1016/0020-711X(71)90023-1`.
             - Abraham, D.J., and A. J. Leo.
               *Extension of the Fragment Method to Calculate Amino Acid
               Zwitterion and Side Chain Partition Coefficients*.
               Proteins: Structure, Function, and Genetics. 1987;2(2):130–52.
-              doi:10.1002/prot.340020207.
+              :doi:`10.1002/prot.340020207`.
             - Argos, P., J. K. Rao, and P. A. Hargrave.
               *Structural Prediction of Membrane-Bound Proteins*.
               European Journal of Biochemistry. Nov 1982;128(2–3):565–75.
-              doi:10.1111/j.1432-1033.1982.tb07002.x. PMID:7151796.
+              :doi:`10.1111/j.1432-1033.1982.tb07002.x`. :pmid:`7151796`.
             - Barley, M. H., N. J. Turner, and R. Goodacre.
               *Improved Descriptors for the Quantitative Structure–Activity
               Relationship Modeling of Peptides and Proteins*. Journal of
               Chemical Information and Modeling. Feb 2018;58(2):234–43.
-              doi:10.1021/acs.jcim.7b00488. PMID:29338232.
+              :doi:`10.1021/acs.jcim.7b00488`. :pmid:`29338232`.
             - Black, S. D., and D. R. Mould.
               *Development of Hydrophobicity Parameters to Analyze Proteins
               Which Bear Post- or Cotranslational Modifications*.
               Analytical Biochemistry. Feb 1991;193(1):72–82.
-              doi:10.1016/0003-2697(91)90045-u. PMID:2042744.
+              :doi:`10.1016/0003-2697(91)90045-u`. :pmid:`2042744`.
             - Bull, H. B., and K. Breese.
               *Surface Tension of Amino Acid Solutions: A Hydrophobicity
               Scale of the Amino Acid Residues*. Archives of Biochemistry
               and Biophysics. Apr 1974;161(2):665–70.
-              doi:10.1016/0003-9861(74)90352-x. PMID: 4839053
+              :doi:`10.1016/0003-9861(74)90352-x`. :pmid:`4839053`.
             - Casari, G., and M. J. Sippl.
               *Structure-Derived Hydrophobic Potential. Hydrophobic
               Potential Derived from X-Ray Structures of Globular Proteins
               Is Able to Identify Native Folds*.
               Journal of Molecular Biology. Apr 1992;224(3):725–32.
-              doi:10.1016/0022-2836(92)90556-y. PMID:1569551.
+              :doi:`10.1016/0022-2836(92)90556-y`. :pmid:`1569551`.
             - Chothia, C.
               *The Nature of the Accessible and Buried Surfaces in Proteins*.
               Journal of Molecular Biology. Jul 2917;105(1):1–12.
-              doi:10.1016/0022-2836(76)90191-1. PMID:994183.
+              :doi:`10.1016/0022-2836(76)90191-1`. :pmid:`994183`.
             - Cid, H., M. Bunster, M. Canales, and F. Gazitúa.
               *Hydrophobicity and Structural Classes in Proteins*.
               Protein Engineering. Jul 1992;5(5):373–75.
-              doi:10.1093/protein/5.5.373. PMID:1518784.
+              :doi:`10.1093/protein/5.5.373`. :pmid:`1518784`.
             - Cowan, R., and R. G. Whittaker.
               *Hydrophobicity Indices for Amino Acid Residues as Determined
               by High-Performance Liquid Chromatography*.
               Peptide Research. Apr 1990;3(2):75–80.
-              PMID:2134053.
+              :pmid:`2134053`.
             - Eisenberg, D., E. Schwarz, M. Komaromy, and R. Wall.
               *Analysis of Membrane and Surface Protein Sequences with
               the Hydrophobic Moment Plot*.
               Journal of Molecular Biology. Oct 1984;179(1):125–42.
-              doi:10.1016/0022-2836(84)90309-7. PMID:6502707.
+              :doi:`10.1016/0022-2836(84)90309-7`. :pmid:`6502707`.
             - Engelman, D. M., T. A. Steitz, and A. Goldman.
               *Identifying Nonpolar Transbilayer Helices in Amino Acid
               Sequences of Membrane Proteins*. Annual Review of Biophysics
               and Biophysical Chemistry. 1986;15:321–53.
-              doi:10.1146/annurev.bb.15.060186.001541. PMID:3521657.
+              :doi:`10.1146/annurev.bb.15.060186.001541`. :pmid:`3521657`.
             - Fasman, G. D.
               *Prediction of Protein Structure and the Principles of Protein
               Conformation*. Springer US. 1989.
-              doi:10.1007/978-1-4613-1571-1. ISBN:978-0-306-43131-9.
+              :doi:`10.1007/978-1-4613-1571-1`. ISBN:978-0-306-43131-9.
             - Fauchère, J-L., and Pliska V.
               *Hydrophobic Parameters π of Amino-Acid Side Chains from the
               Partitioning of N-Acetyl-Amino-Acid Amides*. European Journal
@@ -728,161 +728,161 @@ class Peptide(typing.Sequence[str]):
               *Contribution of the Free Energy of Mixing of Hydrophobic Side
               Chains to the Stability of the Tertiary Structure of Proteins*.
               Journal of Theoretical Biology. Jun 1973;39(3):645–51.
-              doi:10.1016/0022-5193(73)90075-1. PMID:4354159.
+              :doi:`10.1016/0022-5193(73)90075-1`. :pmid:`4354159`.
             - Guy, H. R.
               *Amino Acid Side-Chain Partition Energies and Distribution
               of Residues in Soluble Proteins*.
               Biophysical Journal. Jan 1985;47(1):61–70.
-              doi:10.1016/S0006-3495(85)83877-7. PMID:3978191.
+              :doi:`10.1016/S0006-3495(85)83877-7`. :pmid:`3978191`.
             - Hopp, T. P., and K. R. Woods.
               *Prediction of Protein Antigenic Determinants from Amino Acid
               Sequences*. Proceedings of the National Academy of Sciences
               of the United States of America. Jun 1981;78(6):3824–28.
-              doi:10.1073/pnas.78.6.3824. PMID:6167991.
+              :doi:`10.1073/pnas.78.6.3824`. :pmid:`6167991`.
             - Janin, J.
               *Surface and inside Volumes in Globular Proteins*.
               Nature. Feb 1979;277(5696):491–92.
-              doi:10.1038/277491a0. PMID:763335.
+              :doi:`10.1038/277491a0`. :pmid:`763335`.
             - Jones, D. D.
               *Amino Acid Properties and Side-Chain Orientation in Proteins:
               A Cross Correlation Approach*.
               Journal of Theoretical Biology. Mar 1975;50(1):167–83.
-              doi:10.1016/0022-5193(75)90031-4. PMID:1127956.
+              :doi:`10.1016/0022-5193(75)90031-4`. :pmid:`1127956`.
             - Juretić, D., D. Zucić, B. Lucić, and N. Trinajstić.
               *Preference Functions for Prediction of Membrane-Buried
               Helices in Integral Membrane Proteins*.
               Computers & Chemistry. Jun 1998;22(4):279–94.
-              doi:10.1016/s0097-8485(97)00070-3. PMID:9680689.
+              :doi:`10.1016/s0097-8485(97)00070-3`. :pmid:`9680689`.
             - Kawashima, S., H. Ogata, and M. Kanehisa.
               *AAindex: Amino Acid Index Database*.
               Nucleic Acids Research. Jan 1999;27(1):368–69.
-              doi:10.1093/nar/27.1.368. PMID:9847231.
+              :doi:`10.1093/nar/27.1.368`. :pmid:`9847231`.
             - Kawashima, S., and M. Kanehisa.
               *AAindex: Amino Acid Index Database*.
               Nucleic Acids Research. Jan 2000;28(1):374.
-              doi:10.1093/nar/28.1.374. PMID:10592278.
+              :doi:`10.1093/nar/28.1.374`. :pmid:`10592278`.
             - Kawashima, S., P. Pokarowski, M. Pokarowska, A. Kolinski,
               T. Katayama, and M. Kanehisa.
               *AAindex: Amino Acid Index Database, Progress Report 2008*.
               Nucleic Acids Research. Jan 2008;36:D202-205.
-              doi:10.1093/nar/gkm998. PMID:17998252.
+              :doi:`10.1093/nar/gkm998`. :pmid:`17998252`.
             - Kidera, A., Y. Konishi, M. Oka, T. Ooi, and H. A. Scheraga.
               *Statistical Analysis of the Physical Properties of the
               20 Naturally Occurring Amino Acids*.
               Journal of Protein Chemistry. Feb 1985;4(1):23-55.
-              doi:10.1007/BF01025492.
+              :doi:`10.1007/BF01025492`.
             - Kuhn, L. A., C. A. Swanson, M. E. Pique, J. A. Tainer, and
               E. D. Getzoff.
               *Atomic and Residue Hydrophilicity in the Context of Folded
               Protein Structures*. Proteins. Dec 1995;23(4):536–47.
-              doi:10.1002/prot.340230408. PMID:8749849.
+              :doi:`10.1002/prot.340230408`. :pmid:`8749849`.
             - Kyte, J., and R. F. Doolittle.
               *A Simple Method for Displaying the Hydropathic Character of a
               Protein*. Journal of Molecular Biology. May 1982;157(1):105–32.
-              doi:10.1016/0022-2836(82)90515-0. PMID:7108955.
+              :doi:`10.1016/0022-2836(82)90515-0`. :pmid:`7108955`.
             - Levitt, M.
               *A Simplified Representation of Protein Conformations for
               Rapid Simulation of Protein Folding*.
               Journal of Molecular Biology. Jun 1976;104(1):59–107.
-              doi:10.1016/0022-2836(76)90004-8. PMID:957439.
+              :doi:`10.1016/0022-2836(76)90004-8`. :pmid:`957439`.
             - Manavalan, P., and P. K. Ponnuswamy.
               *Hydrophobic Character of Amino Acid Residues in Globular
               Proteins*. Nature. Oct 1978;275(5681):673–74.
-              doi:10.1038/275673a0. PMID:703834.
+              :doi:`10.1038/275673a0`. :pmid:`703834`.
             - Miyazawa, S., and R. L. Jernigan.
               *Estimation of Effective Interresidue Contact Energies from
               Protein Crystal Structures: Quasi-Chemical Approximation*.
               Macromolecules. Mar 1985;18(3):534–52.
-              doi:10.1021/ma00145a039.
+              :doi:`10.1021/ma00145a039`.
             - Nakai, K., A. Kidera, and M. Kanehisa.
               *Cluster Analysis of Amino Acid Indices for Prediction of
               Protein Structure and Function*.
               Protein Engineering. Jul 1988;2(2):93–100.
-              doi:10.1093/protein/2.2.93. PMID:3244698.
+              :doi:`10.1093/protein/2.2.93`. :pmid:`3244698`.
             - Nozaki, Y., and C. Tanford.
               *The Solubility of Amino Acids and Two Glycine Peptides in
               Aqueous Ethanol and Dioxane Solutions. Establishment of a
               Hydrophobicity Scale*.
               The Journal of Biological Chemistry. Apr 1971;246(7):2211–17.
-              PMID:5555568.
+              :pmid:`5555568`.
             - Parker, J. M., D. Guo, and R. S. Hodges.
               *New Hydrophilicity Scale Derived from High-Performance Liquid
               Chromatography Peptide Retention Data: Correlation of
               Predicted Surface Residues with Antigenicity and X-Ray-Derived
               Accessible Sites*. Biochemistry. 1986;25(19):5425–32.
-              doi:10.1021/bi00367a013. PMID:2430611.
+              :doi:`10.1021/bi00367a013`. :pmid:`2430611`.
             - Ponnuswamy, P. K.
               *Hydrophobic Characteristics of Folded Proteins*. Progress in
               Biophysics and Molecular Biology. 1993;59(1):57–103.
-              doi:10.1016/0079-6107(93)90007-7. PMID:8419986.
+              :doi:`10.1016/0079-6107(93)90007-7`. :pmid:`8419986`.
             - Prabhakaran, M.
               *The Distribution of Physical, Chemical and Conformational
               Properties in Signal and Nascent Peptides*.
               The Biochemical Journal. Aug 1990;269(3):691–96.
-              doi:10.1042/bj2690691. PMID:2390062.
+              :doi:`10.1042/bj2690691`. :pmid:`2390062`.
             - Rao, J. K. M., and P. Argos.
               *A Conformational Preference Parameter to Predict Helices in
               Integral Membrane Proteins*.
               Biochimica Et Biophysica Acta. Jan 1986;869(2):197–214.
-              doi:10.1016/0167-4838(86)90295-5. PMID:2935194.
+              :doi:`10.1016/0167-4838(86)90295-5`. :pmid:`2935194`.
             - Rose, G. D., A. R. Geselowitz, G. J. Lesser, R. H. Lee, and
               M. H. Zehfus.
               *Hydrophobicity of Amino Acid Residues in Globular Proteins*.
               Science (New York, N.Y.). Aug 1985;229(4716):834–38.
-              doi:10.1126/science.4023714. PMID:4023714.
+              :doi:`10.1126/science.4023714`. :pmid:`4023714`.
             - Roseman, M. A.
               *Hydrophilicity of Polar Amino Acid Side-Chains Is Markedly
               Reduced by Flanking Peptide Bonds*.
               Journal of Molecular Biology. Apr 1988;200(3):513–22.
-              doi:10.1016/0022-2836(88)90540-2. PMID:3398047.
+              :doi:`10.1016/0022-2836(88)90540-2`. :pmid:`3398047`.
             - Sweet, R. M., and D. Eisenberg.
               *Correlation of Sequence Hydrophobicities Measures Similarity
               in Three-Dimensional Protein Structure*.
               Journal of Molecular Biology. Dec 1983;171(4):479-88.
-              doi:10.1016/0022-2836(83)90041-4. PMID:6663622.
+              :doi:`10.1016/0022-2836(83)90041-4`. :pmid:`6663622`.
             - Tomii, K., and M. Kanehisa.
               *Analysis of Amino Acid Indices and Mutation Matrices for
               Sequence Comparison and Structure Prediction of Proteins*.
               Protein Engineering. Jan 1996;9(1):27–36.
-              doi:10.1093/protein/9.1.27. PMID:9053899.
+              :doi:`10.1093/protein/9.1.27`. :pmid:`9053899`.
             - Welling, G. W., W. J. Weijer, R. van der Zee R, and
               S. Welling-Wester.
               *Prediction of Sequential Antigenic Regions in Proteins*.
               FEBS Letters. Feb 1985;188(2):215-8.
-              doi:10.1016/0014-5793(85)80374-4. PMID:2411595.
+              :doi:`10.1016/0014-5793(85)80374-4`. :pmid:`2411595`.
             - White, S. H., and W. C. Wimley.
               *Membrane Protein Folding and Stability: Physical Principles*.
               Annual Review of Biophysics and Biomolecular Structure.
               1999;28:319–65.
-              doi:10.1146/annurev.biophys.28.1.319. PMID:10410805
+              :doi:`10.1146/annurev.biophys.28.1.319`. :pmid:`10410805`
             - White, S. H., and W. C. Wimley.
               *Hydrophobic Interactions of Peptides with Membrane Interfaces*.
               Biochimica Et Biophysica Acta. Nov 1998;1376(3):339-52.
-              doi:10.1016/s0304-4157(98)00021-5. PMID:9804985.
+              :doi:`10.1016/s0304-4157(98)00021-5`. :pmid:`9804985`.
             - Wilson, K. J., A. Honegger, R. P. Stötzel, and G. J. Hughes.
               *The Behaviour of Peptides on Reverse-Phase Supports during
               High-Pressure Liquid Chromatography*.
               The Biochemical Journal. Oct 1981;199(1):31-41.
-              doi:10.1042/bj1990031. PMID:7337711.
+              :doi:`10.1042/bj1990031`. :pmid:`7337711`.
             - Wimley, W. C., and S. H. White.
               *Experimentally Determined Hydrophobicity Scale for Proteins
               at Membrane Interfaces*.
               Nature Structural Biology. Oct 1996;3(10):842–48.
-              doi:10.1038/nsb1096-842. PMID:8836100.
+              :doi:`10.1038/nsb1096-842`. :pmid:`8836100`.
             - Wimley, W. C., T. P. Creamer, and S. H. White.
               *Solvation Energies of Amino Acid Side Chains and Backbone in
               a Family of Host-Guest Pentapeptides*.
               Biochemistry. Apr 1996;35(16):5109–24.
-              doi:10.1021/bi9600153. PMID:8611495.
+              :doi:`10.1021/bi9600153`. :pmid:`8611495`.
             - Wolfenden, R., L. Andersson, P. M. Cullis, and C. C. Southgate.
               *Affinities of Amino Acid Side Chains for Solvent Water*.
               Biochemistry. Feb 1981;20(4):849–55.
-              doi:10.1021/bi00507a030. PMID:7213619.
+              :doi:`10.1021/bi00507a030`. :pmid:`7213619`.
             - Zimmerman, J. M., N. Eliezer, and R. Simha.
               *The Characterization of Amino Acid Sequences in Proteins by
               Statistical Methods*.
               Journal of Theoretical Biology. Nov 1968;21(2):170–201.
-              doi:10.1016/0022-5193(68)90069-6. PMID:5700434.
+              :doi:`10.1016/0022-5193(68)90069-6`. :pmid:`5700434`.
 
         """
         table = tables.HYDROPHOBICITY.get(scale)
@@ -913,7 +913,7 @@ class Peptide(typing.Sequence[str]):
               Composition: A Novel Approach for Predicting in Vivo
               Stability of a Protein from Its Primary Sequence*. Protein
               Engineering, Design and Selection. 1990 Dec;4(2):155–61.
-              doi:10.1093/protein/4.2.155. PMID:2075190.
+              :doi:`10.1093/protein/4.2.155`. :pmid:`2075190`.
 
         """
         scale = tables.INSTABILITY["Guruprasad"]
@@ -963,7 +963,7 @@ class Peptide(typing.Sequence[str]):
             - Rice, P., I. Longden, and A. Bleasby.
               *EMBOSS: The European Molecular Biology Open Software Suite*.
               Trends in Genetics. June 2000;16(6):276–77.
-              doi:10.1016/s0168-9525(00)02024-2. PMID:10827456
+              :doi:`10.1016/s0168-9525(00)02024-2`. :pmid:`10827456`
 
         """
         # use a simple bissecting loop to minimize the charge function
@@ -1011,12 +1011,12 @@ class Peptide(typing.Sequence[str]):
               *Properties of 13C-Substituted Arginine in Stable Isotope
               Labeling by Amino Acids in Cell Culture (SILAC)*.
               Journal of Proteome Research. Apr 2003;2(2):173–81.
-              doi:10.1021/pr0255708. PMID:12716131.
+              :doi:`10.1021/pr0255708`. :pmid:`12716131`.
             - Picotti, P., B. Bodenmiller, L. N. Mueller, B. Domon,
               and R. Aebersold.
               *Full Dynamic Range Proteome Analysis of S. Cerevisiae by
               Targeted Proteomics*. Cell. Aug 2009;138(4):795–806.
-              doi:10.1016/j.cell.2009.05.051. PMID:19664813.
+              :doi:`10.1016/j.cell.2009.05.051`. :pmid:`19664813`.
 
         """
         if isinstance(aa_shift, str):
@@ -1081,7 +1081,7 @@ class Peptide(typing.Sequence[str]):
               K. L. Williams, R. D. Appel, and D. F. Hochstrasser.
               *Protein Identification and Analysis Tools in the ExPASy
               Server*. Methods in Molecular Biology. 1992;112: 531–52.
-              doi:10.1385/1-59259-584-7:531. PMID:10027275
+              :doi:`10.1385/1-59259-584-7:531`. :pmid:`10027275`
 
         """
         scale = tables.MOLECULAR_WEIGHT.get(average)
@@ -1237,16 +1237,16 @@ class Peptide(typing.Sequence[str]):
             - Eisenberg, D.
               *Three-Dimensional Structure of Membrane and Surface Proteins*.
               Annual Review of Biochemistry. July 1984;53:595–623.
-              doi:10.1146/annurev.bi.53.070184.003115. PMID:6383201.
+              :doi:`10.1146/annurev.bi.53.070184.003115`. :pmid:`6383201`.
             - Eisenberg, D., E. Schwarz, M. Komaromy, and R. Wall.
               *Analysis of Membrane and Surface Protein Sequences with
               the Hydrophobic Moment Plot*.
               Journal of Molecular Biology. Oct 1984;179(1):125–42.
-              doi:10.1016/0022-2836(84)90309-7. PMID:6502707.
+              :doi:`10.1016/0022-2836(84)90309-7`. :pmid:`6502707`.
             - Eisenberg, D., R. M. Weiss, and T. C. Terwilliger.
               *The Helical Hydrophobic Moment: A Measure of the
               Amphiphilicity of a Helix*. Nature. Sep 1982;299(5881):371–74.
-              doi:10.1038/299371a0. PMID:7110359
+              :doi:`10.1038/299371a0`. :pmid:`7110359`
 
         """
         profile_H = self.hydrophobicity_profile(window=window, scale="Eisenberg")
@@ -1363,35 +1363,35 @@ class Peptide(typing.Sequence[str]):
             - Chou, K-C., W-M. Liu, G. M. Maggiora, and C-T. Zhang.
               *Prediction and Classification of Domain Structural Classes*.
               Proteins: Structure, Function, and Genetics.
-              Apr 1998;31(1):97–103. PMID:9552161.
+              Apr 1998;31(1):97–103. :pmid:`9552161`.
             - Chou, K-C., and C-T. Zhang.
               *Prediction of Protein Structural Classes*. Critical Reviews
               in Biochemistry and Molecular Biology. Feb 1995;30:275–349.
-              doi:10.3109/10409239509083488. PMID:7587280.
+              :doi:`10.3109/10409239509083488`. :pmid:`7587280`.
             - Chou, K-C., and C-T. Zhang.
               *A Correlation-Coefficient Method to Predicting
               Protein-Structural Classes from Amino Acid Compositions*.
               European Journal of Biochemistry. 1992;207(2):429–33.
-              doi:10.1111/j.1432-1033.1992.tb17067.x. PMID:1633801.
+              :doi:`10.1111/j.1432-1033.1992.tb17067.x`. :pmid:`1633801`.
             - Chou, P. Y.
               *Prediction of Protein Structural Classes from Amino Acid
               Compositions*. In Prediction of Protein Structure and the
               Principles of Protein Conformation, edited by G. D. Fasman.
               Springer US. 1989:549–86.
-              doi:10.1007/978-1-4613-1571-1. ISBN:978-0-306-43131-9.
+              :doi:`10.1007/978-1-4613-1571-1`. ISBN:978-0-306-43131-9.
             - Nakashima, H., K. Nishikawa, and T. Ooi.
               *The Folding Type of a Protein Is Relevant to the Amino Acid
               Composition*. Journal of Biochemistry. Jan 1986;99(1):153–62.
-              doi:10.1093/oxfordjournals.jbchem.a135454. PMID:3957893.
+              :doi:`10.1093/oxfordjournals.jbchem.a135454`. :pmid:`3957893`.
             - Zhang, Chun-Ting, and Kuo-Chen Chou.
               *An Eigenvalue-Eigenvector Approach to Predicting Protein
               Folding Types*.
               Journal of Protein Chemistry. Jul 1995;14(5):309–26.
-              doi:10.1007/BF01886788. PMID:8590599.
+              :doi:`10.1007/BF01886788`. :pmid:`8590599`.
             - Zhou, G.P., and N. Assa-Munt.
               *Some Insights into Protein Structural Class Prediction*.
               Proteins: Structure, Function, and Bioinformatics.
-              2001;44(1):57–59. doi:10.1002/prot.1071. PMID:11354006.
+              2001;44(1):57–59. :doi:`10.1002/prot.1071`. :pmid:`11354006`.
 
         """
         # get peptide frequencies
@@ -1440,7 +1440,7 @@ class Peptide(typing.Sequence[str]):
                 s = sum((pep_frequencies[x]-table[x])**2 for x in table)
                 distances[name] = math.sqrt(s)
         elif distance == "mahalanobis" or distance == "discriminant":
-            x = [pep_frequencies[aa]*100 for aa in sorted(self._CODE1[:20])]
+            x = [pep_frequencies[aa] for aa in sorted(self._CODE1[:20])]
             for name,tables in dataset.items():
                 if name == "all":
                     continue
@@ -1452,7 +1452,7 @@ class Peptide(typing.Sequence[str]):
                     continue
                 # compute Mahalanobis distance using the components of
                 # the eigendecomposition
-                xm = [mean[aa]*100 for aa in sorted(self._CODE1[:20])]
+                xm = [mean[aa] for aa in sorted(self._CODE1[:20])]
                 y = [
                     sum(eivecs[i][j] * (x[j] - xm[j]) for j in range(20))
                     for i in range(20)
@@ -1505,7 +1505,7 @@ class Peptide(typing.Sequence[str]):
             - Georgiev, A. G.
               *Interpretable Numerical Descriptors of Amino Acid Space*.
               Journal of Computational Biology. May 2009;16(5):703–23.
-              doi:10.1089/cmb.2008.0173. PMID:19432540.
+              :doi:`10.1089/cmb.2008.0173`. :pmid:`19432540`.
 
         """
         out = array.array("d")
@@ -1542,7 +1542,7 @@ class Peptide(typing.Sequence[str]):
               *Peptide Studies by Means of Principal Properties of Amino
               Acids Derived from MIF Descriptors*.
               Journal of Chemometrics. 2004;18(3-4):146–55.
-              doi:10.1002/cem.856.
+              :doi:`10.1002/cem.856`.
 
         """
         out = array.array("d")
@@ -1582,7 +1582,7 @@ class Peptide(typing.Sequence[str]):
               as Applied in Predicting Interactions between the Human
               Amphiphysin-1 SH3 Domains and Their Peptide Ligands*.
               Chemical Biology & Drug Design. Apr 2008;71(4):345–51.
-              doi:10.1111/j.1747-0285.2008.00641.x. PMID:18318694.
+              :doi:`10.1111/j.1747-0285.2008.00641.x`. :pmid:`18318694`.
 
         """
         out = array.array("d")
@@ -1627,7 +1627,7 @@ class Peptide(typing.Sequence[str]):
               *Statistical Analysis of the Physical Properties of the 20
               Naturally Occurring Amino Acids*.
               Journal of Protein Chemistry. Feb 1985;4(1):23–55.
-              doi:10.1007/BF01025492.
+              :doi:`10.1007/BF01025492`.
 
         """
         out = array.array("d")
@@ -1664,16 +1664,16 @@ class Peptide(typing.Sequence[str]):
               Molecular Surface Properties: A Comparative 3D QSAR Study in a
               Series of Steroids*. Journal of Computer-Aided Molecular
               Design. Jan 1997;11(1):79-92.
-              doi:10.1023/a:1008079512289. PMID:9139115
+              :doi:`10.1023/a:1008079512289`. :pmid:`9139115`
             - Gancia, E., G. Bravi, P. Mascagni, and A. Zaliani.
               *Global 3D-QSAR Methods: MS-WHIM and Autocorrelation*. Journal
               of Computer-Aided Molecular Design. Mar 2000;14(3):293–306.
-              doi:10.1023/a:1008142124682. PMID:10756483.
+              :doi:`10.1023/a:1008142124682`. :pmid:`10756483`.
             - Zaliani, A., and E. Gancia.
               *MS-WHIM Scores for Amino Acids: A New 3D-Description for
               Peptide QSAR and QSPR Studies*. Journal of Chemical
               Information and Computer Sciences. May 1999;39(3):525–33.
-              doi:10.1021/ci980211b.
+              :doi:`10.1021/ci980211b`.
 
         """
         out = array.array("d")
@@ -1710,12 +1710,12 @@ class Peptide(typing.Sequence[str]):
               Multidimensional Scaling of a Large Number of
               Physical–Chemical Properties*.
               Molecular Modeling Annual. Dec 2001;7(12):445–53.
-              doi:10.1007/s00894-001-0058-5.
+              :doi:`10.1007/s00894-001-0058-5`.
             - Mathura, V. S., D. Paris, and M. J. Mullan.
               *A Novel Physico-Chemical Property Based Model for Studying
               the Effects of Mutation on the Aggregation of Peptides*.
               Protein and Peptide Letters. 2009;16(8):991–98.
-              doi:10.2174/092986609788923220. PMID:19689427.
+              :doi:`10.2174/092986609788923220`. :pmid:`19689427`.
 
         """
         out = array.array("d")
@@ -1757,12 +1757,12 @@ class Peptide(typing.Sequence[str]):
             *Improved Descriptors for the Quantitative Structure–Activity
             Relationship Modeling of Peptides and Proteins*. Journal of
             Chemical Information and Modeling. Feb 2018;58(2):234–43.
-            doi:10.1021/acs.jcim.7b00488. PMID:29338232.
+            :doi:`10.1021/acs.jcim.7b00488`. :pmid:`29338232`.
           - Feng, X., J. Sanchis, M. T. Reetz, and H. Rabitz.
             *Enhancing the Efficiency of Directed Evolution in Focused
             Enzyme Libraries by the Adaptive Substituent Reordering
             Algorithm*. Chemistry. Apr 2012;18(18):5646–54.
-            doi:10.1002/chem.201103811. PMID:22434591.
+            :doi:`10.1002/chem.201103811`. :pmid:`22434591`.
 
         """
         out = array.array("d")
@@ -1804,14 +1804,14 @@ class Peptide(typing.Sequence[str]):
               *Benchmarking of Protein Descriptor Sets in Proteochemometric
               Modeling (Part 1): Comparative Study of 13 Amino Acid
               Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):41.
-              doi:10.1186/1758-2946-5-41. PMID:24059694.
+              :doi:`10.1186/1758-2946-5-41`. :pmid:`24059694`.
             - van Westen, G. J., R. F. Swier, I. Cortes-Ciriano,
               J. K. Wegner, J. P. Overington, A. P. Ijzerman,
               H. W. van Vlijmen, and A. Bender.
               *Benchmarking of Protein Descriptor Sets in Proteochemometric
               Modeling (Part 2): Modeling Performance of 13 Amino Acid
               Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):42.
-              doi:10.1186/1758-2946-5-42. PMID:24059743.
+              :doi:`10.1186/1758-2946-5-42`. :pmid:`24059743`.
 
         """
         out = array.array("d")
@@ -1853,7 +1853,7 @@ class Peptide(typing.Sequence[str]):
               *Relations between Chemical Structure and Biological Activity
               in Peptides*.
               Journal of Theoretical Biology. Nov 1996;12(2):157–95.
-              doi:10.1016/0022-5193(66)90112-3. PMID:4291386.
+              :doi:`10.1016/0022-5193(66)90112-3`. :pmid:`4291386`.
 
         """
         out = array.array("d")
@@ -1894,7 +1894,7 @@ class Peptide(typing.Sequence[str]):
               *ST-Scale as a Novel Amino Acid Descriptor and Its Application
               in QSAM of Peptides and Analogues*.
               Amino Acids. Mar 2010;38(3):805–16.
-              doi:10.1007/s00726-009-0287-y. PMID:19373543.
+              :doi:`10.1007/s00726-009-0287-y`. :pmid:`19373543`.
 
         """
         out = array.array("d")
@@ -1932,7 +1932,7 @@ class Peptide(typing.Sequence[str]):
               *T-Scale as a Novel Vector of Topological Descriptors for
               Amino Acids and Its Application in QSARs of Peptides*.
               Journal of Molecular Structure. Mar 2007;830(1):106–15.
-              doi:10.1016/j.molstruc.2006.07.004.
+              :doi:`10.1016/j.molstruc.2006.07.004`.
 
         """
         out = array.array("d")
@@ -1977,7 +1977,7 @@ class Peptide(typing.Sequence[str]):
             - Mei, H., Z. H. Liao, Y. Zhou, and S. Z. Li. *A New Set of
               Amino Acid Descriptors and Its Application in Peptide QSARs*.
               Biopolymers. 2005;80(6):775-86.
-              doi:10.1002/bip.20296. PMID:15895431.
+              :doi:`10.1002/bip.20296`. :pmid:`15895431`.
 
         """
         out = array.array("d")
@@ -2021,7 +2021,7 @@ class Peptide(typing.Sequence[str]):
               Biologically Active Peptides. A Multivariate Characterization
               of 87 Amino Acids*.
               Journal of Medicinal Chemistry. Jul 1998;41(14):2481–91.
-              doi:10.1021/jm9700575. PMID:9651153.
+              :doi:`10.1021/jm9700575`. :pmid:`9651153`.
 
         """
         out = array.array("d")

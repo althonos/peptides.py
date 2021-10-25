@@ -107,7 +107,8 @@ The original R `Peptides` package was written by [Daniel Osorio](https://orcid.o
 [Paola Rondón-Villarreal](https://orcid.org/0000-0001-8209-3885) and
 [Rodrigo Torres](https://orcid.org/0000-0003-1113-3020), and is licensed under
 the terms of the [GNU General Public License v2.0](https://choosealicense.com/licenses/gpl-2.0/).
-The [EMBOSS] applications are released under the [GNU General Public License v1.0](https://www.gnu.org/licenses/old-licenses/gpl-1.0.html).
+The [EMBOSS](http://emboss.bioinformatics.nl/cgi-bin/emboss/) applications are
+released under the [GNU General Public License v1.0](https://www.gnu.org/licenses/old-licenses/gpl-1.0.html).
 
 *This project is in no way not affiliated, sponsored, or otherwise endorsed
 by the [original `Peptides` authors](https://github.com/dosorio). It was developed
