@@ -36,8 +36,8 @@ sys.modules['peptides.tables'] = types.ModuleType('peptides.tables')
 def setup(app):
     # Add custom stylesheet
     app.add_css_file(os.path.join("_static/css/main.css"))
-    # app.add_js_file("js/apitoc.js")
-    # app.add_js_file("js/example-admonition.js")
+    app.add_js_file("js/apitoc.js")
+    app.add_js_file("js/example-admonition.js")
 
 
 # -- Project information -----------------------------------------------------
@@ -181,8 +181,8 @@ htmlhelp_basename = peptides.__name__
 # -- Options for extlinks extension ------------------------------------------
 
 extlinks = {
-    'doi': ('https://doi.org/%s', 'doi:%s'),
-    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:%s'),
+    'doi': ('https://doi.org/%s', 'doi:'),
+    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:'),
 }
 
 
