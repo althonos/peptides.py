@@ -93,7 +93,7 @@ A non-exhaustive list of available features:
   - Hydrophobic moment profile based on `Eisenberg, Weiss and Terwilliger (1984) <https://doi.org/10.1073/pnas.81.1.140>`_.
   - Membrane position based on `Eisenberg (1984) <https://doi.org/10.1146/annurev.bi.53.070184.003115>`_.
 
-- Physico-chemical properties:
+- Physical-chemical properties:
 
   - Aliphatic index proposed in `Ikai (1980) <https://pubmed.ncbi.nlm.nih.gov/7462208/>`_.
   - Instability index proposed in `Boman (2003) <https://doi.org/10.1046/j.1365-2796.2003.01228.x>`_.

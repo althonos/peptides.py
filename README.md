@@ -4,11 +4,11 @@
 
 [![Actions](https://img.shields.io/github/workflow/status/althonos/peptides.py/Test/main?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/peptides.py/actions)
 [![Coverage](https://img.shields.io/codecov/c/gh/althonos/peptides.py?style=flat-square&maxAge=3600)](https://codecov.io/gh/althonos/peptides.py/)
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![PyPI](https://img.shields.io/pypi/v/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides)
 [![Wheel](https://img.shields.io/pypi/wheel/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
 [![Python Versions](https://img.shields.io/pypi/pyversions/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
 [![Python Implementations](https://img.shields.io/badge/impl-universal-success.svg?style=flat-square&maxAge=3600&label=impl)](https://pypi.org/project/peptides/#files)
-[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/peptides.py/)
 [![Mirror](https://img.shields.io/badge/mirror-EMBL-009f4d?style=flat-square&maxAge=2678400)](https://git.embl.de/larralde/peptides.py/)
 [![GitHub issues](https://img.shields.io/github/issues/althonos/peptides.py.svg?style=flat-square&maxAge=600)](https://github.com/althonos/peptides.py/issues)
@@ -27,6 +27,29 @@ some additional features from [EMBOSS](http://emboss.bioinformatics.nl/cgi-bin/e
 This library has no external dependency and is available for all modern Python
 versions (3.6+).
 
+### 📋 Features
+
+A non-exhaustive list of available features:
+
+- Peptide statistics: amino acid counts and frequencies.
+- **QSAR** descriptors: BLOSUM indices, Cruciani properties, FASGAI vectors, Kidera factors, MS-WHIM scores, PCP descriptors, ProtFP descriptors, Sneath vectors, ST-scales, T-scales, VHSE-scales, Z-scales.
+- Sequence profiles: hydrophobicity, hydrophobic moment, membrane position.
+- Physicochemical properties: aliphatic index, instability index, theoretical net charge, isoelectric point, molecular weight (with isotope labelling support).
+- Biological properties: structural class prediction.
+
+*If this library is missing a useful statistic or descriptor, feel free to
+reach out and open a feature request on the [issue tracker](https://github.com/althonos/peptides.py/issues)
+of the [project repository](https://github.com/althonos/peptides.py).*
+
+### 🧊 Vectorization
+
+Most of the descriptors for a protein sequence are simple averages of values
+taken in a lookup table, so computing them can be done in a vectorized manner.
+If [`numpy`](https://numpy.org/) can be imported, relevant functions
+(like `numpy.sum` or `numpy.take`) will be used, otherwise a fallback
+implementation using [`array.array`](https://docs.python.org/3/library/array.html#array.array)
+from the standard library is available.
+
 ## 🔧 Installing
 
 Install the `peptides` package directly from [PyPi](https://pypi.org/project/peptides)
@@ -41,6 +64,16 @@ package:
 ```console
 $ conda install -c bioconda peptides-py
 ``` -->
+
+## 📖 Documentation
+
+A complete [API reference](https://peptides.readthedocs.io/en/stable/api.html)
+can be found in the [online documentation](https://peptides.readthedocs.io/),
+or directly from the command line using
+[`pydoc`](https://docs.python.org/3/library/pydoc.html):
+```console
+$ pydoc peptides.Peptide
+```
 
 ## 💡 Example
 
