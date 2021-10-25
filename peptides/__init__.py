@@ -26,7 +26,7 @@ except ImportError:
 
 
 __all__ = ["Peptide", "tables", "datasets"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
 __license__ = "GPLv3"
 __credits__ = """

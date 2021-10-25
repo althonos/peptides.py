@@ -4,5 +4,6 @@ include           COPYING
 include           pyproject.toml
 recursive-include peptides/tables *.csv
 exclude           peptides/tables/__init__.py
+exclude           peptides/datasets/__init__.py
 include           peptides/py.typed
 prune             tests
