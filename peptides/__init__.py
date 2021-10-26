@@ -11,19 +11,9 @@ import typing
 from . import tables, datasets
 
 try:
-    raise ImportError
-    import numpy
     from numpy import array, prod, sum, take, zeros
-
-    def sumtake(a, indices):
-        return numpy.sum(numpy.take(a, indices))
-
 except ImportError:
-    numpy = None
     from ._npcompat import array, prod, take, zeros
-
-    def sumtake(a, indices):
-        return sum(map(a.__getitem__, indices))
 
 
 __all__ = ["Peptide", "tables", "datasets"]
@@ -253,7 +243,7 @@ class Peptide(typing.Sequence[str]):
         self.sequence: str = sequence
         # store an encoded version of the sequence as an array of indices
         encoder = {aa:i for i,aa in enumerate(self._CODE1)}
-        self.encoded: array = zeros(len(sequence), dtype='B')
+        self.encoded = zeros(len(sequence), dtype='B')
         for i, aa in enumerate(sequence):
             self.encoded[i] = encoder.get(aa, encoder["X"])
 
@@ -321,9 +311,9 @@ class Peptide(typing.Sequence[str]):
         # build look up table
         lut = array([table.get(aa, 0.0) for aa in self._CODE1])
         # compute using Cruciani formula
-        v1 = take(lut, self.encoded[:-lag])
-        v2 = take(lut, self.encoded[lag:])
-        return sum(v1*v2) / sum(v1**2)
+        v1 = array(lut.take(self.encoded[:-lag]))
+        v2 = array(lut.take(self.encoded[lag:]))
+        return (v1*v2).sum() / (v1**2).sum()
 
     def auto_covariance(
         self, table: typing.Dict[str, float], lag: int = 1, center: bool = True
@@ -347,9 +337,9 @@ class Peptide(typing.Sequence[str]):
         # build the lookup table
         lut = array([table.get(aa, 0.0) for aa in self._CODE1])
         # compute correlation using Cruciani formula
-        v1 = take(lut, self.encoded[:-lag])
-        v2 = take(lut, self.encoded[lag:])
-        return sum(v1 * v2) / len(self)
+        v1 = lut.take(self.encoded[:-lag])
+        v2 = lut.take(self.encoded[lag:])
+        return (v1 * v2).sum() / len(self)
 
     def cross_covariance(
         self,
@@ -384,9 +374,9 @@ class Peptide(typing.Sequence[str]):
         lut2 = array([table2.get(aa, 0.0) for aa in self._CODE1])
 
         # compute using Cruciani formula
-        v1 = take(lut1, self.encoded[:-lag])
-        v2 = take(lut2, self.encoded[lag:])
-        return sum(v1*v2) / len(self)
+        v1 = lut1.take(self.encoded[:-lag])
+        v2 = lut2.take(self.encoded[lag:])
+        return (v1*v2).sum() / len(self)
 
 
     # --- Sequence properties -----------------------------------------------
@@ -499,7 +489,7 @@ class Peptide(typing.Sequence[str]):
 
         """
         lut = array([tables.BOMAN["Boman"].get(aa, 0.0) for aa in self._CODE1])
-        return -sumtake(lut, self.encoded) / len(self.sequence)
+        return -lut.take(self.encoded).sum() / len(self.sequence)
 
     def charge(self, pH: float = 7, pKscale: str = "Lehninger") -> float:
         """Compute the theoretical net charge of a peptide sequence.
@@ -589,9 +579,9 @@ class Peptide(typing.Sequence[str]):
         sign_lut = array([tables.CHARGE["sign"].get(aa, 0.0) for aa in self._CODE1])
 
         # compute charge of each amino-acid and sum
-        pK = take(lut, self.encoded)
-        sign = take(sign_lut, self.encoded)
-        charge = sum(sign / (1 + 10**(sign * (pH - pK))))
+        pK = lut.take(self.encoded)
+        sign = array(sign_lut.take(self.encoded))
+        charge = (sign / (1 + 10**(sign * (pH - pK)))).sum()
 
         # add charge for C-terminal and N-terminal ends of the peptide
         if "nTer" in scale:
@@ -640,7 +630,7 @@ class Peptide(typing.Sequence[str]):
 
         """
         scale = tables.HYDROPHOBICITY["Eisenberg"]
-        lut = [scale.get(aa, 0.0) for aa in self._CODE1]
+        lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
 
         angles = [(angle * i) % 360 for i in range(window)]
         angsin = array([math.sin(math.radians(a)) for a in angles])
@@ -649,8 +639,9 @@ class Peptide(typing.Sequence[str]):
         maxnorm = 0.0
         for i in range(len(self.sequence) - window + 1):
             # compute sin and cos of angles
-            sumsin = sum( take(lut, self.encoded[i:i+window]) * angsin )
-            sumcos = sum( take(lut, self.encoded[i:i+window]) * angcos )
+            hvec = array(lut.take(self.encoded[i:i+window]))
+            sumsin = (hvec * angsin).sum()
+            sumcos = (hvec * angcos).sum()
             # compute only the distance component (this way we can avoid
             # computing the square root in each iteration)
             norm = sumsin**2 + sumcos**2
@@ -919,7 +910,7 @@ class Peptide(typing.Sequence[str]):
         if table is None:
             raise ValueError(f"Invalid hydrophobicity scale: {scale!r}")
         lut = array([table.get(aa, 0.0) for aa in self._CODE1], dtype="d")
-        return sumtake(lut, self.encoded) / len(self.sequence)
+        return lut.take(self.encoded).sum() / len(self.sequence)
 
     def instability_index(self) -> float:
         """Compute the instability index of a protein sequence.
@@ -1072,7 +1063,7 @@ class Peptide(typing.Sequence[str]):
             )
 
         lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
-        return sumtake(lut, self.encoded) + scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
+        return lut.take(self.encoded).sum() + scale.get("nTer", 0.0) + scale.get("cTer", 0.0)
 
     def molecular_weight(
         self,
@@ -1121,7 +1112,7 @@ class Peptide(typing.Sequence[str]):
         # build a look-up table
         lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
         # sum the weight of each amino acid
-        mass = sumtake(lut, self.encoded)
+        mass = lut.take(self.encoded).sum()
         # add weight of water molecules
         mass += scale["H2O"]
         # add mass shift for labeled proteins
@@ -1546,7 +1537,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.BLOSUM[f"BLOSUM{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return BLOSUMIndices(*out)
 
     def cruciani_properties(self) -> CrucianiProperties:
@@ -1586,7 +1577,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.CRUCIANI[f"PP{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return CrucianiProperties(*out)
 
     def fasgai_vectors(self) -> FasgaiVectors:
@@ -1629,7 +1620,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.FASGAI[f"F{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return FasgaiVectors(*out)
 
     def kidera_factors(self) -> KideraFactors:
@@ -1677,7 +1668,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.KIDERA[f"KF{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return KideraFactors(*out)
 
     def ms_whim_scores(self) -> MSWHIMScores:
@@ -1724,7 +1715,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.MSWHIM[f"MSWHIM{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return MSWHIMScores(*out)
 
     def pcp_descriptors(self) -> PCPDescriptors:
@@ -1767,7 +1758,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.PCP_DESCRIPTORS[f"E{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return PCPDescriptors(*out)
 
     def physical_descriptors(self) -> PhysicalDescriptors:
@@ -1815,7 +1806,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.PHYSICAL_DESCRIPTORS[f"PD{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return PhysicalDescriptors(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
@@ -1865,7 +1856,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.PROTFP[f"ProtFP{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return ProtFPDescriptors(*out)
 
     def sneath_vectors(self) -> SneathVectors:
@@ -1888,11 +1879,11 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
             >>> for i, fp in enumerate(peptide.sneath_vectors()):
-            ...     print(f"SV{i+1:<3} {fp: .4f}")
-            SV1    0.1962
-            SV2    0.0466
-            SV3    0.0405
-            SV4    0.0278
+            ...     print(f"SV{i+1:<3} {fp: .5f}")
+            SV1    0.19620
+            SV2    0.04655
+            SV3    0.04050
+            SV4    0.02775
 
         References:
             - Sneath, P. H. A.
@@ -1906,9 +1897,9 @@ class Peptide(typing.Sequence[str]):
         for i in range(len(tables.SNEATH)):
             # build a look-up table
             scale = tables.SNEATH[f"SV{i+1}"]
-            lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+            lut = array([scale.get(aa, 0.0) for aa in self._CODE1], "f")
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return SneathVectors(*out)
 
     def st_scales(self) -> STScales:
@@ -1950,7 +1941,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.ST_SCALES[f"ST{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return STScales(*out)
 
     def t_scales(self) -> TScales:
@@ -1989,7 +1980,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.T_SCALES[f"T{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return TScales(*out)
 
     def vhse_scales(self) -> VHSEScales:
@@ -2035,7 +2026,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.VHSE[f"VHSE{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return VHSEScales(*out)
 
     def z_scales(self) -> ZScales:
@@ -2080,7 +2071,7 @@ class Peptide(typing.Sequence[str]):
             scale = tables.Z_SCALES[f"Z{i+1}"]
             lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
             # average the weight of each amino acid
-            out.append(sumtake(lut, self.encoded) / len(self))
+            out.append(lut.take(self.encoded).sum() / len(self))
         return ZScales(*out)
 
     __DESCRIPTORS = {
