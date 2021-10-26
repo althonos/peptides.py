@@ -575,20 +575,27 @@ class Peptide(typing.Sequence[str]):
               ISBN:978-83-01-12044-3.
 
         """
-        sign_scale = tables.CHARGE["sign"]
+        # get chosen the pKa scale
         scale = tables.PK.get(pKscale)
         if scale is None:
             raise ValueError(f"Invalid pK scale: {scale!r}")
 
-        # nterm
-        charge = 1.0 / (1.0 + 10 ** (1.0 * (pH - scale["nTer"])))
-        # aa
-        for aa in self.sequence:
-            sign = sign_scale.get(aa, 0)
-            charge += sign / (1 + 10 ** (sign * (pH - scale.get(aa, 0))))
-        # cterm
-        charge += -1.0 / (1.0 + 10 ** (-1.0 * (pH - scale["cTer"])))
+        # build a look-up table for the pKa scale and the charge sign
+        lut = array([scale.get(aa, 0.0) for aa in self._CODE1])
+        sign_lut = array([tables.CHARGE["sign"].get(aa, 0.0) for aa in self._CODE1])
 
+        # compute charge of each amino-acid and sum
+        pK = take(lut, self.encoded)
+        sign = take(sign_lut, self.encoded)
+        charge = sum(sign / (1 + 10**(sign * (pH - pK))))
+
+        # add charge for C-terminal and N-terminal ends of the peptide
+        if "nTer" in scale:
+            charge += 1.0 / (1.0 + 10 ** (1.0 * (pH - scale["nTer"])))
+        if "cTer" in scale:
+            charge += -1.0 / (1.0 + 10 ** (-1.0 * (pH - scale["cTer"])))
+
+        # return the net protein charge
         return charge
 
     def hydrophobic_moment(self, window: int = 11, angle: int = 100) -> float:
