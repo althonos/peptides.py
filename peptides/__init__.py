@@ -636,21 +636,25 @@ class Peptide(typing.Sequence[str]):
 
         """
         scale = tables.HYDROPHOBICITY["Eisenberg"]
-        angles = [(angle * i) % 360 for i in range(window)]
-        moment = 0.0
+        lut = [scale.get(aa, 0.0) for aa in self._CODE1]
 
+        angles = [(angle * i) % 360 for i in range(window)]
+        angsin = array([math.sin(math.radians(a)) for a in angles])
+        angcos = array([math.cos(math.radians(a)) for a in angles])
+
+        maxnorm = 0.0
         for i in range(len(self.sequence) - window + 1):
             # compute sin and cos of angles
-            sumsin = sumcos = 0.0
-            for aa, theta in zip(self.sequence[i : i + window], angles):
-                sumsin += scale.get(aa, 0.0) * math.sin(math.radians(theta))
-                sumcos += scale.get(aa, 0.0) * math.cos(math.radians(theta))
-            # compute hydrophobic moment of window
-            hm = math.sqrt(sumsin ** 2 + sumcos ** 2) / window
-            if hm > moment:
-                moment = hm
+            sumsin = sum( take(lut, self.encoded[i:i+window]) * angsin )
+            sumcos = sum( take(lut, self.encoded[i:i+window]) * angcos )
+            # compute only the distance component (this way we can avoid
+            # computing the square root in each iteration)
+            norm = sumsin**2 + sumcos**2
+            if norm > maxnorm:
+                maxnorm = norm
 
-        return moment
+        # compute the angular moment from the norm
+        return math.sqrt(maxnorm) / window
 
     def hydrophobicity(self, scale: str = "KyteDoolittle") -> float:
         """Compute the hydrophobicity index of a protein sequence.
