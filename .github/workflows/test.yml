@@ -54,6 +54,9 @@ jobs:
       run: python -m pip install -U pip wheel setuptools
     - name: Install Python requirements
       run: python -m pip install -r .github/workflows/requirements.txt
+    - name: Install NumPy
+      if: matrix.python-impl == 'CPython'
+      run: python -m pip install -U numpy
     - name: Generate code for data tables
       run: python setup.py codegen --inplace
     - name: Test with coverage
@@ -114,6 +117,9 @@ jobs:
       run: python -m pip install -U pip wheel setuptools
     - name: Install Python requirements
       run: python -m pip install -r .github/workflows/requirements.txt
+    - name: Install NumPy
+      if: matrix.python-impl == 'CPython'
+      run: python -m pip install -U numpy
     - name: Generate code for data tables
       run: python setup.py codegen --inplace
     - name: Test with coverage
