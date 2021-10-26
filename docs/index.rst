@@ -107,7 +107,7 @@ A non-exhaustive list of available features:
     `Nakashima, Nishikawa & Ooi (1985) <https://doi.org/10.1093/oxfordjournals.jbchem.a135454>`_,
     `Chou (1989) <https://doi.org/10.1007/978-1-4613-1571-1>`_,
     `Chou & Zhang (1992) <https://doi.org/10.1111/j.1432-1033.1992.tb17067.x>`_,
-    or `Chou, Liu, Maggiora & Zhang <https://pubmed.ncbi.nlm.nih.gov/9552161/>`_.
+    or `Chou, Liu, Maggiora & Zhang (1998) <https://pubmed.ncbi.nlm.nih.gov/9552161/>`_.
 
 
 Setup
