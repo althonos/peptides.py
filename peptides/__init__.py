@@ -11,6 +11,7 @@ import typing
 from . import tables, datasets
 
 try:
+    raise ImportError
     import numpy
     from numpy import array, prod, sum, take, zeros
 
@@ -317,13 +318,12 @@ class Peptide(typing.Sequence[str]):
             mu = statistics.mean(table.values())
             sigma = statistics.stdev(table.values())
             table = {k: (v - mu) / sigma for k, v in table.items()}
+        # build look up table
+        lut = array([table.get(aa, 0.0) for aa in self._CODE1])
         # compute using Cruciani formula
-        s1 = s2 = 0.0
-        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
-            s1 += table.get(aa1, 0.0) * table.get(aa2, 0.0)
-            s2 += table.get(aa1, 0.0) ** 2
-        # return correlation
-        return s1 / s2
+        v1 = take(lut, self.encoded[:-lag])
+        v2 = take(lut, self.encoded[lag:])
+        return sum(v1*v2) / sum(v1**2)
 
     def auto_covariance(
         self, table: typing.Dict[str, float], lag: int = 1, center: bool = True
@@ -349,7 +349,7 @@ class Peptide(typing.Sequence[str]):
         # compute correlation using Cruciani formula
         v1 = take(lut, self.encoded[:-lag])
         v2 = take(lut, self.encoded[lag:])
-        return sum(v1 * v2) / len(self.sequence)
+        return sum(v1 * v2) / len(self)
 
     def cross_covariance(
         self,
@@ -370,7 +370,7 @@ class Peptide(typing.Sequence[str]):
             0.0259803...
 
         """
-        # center the table if requested
+        # center the tables if requested
         if center:
             mu1 = statistics.mean(table1.values())
             sigma1 = statistics.stdev(table1.values())
@@ -378,12 +378,16 @@ class Peptide(typing.Sequence[str]):
             mu2 = statistics.mean(table2.values())
             sigma2 = statistics.stdev(table2.values())
             table2 = {k: (v - mu2) / sigma2 for k, v in table2.items()}
+
+        # build the lookup table
+        lut1 = array([table1.get(aa, 0.0) for aa in self._CODE1])
+        lut2 = array([table2.get(aa, 0.0) for aa in self._CODE1])
+
         # compute using Cruciani formula
-        s = 0.0
-        for aa1, aa2 in zip(self.sequence, self.sequence[lag:]):
-            s += table1.get(aa1, 0.0) * table2.get(aa2, 0.0)
-        # return correlation
-        return s / len(self.sequence)
+        v1 = take(lut1, self.encoded[:-lag])
+        v2 = take(lut2, self.encoded[lag:])
+        return sum(v1*v2) / len(self)
+
 
     # --- Sequence properties -----------------------------------------------
 
@@ -423,7 +427,7 @@ class Peptide(typing.Sequence[str]):
 
         """
         return {
-            aa:count/len(self.sequence)
+            aa:count/len(self)
             for aa,count in self.counts().items()
         }
 
