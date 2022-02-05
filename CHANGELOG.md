@@ -6,7 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.2.1...HEAD
+
+
+## [v0.2.1] - 2022-02-05
+[v0.2.1]: https://github.com/althonos/peptides.py/compare/v0.2.0...v0.2.1
+
+### Fixed
+- `Peptide.hydrophobic_moment` not working properly on sequences smaller than the provided window length ([#1](https://github.com/althonos/peptides.py/issues/1)).
 
 
 ## [v0.2.0] - 2021-10-21
