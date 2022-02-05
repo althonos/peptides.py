@@ -91,10 +91,6 @@ jobs:
           python-impl: CPython
         - python-version: "3.10"
           python-release: v3.10
-          python-impl: CPython
-        - python-version: pypy-3.6
-          python-release: v3.6
-          python-impl: PyPy
         - python-version: pypy-3.7
           python-release: v3.7
           python-impl: PyPy
@@ -132,3 +128,88 @@ jobs:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
         codecov_curl_args: "--globoff"
+
+  wheel:
+    runs-on: ubuntu-latest
+    name: Build universal wheel
+    needs:
+    - test-osx
+    - test-linux
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Setup Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: Install build requirements
+      run: python -m pip install -r .github/workflows/requirements.txt
+    - name: Build wheel
+      run: python setup.py bdist_wheel
+    - name: Store built wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/*
+
+  sdist:
+    runs-on: ubuntu-latest
+    name: Build source distribution
+    needs:
+    - test-osx
+    - test-linux
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: Install build requirements
+      run: python -m pip install -r .github/workflows/requirements.txt
+    - name: Build wheel distribution
+      run: python setup.py sdist
+    - name: Store built wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/*
+
+  upload:
+    environment: PyPI
+    runs-on: ubuntu-latest
+    name: Upload
+    needs:
+    - sdist
+    - wheel
+    steps:
+    - name: Download built distributions
+      uses: actions/download-artifact@v2
+      with:
+          name: dist
+          path: dist
+    - name: Publish distributions to PyPI
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip_existing: false
+
+  release:
+    environment: GitHub Releases
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    name: Release
+    needs: upload
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Release a Changelog
+      uses: rasmus-saks/release-a-changelog-action@v1.0.1
+      with:
+        github-token: '${{ secrets.GITHUB_TOKEN }}'
