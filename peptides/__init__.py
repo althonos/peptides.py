@@ -657,6 +657,7 @@ class Peptide(typing.Sequence[str]):
               :doi:`10.1073/pnas.81.1.140`. :pmid:`6582470`.
 
         """
+        window = min(window, len(self))
         scale = tables.HYDROPHOBICITY["Eisenberg"]
         lut = [scale.get(aa, 0.0) for aa in self._CODE1]
         angles = [(angle * i) % 360 for i in range(window)]
