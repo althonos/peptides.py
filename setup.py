@@ -199,4 +199,4 @@ class build_py(_build_py):
 
 
 if __name__ == "__main__":
-    setuptools.setup(cmdclass=dict(build_py=build_py, codegen=codegen))
+    setuptools.setup(cmdclass=dict(build_py=build_py, codegen=codegen, sdist=sdist))
