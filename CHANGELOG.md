@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.0...HEAD
+
+
+## [v0.3.0] - 2022-09-01
+[v0.3.0]: https://github.com/althonos/peptides.py/compare/v0.2.1...v0.3.0
+
+### Added
+- `Peptide.linker_preference_profile` to build a profile like used in the DomCut method from Suyama & Ohara (2002).
+- `Peptide.profile` to build a generic per-residue profile from a data table ([#3](https://github.com/althonos/peptides.py/issues/3)).
 
 
 ## [v0.2.1] - 2022-02-05
