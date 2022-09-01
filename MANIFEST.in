@@ -2,7 +2,8 @@ include           README.md
 include           CHANGELOG.md
 include           COPYING
 include           pyproject.toml
-recursive-include peptides/tables *.csv
+recursive-include peptides/tables   *.csv
+recursive-include peptides/datasets *.csv
 exclude           peptides/tables/__init__.py
 exclude           peptides/datasets/__init__.py
 include           peptides/py.typed
