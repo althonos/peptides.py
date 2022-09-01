@@ -1389,7 +1389,7 @@ class Peptide(typing.Sequence[str]):
 
         return profile
 
-    # --- Structural class ---------------------------------------------------
+    # --- Structural properties ----------------------------------------------
 
     def structural_class(
         self,
@@ -1597,6 +1597,33 @@ class Peptide(typing.Sequence[str]):
 
         # find the most likely structural class based on the distance
         return min(distances, key=distances.get)
+
+    def linker_preference_profile(
+        self, window: int = 15
+    ) -> typing.Sequence[float]:
+        """Compute the linker preference profile of a protein sequence.
+
+        The linker preference profile is a measure used as a basis for the
+        DomCut method in Suyama & Ohara (2002). The resulting profile can
+        then be used to identify putative domain boundaries in the input
+        protein, either:
+
+        - Using prior knowledge of the estimated domain count :math:`D`, in
+          which case the :math:`D-1` global minimums in the sequence can
+          be used as cutting points
+        - Without prior knowledge of the domain count, using a fixed
+          threshold to estimate the number of domains and linkers. A
+          cutoff value of :math:`-0.09` was selected by the authors
+          optimizing on the specificity / selectivity tradeoff.
+
+        References:
+            - Suyama, M., O. Ohara O.
+              *DomCut: prediction of inter-domain linker regions in amino
+              acid sequences.* Bioinformatics. Mar 2003;19(5):673-4.
+              :doi:`10.1093/bioinformatics/btg031`. :pmid:`12651735`.
+
+        """
+        return self.profile(tables.LINKER_INDEX["Suyama"], window=window)
 
     # --- Descriptors --------------------------------------------------------
 
