@@ -1622,6 +1622,8 @@ class Peptide(typing.Sequence[str]):
               acid sequences.* Bioinformatics. Mar 2003;19(5):673-4.
               :doi:`10.1093/bioinformatics/btg031`. :pmid:`12651735`.
 
+        .. versionadded:: 0.3.0
+
         """
         return self.profile(tables.LINKER_INDEX["Suyama"], window=window)
 
