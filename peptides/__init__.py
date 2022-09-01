@@ -399,6 +399,65 @@ class Peptide(typing.Sequence[str]):
             s = numpy.sum(v1*v2)
         return s / len(self)
 
+    def profile(
+        self,
+        table: typing.Dict[str, float],
+        window: int = 1,
+        default: float = 0.0,
+    ) -> typing.Sequence[float]:
+        """Compute a generic per-residue profile from per-residue indices.
+
+        Arguments:
+            table (`dict`): The values per residue to apply to the whole
+                protein sequence.
+            window (`int`): The window size for computing the profile.
+                Leave as *1* to return per-residue values.
+            default (`float`): The default value to use for amino-acids
+                that are not present in the given table.
+
+        Returns:
+            `collections.abc.Sequence` of `float`: The per-residue profile
+            values, averaged in the given window size. When ``window`` is
+            larger than the available number of resiudes, an empty sequence
+            is returned.
+
+        Example:
+            >>> peptide = Peptide("PKLVCLLTKKC")
+            >>> peptide.profile(peptides.tables.CHARGE['sign'])
+            [0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0]
+            >>> peptide.profile(peptides.tables.MOLECULAR_WEIGHT['expasy'], 5)
+            [108..., 111..., 108..., 105..., 111..., 116..., 114...]
+
+        .. versionadded:: 0.3.0
+
+        """
+        if window < 1:
+            raise ValueError("Window must be strictly positive")
+
+        # build the profile values in advance
+        p = [default] * (len(self) - window + 1)
+
+        # skip computing profile is window is larger than the available
+        # number of residues in the peptide sequence
+        if p:
+            # build a look-up table and index values
+            lut = [table.get(aa, default) for aa in self._CODE1]
+            if numpy is None:
+                values = [lut[i] for i in self.encoded]
+            else:
+                values = numpy.take(lut, self.encoded)  # type: ignore
+            # use a rolling sum over the window
+            s = 0.0
+            for i in range(window):
+                s += values[i]
+            for j in range(window, len(self)):
+                p[j - window] = s / window
+                s -= values[j-window]
+                s += values[j]
+            p[len(self) - window] = s / window
+
+        return p
+
     # --- Sequence properties -----------------------------------------------
 
     def counts(self) -> typing.Dict[str, int]:
