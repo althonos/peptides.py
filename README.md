@@ -6,6 +6,7 @@
 [![Coverage](https://img.shields.io/codecov/c/gh/althonos/peptides.py?style=flat-square&maxAge=3600)](https://codecov.io/gh/althonos/peptides.py/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![PyPI](https://img.shields.io/pypi/v/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides)
+[![Bioconda](https://img.shields.io/conda/vn/bioconda/peptides?style=flat-square&maxAge=3600&logo=anaconda)](https://anaconda.org/bioconda/peptides)
 [![Wheel](https://img.shields.io/pypi/wheel/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
 [![Python Versions](https://img.shields.io/pypi/pyversions/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides/#files)
 [![Python Implementations](https://img.shields.io/badge/impl-universal-success.svg?style=flat-square&maxAge=3600&label=impl)](https://pypi.org/project/peptides/#files)
