@@ -22,7 +22,13 @@ Descriptors
 
 .. autoclass:: peptides.MSWHIMScores(typing.NamedTuple)
 
+.. autoclass:: peptides.PhysicalDescriptors(typing.NamedTuple)
+
+.. autoclass:: peptides.PCPDescriptors(typing.NamedTuple)
+
 .. autoclass:: peptides.ProtFPDescriptors(typing.NamedTuple)
+
+.. autoclass:: peptides.SneathVectors(typing.NamedTuple)
 
 .. autoclass:: peptides.STScales(typing.NamedTuple)
 

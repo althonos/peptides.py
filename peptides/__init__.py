@@ -31,6 +31,19 @@ Dong-Sheng Cao, Nan Xiao, Qing-Song Xu, and Alex F. Chen for ``Rcpi``.
 
 
 class BLOSUMIndices(typing.NamedTuple):
+    """The BLOSUM62-derived indices of a peptide.
+
+    BLOSUM indices were derived of physicochemical properties that have
+    been subjected to a VARIMAX analysis and an alignment matrix of the
+    20 natural AAs using the BLOSUM62 matrix.
+
+    References:
+        - Georgiev, A. G.
+          *Interpretable Numerical Descriptors of Amino Acid Space*.
+          Journal of Computational Biology. May 2009;16(5):703–23.
+          :doi:`10.1089/cmb.2008.0173`. :pmid:`19432540`.
+
+    """
     blosum1: float
     blosum2: float
     blosum3: float
@@ -44,12 +57,46 @@ class BLOSUMIndices(typing.NamedTuple):
 
 
 class CrucianiProperties(typing.NamedTuple):
+    """The Cruciani properties of a peptide.
+
+    The Cruciani properties are a collection of scaled principal
+    component scores that summarize a broad set of descriptors
+    calculated based on the interaction of each amino acid residue with
+    several chemical groups (or "probes"), such as charged ions, methyl,
+    hydroxyl groups, and so forth.
+
+    References:
+        - Cruciani, G., M. Baroni, E. Carosati, M. Clementi, R. Valigi,
+          and S. Clementi.
+          *Peptide Studies by Means of Principal Properties of Amino
+          Acids Derived from MIF Descriptors*. Journal of Chemometrics. 
+          2004;18(3-4):146–55. :doi:`10.1002/cem.856`.
+
+    """
     pp1: float
     pp2: float
     pp3: float
 
 
 class FasgaiVectors(typing.NamedTuple):
+    """FASGAI vectors of a peptide.
+
+    The FASGAI vectors (Factor Analysis Scales of Generalized Amino
+    Acid Information) are a set of amino acid descriptors, that reflect
+    hydrophobicity, alpha and turn propensities, bulky properties,
+    compositional characteristics, local flexibility, and electronic
+    properties, that can be utilized to represent the sequence
+    structural features of peptides or protein motifs.
+
+    References:
+        - Liang, G., G. Chen, W. Niu, and Z. Li.
+          *Factor Analysis Scales of Generalized Amino Acid Information
+          as Applied in Predicting Interactions between the Human
+          Amphiphysin-1 SH3 Domains and Their Peptide Ligands*.
+          Chemical Biology & Drug Design. Apr 2008;71(4):345–51.
+          :doi:`10.1111/j.1747-0285.2008.00641.x`. :pmid:`18318694`.
+
+    """
     f1: float
     f2: float
     f3: float
@@ -59,6 +106,32 @@ class FasgaiVectors(typing.NamedTuple):
 
 
 class KideraFactors(typing.NamedTuple):
+    """The Kidera factors of a peptide.
+
+    The Kidera Factors were originally derived by applying multivariate
+    analysis to 188 physical properties of the 20 amino acids and using
+    dimension reduction techniques.
+
+    Attributes:
+        kf1 (`float`): A factor modeling the helix / bend preference.
+        kf2 (`float`): A factor modeling the side-chain size of each 
+            residue (:aaindex:`KIDA850101`).
+        kf3 (`float`): A factor modeling the extended structured preference.
+        kf4 (`float`): A factor representing the hydrophobicity.
+        kf5 (`float`): A factor modeling the double-bend preference.
+        kf6 (`float`): A factor modeling the partial specific volume.
+        kf7 (`float`): A factor modeling the flat extended preference.
+        kf8 (`float`): A factor modeling the occurence in alpha regions.
+        kf9 (`float`): A factor encoding the pK-C.
+        kf10 (`float`): A factor representing the surrounding hydrophobicity.
+
+    References:
+        - Kidera, A., Y. Konishi, M. Oka, T. Ooi, and H. A. Scheraga.
+          *Statistical Analysis of the Physical Properties of the 20 
+          Naturally Occurring Amino Acids*. Journal of Protein Chemistry. 
+          Feb 1985;4(1):23–55. :doi:`10.1007/BF01025492`.
+
+    """
     kf1: float
     kf2: float
     kf3: float
@@ -72,17 +145,91 @@ class KideraFactors(typing.NamedTuple):
 
 
 class MSWHIMScores(typing.NamedTuple):
+    """The MS-WHIM scores of a peptide.
+
+    MS-WHIM scores were derived from 36 electrostatic potential
+    properties derived from the three-dimensional structure of the
+    20 natural amino acids.
+
+    References:
+        - Bravi, G., E. Gancia, P. Mascagni, M. Pegna, R. Todeschini,
+          and A. Zaliani.
+          *MS-WHIM, New 3D Theoretical Descriptors Derived from
+          Molecular Surface Properties: A Comparative 3D QSAR Study in a
+          Series of Steroids*. Journal of Computer-Aided Molecular
+          Design. Jan 1997;11(1):79-92.
+          :doi:`10.1023/a:1008079512289`. :pmid:`9139115`
+        - Gancia, E., G. Bravi, P. Mascagni, and A. Zaliani.
+          *Global 3D-QSAR Methods: MS-WHIM and Autocorrelation*. Journal
+          of Computer-Aided Molecular Design. Mar 2000;14(3):293–306.
+          :doi:`10.1023/a:1008142124682`. :pmid:`10756483`.
+        - Zaliani, A., and E. Gancia.
+          *MS-WHIM Scores for Amino Acids: A New 3D-Description for
+          Peptide QSAR and QSPR Studies*. Journal of Chemical
+          Information and Computer Sciences. May 1999;39(3):525–33.
+          :doi:`10.1021/ci980211b`.
+
+    """
     mswhim1: float
     mswhim2: float
     mswhim3: float
 
 
 class PhysicalDescriptors(typing.NamedTuple):
+    """The Physical Descriptors of a peptide.
+
+    The PP descriptors were constructed by improving on existing
+    PCA-derived descriptors (Z-scales, MS-WHIM and T-scales) after
+    correcting for the hydrophilicity of Methionine, Asparagine and
+    Tryptophan based on Feng *et al*.
+    
+    Attributes:
+        pd1 (`float`): A descriptor related to residue volume.
+        pd2 (`float`): A descriptor related to hydrophilicity.
+
+    Note:
+        Barley *et al* insisted on maintaining a minimal number of
+        descriptors as a way to reduce the chances of finding spurious
+        QSAM models that would be affected by mutation between
+        interaction sites.
+
+    References:
+        - Barley, M. H., N. J. Turner, and R. Goodacre.
+          *Improved Descriptors for the Quantitative Structure–Activity
+          Relationship Modeling of Peptides and Proteins*. Journal of
+          Chemical Information and Modeling. Feb 2018;58(2):234–43.
+          :doi:`10.1021/acs.jcim.7b00488`. :pmid:`29338232`.
+        - Feng, X., J. Sanchis, M. T. Reetz, and H. Rabitz.
+          *Enhancing the Efficiency of Directed Evolution in Focused
+          Enzyme Libraries by the Adaptive Substituent Reordering
+          Algorithm*. Chemistry. Apr 2012;18(18):5646–54.
+          :doi:`10.1002/chem.201103811`. :pmid:`22434591`.
+
+    """
     pd1: float
     pd2: float
 
 
 class PCPDescriptors(typing.NamedTuple):
+    """The Physical-Chemical Properties descriptors of a peptide.
+
+    The PCP descriptors were constructed by performing multidimensional
+    scaling of 237 physical-chemical properties.
+
+    References:
+        - Mathura, V. S., and W. Braun.
+          *New Quantitative Descriptors of Amino Acids Based on
+          Multidimensional Scaling of a Large Number of
+          Physical–Chemical Properties*.
+          Molecular Modeling Annual. Dec 2001;7(12):445–53.
+          :doi:`10.1007/s00894-001-0058-5`.
+        - Mathura, V. S., D. Paris, and M. J. Mullan.
+          *A Novel Physico-Chemical Property Based Model for Studying
+          the Effects of Mutation on the Aggregation of Peptides*.
+          Protein and Peptide Letters. 2009;16(8):991–98.
+          :doi:`10.2174/092986609788923220`. :pmid:`19689427`.
+
+    """
     e1: float
     e2: float
     e3: float
@@ -91,6 +238,28 @@ class PCPDescriptors(typing.NamedTuple):
 
 
 class ProtFPDescriptors(typing.NamedTuple):
+    """The ProtFP descriptors of a peptide.
+
+    The ProtFP set was constructed from a large initial selection of
+    indices obtained from the `AAindex <https://www.genome.jp/aaindex/>`_ 
+    database for all 20 naturally occurring amino acids.
+
+    References:
+        - van Westen, G. J., R. F. Swier, J. K. Wegner, A. P. Ijzerman,
+          H. W. van Vlijmen, and A. Bender.
+          *Benchmarking of Protein Descriptor Sets in Proteochemometric
+          Modeling (Part 1): Comparative Study of 13 Amino Acid
+          Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):41.
+          :doi:`10.1186/1758-2946-5-41`. :pmid:`24059694`.
+        - van Westen, G. J., R. F. Swier, I. Cortes-Ciriano,
+          J. K. Wegner, J. P. Overington, A. P. Ijzerman,
+          H. W. van Vlijmen, and A. Bender.
+          *Benchmarking of Protein Descriptor Sets in Proteochemometric
+          Modeling (Part 2): Modeling Performance of 13 Amino Acid
+          Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):42.
+          :doi:`10.1186/1758-2946-5-42`. :pmid:`24059743`.
+
+    """
     protfp1: float
     protfp2: float
     protfp3: float
@@ -102,6 +271,33 @@ class ProtFPDescriptors(typing.NamedTuple):
 
 
 class SneathVectors(typing.NamedTuple):
+    """The Sneath vectors of a peptide.
+
+    These vectors were obtained in Sneath (1996) by running PCA on the
+    `ϕ coefficient <https://en.wikipedia.org/wiki/Phi_coefficient>`_
+    to explain the dissimilarity between the 20 natural amino acids
+    based on binary state encoding of 134 physical and chemical
+    properties (such as presence/absence of a —CH₃ group, step-wise
+    optical rotation, etc.).
+
+    Attributes:
+        sv1 (`float`): A descriptor representing mainly aliphatic properties
+            of each residue (:aaindex:`SNEP660101`).
+        sv2 (`float`): A descriptor putatively modeling the number of 
+            reactive groups (:aaindex:`SNEP660102`).
+        sv3 (`float`): A descriptor representing the aromatic properties 
+            of each residue (:aaindex:`SNEP660103`).
+        sv4 (`float`): A descriptor with uncertain interpretation
+            (:aaindex:`SNEP660104`).
+
+    References:
+        - Sneath, P. H. A.
+          *Relations between Chemical Structure and Biological Activity
+          in Peptides*.
+          Journal of Theoretical Biology. Nov 1996;12(2):157–95.
+          :doi:`10.1016/0022-5193(66)90112-3`. :pmid:`4291386`.
+
+    """
     sv1: float
     sv2: float
     sv3: float
@@ -109,6 +305,21 @@ class SneathVectors(typing.NamedTuple):
 
 
 class STScales(typing.NamedTuple):
+    """The ST-scales of a peptide.
+
+    The ST-scales were proposed in Yang *et al* (2010), taking 827
+    properties into account which are mainly constitutional,
+    topological, geometrical, hydrophobic, electronic, and steric
+    properties of a total set of 167 amino acids.
+
+    References:
+        - Yang, L., M. Shu, K. Ma, H. Mei, Y. Jiang, and Z. Li.
+          *ST-Scale as a Novel Amino Acid Descriptor and Its Application
+          in QSAM of Peptides and Analogues*.
+          Amino Acids. Mar 2010;38(3):805–16.
+          :doi:`10.1007/s00726-009-0287-y`. :pmid:`19373543`.
+
+    """
     st1: float
     st2: float
     st3: float
@@ -120,6 +331,21 @@ class STScales(typing.NamedTuple):
 
 
 class TScales(typing.NamedTuple):
+    """The T-scales of a peptide.
+
+    The T-scales are based on 67 common topological descriptors of 135
+    amino acids. These topological descriptors are based on the
+    connectivity table of amino acids alone, and to not explicitly
+    consider 3D properties of each structure.
+    
+    References:
+        - Tian, F., P. Zhou, and Z. Li.
+          *T-Scale as a Novel Vector of Topological Descriptors for
+          Amino Acids and Its Application in QSARs of Peptides*.
+          Journal of Molecular Structure. Mar 2007;830(1):106–15.
+          :doi:`10.1016/j.molstruc.2006.07.004`.
+
+    """
     t1: float
     t2: float
     t3: float
@@ -128,6 +354,36 @@ class TScales(typing.NamedTuple):
 
 
 class VHSEScales(typing.NamedTuple):
+    """The VHSE-scales of a peptide.
+
+     The VHSE-scales (principal components score Vectors of Hydrophobic,
+    Steric, and Electronic properties), are derived from principal
+    components analysis (PCA) on independent families of 18 hydrophobic
+    properties, 17 steric properties, and 15 electronic properties,
+    respectively, which are included in total 50 physicochemical
+    variables of 20 coded amino acids.
+
+    Attribute:
+        vhse1 (`float`): A descriptor representing hydrophobic properties.
+        vhse2 (`float`): Another descriptor representing hydrophobic 
+            properties.
+        vhse3 (`float`): A descriptor representing steric properties.
+        vhse4 (`float`): Another descriptor representing steric properties.
+        vhse5 (`float`): A descriptor representing electronic properties.
+        vhse6 (`float`): A second descriptor representing electronic 
+            properties.
+        vhse7 (`float`): A third descriptor representing electronic 
+            properties.
+        vhse8 (`float`): A fourth descriptor representing electronic 
+            properties.
+
+    References:
+        - Mei, H., Z. H. Liao, Y. Zhou, and S. Z. Li. *A New Set of
+          Amino Acid Descriptors and Its Application in Peptide QSARs*.
+          Biopolymers. 2005;80(6):775-86.
+          :doi:`10.1002/bip.20296`. :pmid:`15895431`.
+
+    """
     vhse1: float
     vhse2: float
     vhse3: float
@@ -139,6 +395,33 @@ class VHSEScales(typing.NamedTuple):
 
 
 class ZScales(typing.NamedTuple):
+    """The Z-scales of a peptide.
+
+    The Z-scales were proposed in Sandberg *et al* (1998) based on
+    physicochemical properties of proteogenic and non-proteogenic
+    amino acids, including NMR data and thin-layer chromatography
+    (TLC) data.
+
+    Attributes:
+        z1 (`float`): A descriptor quantifying lipophilicity.
+        z2 (`float`): A descriptor modeling steric properties like steric
+            bulk and polarizability.
+        z3 (`float`): A descriptor quantifying electronic properties like
+            polarity and charge.
+        z4 (`float`): A descriptor relating to electronegativity, heat of
+            formation, electrophilicity and hardness.
+        z5 (`float`): Another descriptor relating to electronegativity, 
+            heat of formation, electrophilicity and hardness.
+
+    References:
+        - Sandberg, M., L. Eriksson, J. Jonsson, M. Sjöström, and
+          S. Wold. *New Chemical Descriptors Relevant for the Design of
+          Biologically Active Peptides. A Multivariate Characterization
+          of 87 Amino Acids*.
+          Journal of Medicinal Chemistry. Jul 1998;41(14):2481–91.
+          :doi:`10.1021/jm9700575`. :pmid:`9651153`.
+
+    """
     z1: float
     z2: float
     z3: float
@@ -1630,11 +1913,9 @@ class Peptide(typing.Sequence[str]):
     # --- Descriptors --------------------------------------------------------
 
     def blosum_indices(self) -> BLOSUMIndices:
-        """Compute the BLOSUM62-derived indices of a peptide sequence.
+        """Compute the BLOSUM62-derived indices of the peptide.
 
-        BLOSUM indices were derived of physicochemical properties that have
-        been subjected to a VARIMAX analysis and an alignment matrix of the
-        20 natural AAs using the BLOSUM62 matrix.
+        See `~peptides.BLOSUMIndices` for more information.
 
         Returns:
             `peptides.BLOSUMIndices`: The computed average BLOSUM indices
@@ -1655,12 +1936,6 @@ class Peptide(typing.Sequence[str]):
             BLOSUM9   -0.2145
             BLOSUM10  -0.3218
 
-        References:
-            - Georgiev, A. G.
-              *Interpretable Numerical Descriptors of Amino Acid Space*.
-              Journal of Computational Biology. May 2009;16(5):703–23.
-              :doi:`10.1089/cmb.2008.0173`. :pmid:`19432540`.
-
         """
         out = []
         for i in range(len(tables.BLOSUM)):
@@ -1669,13 +1944,9 @@ class Peptide(typing.Sequence[str]):
         return BLOSUMIndices(*out)
 
     def cruciani_properties(self) -> CrucianiProperties:
-        """Compute the Cruciani properties of protein sequence.
+        """Compute the Cruciani properties of the peptide.
 
-        The Cruciani properties are a collection of scaled principal
-        component scores that summarize a broad set of descriptors
-        calculated based on the interaction of each amino acid residue with
-        several chemical groups (or "probes"), such as charged ions, methyl,
-        hydroxyl groups, and so forth.
+        See `~peptides.CrucianiProperties` for more information.
 
         Returns:
             `peptides.CrucianiProperties`: The computed average Cruciani
@@ -1690,14 +1961,6 @@ class Peptide(typing.Sequence[str]):
             PP2   -0.0220
             PP3    0.2735
 
-        References:
-            - Cruciani, G., M. Baroni, E. Carosati, M. Clementi, R. Valigi,
-              and S. Clementi.
-              *Peptide Studies by Means of Principal Properties of Amino
-              Acids Derived from MIF Descriptors*.
-              Journal of Chemometrics. 2004;18(3-4):146–55.
-              :doi:`10.1002/cem.856`.
-
         """
         out = []
         for i in range(len(tables.CRUCIANI)):
@@ -1706,14 +1969,9 @@ class Peptide(typing.Sequence[str]):
         return CrucianiProperties(*out)
 
     def fasgai_vectors(self) -> FasgaiVectors:
-        """Compute the FASGAI vectors of a protein sequence.
+        """Compute the FASGAI vectors of the peptide.
 
-        The FASGAI vectors (Factor Analysis Scales of Generalized Amino
-        Acid Information) is a set of amino acid descriptors, that reflects
-        hydrophobicity, alpha and turn propensities, bulky properties,
-        compositional characteristics, local flexibility, and electronic
-        properties, that can be utilized to represent the sequence
-        structural features of peptides or protein motifs.
+        See `~peptides.FasgaiVectors` for more information.
 
         Returns:
             `peptides.FasgaiVectors`: The computed average FASGAI vectors
@@ -1730,14 +1988,6 @@ class Peptide(typing.Sequence[str]):
             F5   -0.38015
             F6    0.52740
 
-        References:
-            - Liang, G., G. Chen, W. Niu, and Z. Li.
-              *Factor Analysis Scales of Generalized Amino Acid Information
-              as Applied in Predicting Interactions between the Human
-              Amphiphysin-1 SH3 Domains and Their Peptide Ligands*.
-              Chemical Biology & Drug Design. Apr 2008;71(4):345–51.
-              :doi:`10.1111/j.1747-0285.2008.00641.x`. :pmid:`18318694`.
-
         """
         out = []
         for i in range(len(tables.FASGAI)):
@@ -1746,20 +1996,13 @@ class Peptide(typing.Sequence[str]):
         return FasgaiVectors(*out)
 
     def kidera_factors(self) -> KideraFactors:
-        """Compute the Kidera factors of a protein sequence.
+        """Compute the Kidera factors of the peptide.
 
-        The Kidera Factors were originally derived by applying multivariate
-        analysis to 188 physical properties of the 20 amino acids and using
-        dimension reduction techniques.
+        See `~peptides.KideraFactors` for more information.
 
         Returns:
-            `peptides.KideraFactors`: The compute average of Kidera factors
-            for all the amino acids in the peptide. *KF1* models helix/bend
-            preference, *KF2* the side-chain size, *KF3* the extended
-            structure preference, *KF5* the double-bend preference, *KF6*
-            the partial specific volume, *KF7* the flat extended preference,
-            *KF8* the occurence in alpha regions, *KF9* the pK-C, *KF10*
-            the surrounding hydrophobicity.
+            `peptides.KideraFactors`: The computed average Kidera factors
+            for all the amino acids in the peptide. 
 
         Example:
             >>> peptide = Peptide("KLKLLLLLKLK")
@@ -1776,13 +2019,6 @@ class Peptide(typing.Sequence[str]):
             KF9    0.1118
             KF10   0.8100
 
-        References:
-            - Kidera, A., Y. Konishi, M. Oka, T. Ooi, and H. A. Scheraga.
-              *Statistical Analysis of the Physical Properties of the 20
-              Naturally Occurring Amino Acids*.
-              Journal of Protein Chemistry. Feb 1985;4(1):23–55.
-              :doi:`10.1007/BF01025492`.
-
         """
         out = []
         for i in range(len(tables.KIDERA)):
@@ -1791,11 +2027,9 @@ class Peptide(typing.Sequence[str]):
         return KideraFactors(*out)
 
     def ms_whim_scores(self) -> MSWHIMScores:
-        """Compute the MS-WHIM scores of a protein sequence.
+        """Compute the MS-WHIM scores of the peptide.
 
-        MS-WHIM scores were derived from 36 electrostatic potential
-        properties derived from the three-dimensional structure of the
-        20 natural amino acids.
+        See `~peptides.MSWHIMScores` for more information.
 
         Returns:
             `peptides.MSWHIMScores`: The compute average of MS-WHIM scores
@@ -1809,24 +2043,6 @@ class Peptide(typing.Sequence[str]):
             MSWHIM2    0.4873
             MSWHIM3    0.1164
 
-        References:
-            - Bravi, G., E. Gancia, P. Mascagni, M. Pegna, R. Todeschini,
-              and A. Zaliani.
-              *MS-WHIM, New 3D Theoretical Descriptors Derived from
-              Molecular Surface Properties: A Comparative 3D QSAR Study in a
-              Series of Steroids*. Journal of Computer-Aided Molecular
-              Design. Jan 1997;11(1):79-92.
-              :doi:`10.1023/a:1008079512289`. :pmid:`9139115`
-            - Gancia, E., G. Bravi, P. Mascagni, and A. Zaliani.
-              *Global 3D-QSAR Methods: MS-WHIM and Autocorrelation*. Journal
-              of Computer-Aided Molecular Design. Mar 2000;14(3):293–306.
-              :doi:`10.1023/a:1008142124682`. :pmid:`10756483`.
-            - Zaliani, A., and E. Gancia.
-              *MS-WHIM Scores for Amino Acids: A New 3D-Description for
-              Peptide QSAR and QSPR Studies*. Journal of Chemical
-              Information and Computer Sciences. May 1999;39(3):525–33.
-              :doi:`10.1021/ci980211b`.
-
         """
         out = []
         for i in range(len(tables.MSWHIM)):
@@ -1835,10 +2051,9 @@ class Peptide(typing.Sequence[str]):
         return MSWHIMScores(*out)
 
     def pcp_descriptors(self) -> PCPDescriptors:
-        """Compute the Physical-Chemical Properties of a protein sequence.
+        """Compute the Physical-Chemical Properties descriptors of the peptide.
 
-        The PCP descriptors were constructed by performing multidimensional
-        scaling of 237 physical-chemical properties.
+        See `~peptides.PCPDescriptors` for more information.
 
         Returns:
             `peptides.PCPDescriptors`: The computed average of PCP
@@ -1854,19 +2069,6 @@ class Peptide(typing.Sequence[str]):
             E4    0.04095
             E5   -0.10595
 
-        References:
-            - Mathura, V. S., and W. Braun.
-              *New Quantitative Descriptors of Amino Acids Based on
-              Multidimensional Scaling of a Large Number of
-              Physical–Chemical Properties*.
-              Molecular Modeling Annual. Dec 2001;7(12):445–53.
-              :doi:`10.1007/s00894-001-0058-5`.
-            - Mathura, V. S., D. Paris, and M. J. Mullan.
-              *A Novel Physico-Chemical Property Based Model for Studying
-              the Effects of Mutation on the Aggregation of Peptides*.
-              Protein and Peptide Letters. 2009;16(8):991–98.
-              :doi:`10.2174/092986609788923220`. :pmid:`19689427`.
-
         """
         out = []
         for i in range(len(tables.PCP_DESCRIPTORS)):
@@ -1875,12 +2077,9 @@ class Peptide(typing.Sequence[str]):
         return PCPDescriptors(*out)
 
     def physical_descriptors(self) -> PhysicalDescriptors:
-        """Compute the Physical Descriptors of a protein sequence.
+        """Compute the Physical Descriptors of the peptide.
 
-        The PP descriptors were constructed by improving on existing
-        PCA-derived descriptors (Z-scales, MS-WHIM and T-scales) after
-        correcting for the hydrophilicity of Methionine, Asparagine and
-        Tryptophan based on Feng *et al*.
+        See `~peptides.PhysicalDescriptors` for more information.
 
         Returns:
             `peptides.PhyiscalDescriptors`: The computed average of Physical
@@ -1894,24 +2093,6 @@ class Peptide(typing.Sequence[str]):
             PD1    0.1190
             PD2    0.2825
 
-        Note:
-            Barley *et al* insisted on maintaining a minimal number of
-            descriptors as a way to reduce the chances of finding spurious
-            QSAM models that would be affected by mutation between
-            interaction sites.
-
-        References:
-          - Barley, M. H., N. J. Turner, and R. Goodacre.
-            *Improved Descriptors for the Quantitative Structure–Activity
-            Relationship Modeling of Peptides and Proteins*. Journal of
-            Chemical Information and Modeling. Feb 2018;58(2):234–43.
-            :doi:`10.1021/acs.jcim.7b00488`. :pmid:`29338232`.
-          - Feng, X., J. Sanchis, M. T. Reetz, and H. Rabitz.
-            *Enhancing the Efficiency of Directed Evolution in Focused
-            Enzyme Libraries by the Adaptive Substituent Reordering
-            Algorithm*. Chemistry. Apr 2012;18(18):5646–54.
-            :doi:`10.1002/chem.201103811`. :pmid:`22434591`.
-
         """
         out = []
         for i in range(len(tables.PHYSICAL_DESCRIPTORS)):
@@ -1920,12 +2101,9 @@ class Peptide(typing.Sequence[str]):
         return PhysicalDescriptors(*out)
 
     def protfp_descriptors(self) -> ProtFPDescriptors:
-        """Compute the ProtFP descriptors of a protein sequence.
+        """Compute the ProtFP descriptors of the peptide.
 
-        The ProtFP descriptor set was constructed from a large initial
-        selection of indices obtained from the
-        `AAindex <https://www.genome.jp/aaindex/>`_ database for all 20
-        naturally occurring amino acids.
+        See `~peptides.ProtFPDescriptors` for more information.
 
         Returns:
             `peptides.ProtFPDescriptors`: The computed average of ProtFP
@@ -1944,21 +2122,6 @@ class Peptide(typing.Sequence[str]):
             ProtFP7    0.1715
             ProtFP8    0.1135
 
-        References:
-            - van Westen, G. J., R. F. Swier, J. K. Wegner, A. P. Ijzerman,
-              H. W. van Vlijmen, and A. Bender.
-              *Benchmarking of Protein Descriptor Sets in Proteochemometric
-              Modeling (Part 1): Comparative Study of 13 Amino Acid
-              Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):41.
-              :doi:`10.1186/1758-2946-5-41`. :pmid:`24059694`.
-            - van Westen, G. J., R. F. Swier, I. Cortes-Ciriano,
-              J. K. Wegner, J. P. Overington, A. P. Ijzerman,
-              H. W. van Vlijmen, and A. Bender.
-              *Benchmarking of Protein Descriptor Sets in Proteochemometric
-              Modeling (Part 2): Modeling Performance of 13 Amino Acid
-              Descriptor Sets*. Journal of Cheminformatics. Sep 2013;5(1):42.
-              :doi:`10.1186/1758-2946-5-42`. :pmid:`24059743`.
-
         """
         out = []
         for i in range(len(tables.PROTFP)):
@@ -1967,21 +2130,13 @@ class Peptide(typing.Sequence[str]):
         return ProtFPDescriptors(*out)
 
     def sneath_vectors(self) -> SneathVectors:
-        """Compute the Sneath vectors for a protein sequence.
+        """Compute the Sneath vectors for the peptide.
 
-        These vectors were obtained in Sneath (1996) by running PCA on the
-        `ϕ coefficient <https://en.wikipedia.org/wiki/Phi_coefficient>`_
-        to explain the dissimilarity between the 20 natural amino acids
-        based on binary state encoding of 134 physical and chemical
-        properties (such as presence/absence of a —CH₃ group, step-wise
-        optical rotation, etc.).
+        See `~peptides.SneathVectors` for more information.
 
         Returns:
             `peptides.SneathVectors`: The computed average of Sneath vectors
-            of all the amino acids in the peptide. *SV1* appears to
-            represent mainly aliphatic properties, *SV2* may model the
-            number of reactive groups, *SV3* the aromatic properties, but
-            *SV4* has no certain interpretation.
+            of all the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -1992,13 +2147,6 @@ class Peptide(typing.Sequence[str]):
             SV3    0.04050
             SV4    0.02775
 
-        References:
-            - Sneath, P. H. A.
-              *Relations between Chemical Structure and Biological Activity
-              in Peptides*.
-              Journal of Theoretical Biology. Nov 1996;12(2):157–95.
-              :doi:`10.1016/0022-5193(66)90112-3`. :pmid:`4291386`.
-
         """
         out = []
         for i in range(len(tables.SNEATH)):
@@ -2007,12 +2155,9 @@ class Peptide(typing.Sequence[str]):
         return SneathVectors(*out)
 
     def st_scales(self) -> STScales:
-        """Compute the ST-scales of a protein sequence.
+        """Compute the ST-scales of the peptide.
 
-        The ST-scales were proposed in Yang *et al* (2010), taking 827
-        properties into account which are mainly constitutional,
-        topological, geometrical, hydrophobic, electronic, and steric
-        properties of a total set of 167 amino acids.
+        See `~peptides.STScales` for more information.
 
         Returns:
             `peptides.STScales`: The computed average of ST-scales of all
@@ -2031,12 +2176,7 @@ class Peptide(typing.Sequence[str]):
             ST7    0.58020
             ST8    0.54400
 
-        References:
-            - Yang, L., M. Shu, K. Ma, H. Mei, Y. Jiang, and Z. Li.
-              *ST-Scale as a Novel Amino Acid Descriptor and Its Application
-              in QSAM of Peptides and Analogues*.
-              Amino Acids. Mar 2010;38(3):805–16.
-              :doi:`10.1007/s00726-009-0287-y`. :pmid:`19373543`.
+
 
         """
         out = []
@@ -2046,12 +2186,9 @@ class Peptide(typing.Sequence[str]):
         return STScales(*out)
 
     def t_scales(self) -> TScales:
-        """Compute the T-scales of a protein sequence.
+        """Compute the T-scales of the peptide.
 
-        The T-scales are based on 67 common topological descriptors of 135
-        amino acids. These topological descriptors are based on the
-        connectivity table of amino acids alone, and to not explicitly
-        consider 3D properties of each structure.
+        See `~peptides.TScales` for more information.
 
         Returns:
             `peptides.TScales`: The computed average of T-scales of all the
@@ -2067,13 +2204,6 @@ class Peptide(typing.Sequence[str]):
             T4   -0.1475
             T5    0.7585
 
-        References:
-            - Tian, F., P. Zhou, and Z. Li.
-              *T-Scale as a Novel Vector of Topological Descriptors for
-              Amino Acids and Its Application in QSARs of Peptides*.
-              Journal of Molecular Structure. Mar 2007;830(1):106–15.
-              :doi:`10.1016/j.molstruc.2006.07.004`.
-
         """
         out = []
         for i in range(len(tables.T_SCALES)):
@@ -2082,14 +2212,9 @@ class Peptide(typing.Sequence[str]):
         return TScales(*out)
 
     def vhse_scales(self) -> VHSEScales:
-        """Compute the VHSE-scales of a protein sequence.
+        """Compute the VHSE-scales of the peptide.
 
-        The VHSE-scales (principal components score Vectors of Hydrophobic,
-        Steric, and Electronic properties), are derived from principal
-        components analysis (PCA) on independent families of 18 hydrophobic
-        properties, 17 steric properties, and 15 electronic properties,
-        respectively, which are included in total 50 physicochemical
-        variables of 20 coded amino acids.
+        See `~peptides.VHSEScales` for more information.       
 
         Returns:
             `peptides.VHSEScales`: The computed average of VHSE-scales of
@@ -2111,12 +2236,6 @@ class Peptide(typing.Sequence[str]):
             VHSE7    0.1740
             VHSE8   -0.0960
 
-        References:
-            - Mei, H., Z. H. Liao, Y. Zhou, and S. Z. Li. *A New Set of
-              Amino Acid Descriptors and Its Application in Peptide QSARs*.
-              Biopolymers. 2005;80(6):775-86.
-              :doi:`10.1002/bip.20296`. :pmid:`15895431`.
-
         """
         out = []
         for i in range(len(tables.VHSE)):
@@ -2125,12 +2244,13 @@ class Peptide(typing.Sequence[str]):
         return VHSEScales(*out)
 
     def z_scales(self) -> ZScales:
-        """Compute the Z-scales of a protein sequence.
+        """Compute the Z-scales of the peptide.
 
-        The Z-scales were proposed in Sandberg *et al* (1998) based on
-        physicochemical properties of proteogenic and non-proteogenic
-        amino acids, including NMR data and thin-layer chromatography
-        (TLC) data.
+        See `~peptides.ZScales` for more information.
+
+        Returns:
+            `peptides.ZScales`: The computed average of Z-scales of all
+            the amino acid in the peptide.
 
         Example:
             >>> peptide = Peptide("QWGRRCCGWGPGRRYCVRWC")
@@ -2141,23 +2261,6 @@ class Peptide(typing.Sequence[str]):
             Z3    0.0000
             Z4    0.8130
             Z5   -0.8285
-
-        Returns:
-            `peptides.ZScales`: The computed average of Z-scales of all
-            the amino acid in the peptide. *Z1* quantifies lipophilicity,
-            *Z2* models steric properties (like steric bulk and
-            polarizability), *Z3* quantifies electronic properties (like
-            polarity and charge) while *Z4* and *Z5* relate
-            electronegativity, heat of formation, electrophilicity, and
-            hardness.
-
-        References:
-            - Sandberg, M., L. Eriksson, J. Jonsson, M. Sjöström, and
-              S. Wold. *New Chemical Descriptors Relevant for the Design of
-              Biologically Active Peptides. A Multivariate Characterization
-              of 87 Amino Acids*.
-              Journal of Medicinal Chemistry. Jul 1998;41(14):2481–91.
-              :doi:`10.1021/jm9700575`. :pmid:`9651153`.
 
         """
         out = []

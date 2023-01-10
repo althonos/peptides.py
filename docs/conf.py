@@ -183,6 +183,7 @@ htmlhelp_basename = peptides.__name__
 extlinks = {
     'doi': ('https://doi.org/%s', 'doi:'),
     'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:'),
+    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:')
 }
 
 
