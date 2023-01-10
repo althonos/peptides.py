@@ -2,7 +2,7 @@
 
 *Physicochemical properties, indices and descriptors for amino-acid sequences.*
 
-[![Actions](https://img.shields.io/github/workflow/status/althonos/peptides.py/Test/main?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/peptides.py/actions)
+[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/peptides.py/test.yml?branch=main&logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/peptides.py/actions)
 [![Coverage](https://img.shields.io/codecov/c/gh/althonos/peptides.py?style=flat-square&maxAge=3600)](https://codecov.io/gh/althonos/peptides.py/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![PyPI](https://img.shields.io/pypi/v/peptides.svg?style=flat-square&maxAge=3600)](https://pypi.org/project/peptides)

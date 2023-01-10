@@ -13,7 +13,7 @@
 
 |Actions| |Coverage| |PyPI| |Wheel| |Versions| |Implementations| |License| |Source| |Mirror| |Issues| |Docs| |Changelog| |Downloads|
 
-.. |Actions| image:: https://img.shields.io/github/workflow/status/althonos/peptides.py/Test/main?logo=github&style=flat-square&maxAge=300
+.. |Actions| image:: https://img.shields.io/github/actions/workflow/status/althonos/peptides.py/test.yml?branch=main&logo=github&style=flat-square&maxAge=300
    :target: https://github.com/althonos/peptides.py/actions
 
 .. |Coverage| image:: https://img.shields.io/codecov/c/gh/althonos/peptides.py?style=flat-square&maxAge=600
