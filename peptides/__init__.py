@@ -2173,6 +2173,7 @@ class Peptide(typing.Sequence[str]):
         "KF": kidera_factors,
         "MSWHIM": ms_whim_scores,
         "E": pcp_descriptors,
+        "PD": physical_descriptors,
         "ProtFP": protfp_descriptors,
         "SV": sneath_vectors,
         "ST": st_scales,
