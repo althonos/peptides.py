@@ -69,7 +69,7 @@ class CrucianiProperties(typing.NamedTuple):
         - Cruciani, G., M. Baroni, E. Carosati, M. Clementi, R. Valigi,
           and S. Clementi.
           *Peptide Studies by Means of Principal Properties of Amino
-          Acids Derived from MIF Descriptors*. Journal of Chemometrics. 
+          Acids Derived from MIF Descriptors*. Journal of Chemometrics.
           2004;18(3-4):146–55. :doi:`10.1002/cem.856`.
 
     """
@@ -114,7 +114,7 @@ class KideraFactors(typing.NamedTuple):
 
     Attributes:
         kf1 (`float`): A factor modeling the helix / bend preference.
-        kf2 (`float`): A factor modeling the side-chain size of each 
+        kf2 (`float`): A factor modeling the side-chain size of each
             residue (:aaindex:`KIDA850101`).
         kf3 (`float`): A factor modeling the extended structured preference.
         kf4 (`float`): A factor representing the hydrophobicity.
@@ -127,8 +127,8 @@ class KideraFactors(typing.NamedTuple):
 
     References:
         - Kidera, A., Y. Konishi, M. Oka, T. Ooi, and H. A. Scheraga.
-          *Statistical Analysis of the Physical Properties of the 20 
-          Naturally Occurring Amino Acids*. Journal of Protein Chemistry. 
+          *Statistical Analysis of the Physical Properties of the 20
+          Naturally Occurring Amino Acids*. Journal of Protein Chemistry.
           Feb 1985;4(1):23–55. :doi:`10.1007/BF01025492`.
 
     """
@@ -182,7 +182,7 @@ class PhysicalDescriptors(typing.NamedTuple):
     PCA-derived descriptors (Z-scales, MS-WHIM and T-scales) after
     correcting for the hydrophilicity of Methionine, Asparagine and
     Tryptophan based on Feng *et al*.
-    
+
     Attributes:
         pd1 (`float`): A descriptor related to residue volume.
         pd2 (`float`): A descriptor related to hydrophilicity.
@@ -241,7 +241,7 @@ class ProtFPDescriptors(typing.NamedTuple):
     """The ProtFP descriptors of a peptide.
 
     The ProtFP set was constructed from a large initial selection of
-    indices obtained from the `AAindex <https://www.genome.jp/aaindex/>`_ 
+    indices obtained from the `AAindex <https://www.genome.jp/aaindex/>`_
     database for all 20 naturally occurring amino acids.
 
     References:
@@ -283,9 +283,9 @@ class SneathVectors(typing.NamedTuple):
     Attributes:
         sv1 (`float`): A descriptor representing mainly aliphatic properties
             of each residue (:aaindex:`SNEP660101`).
-        sv2 (`float`): A descriptor putatively modeling the number of 
+        sv2 (`float`): A descriptor putatively modeling the number of
             reactive groups (:aaindex:`SNEP660102`).
-        sv3 (`float`): A descriptor representing the aromatic properties 
+        sv3 (`float`): A descriptor representing the aromatic properties
             of each residue (:aaindex:`SNEP660103`).
         sv4 (`float`): A descriptor with uncertain interpretation
             (:aaindex:`SNEP660104`).
@@ -337,7 +337,7 @@ class TScales(typing.NamedTuple):
     amino acids. These topological descriptors are based on the
     connectivity table of amino acids alone, and to not explicitly
     consider 3D properties of each structure.
-    
+
     References:
         - Tian, F., P. Zhou, and Z. Li.
           *T-Scale as a Novel Vector of Topological Descriptors for
@@ -365,16 +365,16 @@ class VHSEScales(typing.NamedTuple):
 
     Attribute:
         vhse1 (`float`): A descriptor representing hydrophobic properties.
-        vhse2 (`float`): Another descriptor representing hydrophobic 
+        vhse2 (`float`): Another descriptor representing hydrophobic
             properties.
         vhse3 (`float`): A descriptor representing steric properties.
         vhse4 (`float`): Another descriptor representing steric properties.
         vhse5 (`float`): A descriptor representing electronic properties.
-        vhse6 (`float`): A second descriptor representing electronic 
+        vhse6 (`float`): A second descriptor representing electronic
             properties.
-        vhse7 (`float`): A third descriptor representing electronic 
+        vhse7 (`float`): A third descriptor representing electronic
             properties.
-        vhse8 (`float`): A fourth descriptor representing electronic 
+        vhse8 (`float`): A fourth descriptor representing electronic
             properties.
 
     References:
@@ -410,7 +410,7 @@ class ZScales(typing.NamedTuple):
             polarity and charge.
         z4 (`float`): A descriptor relating to electronegativity, heat of
             formation, electrophilicity and hardness.
-        z5 (`float`): Another descriptor relating to electronegativity, 
+        z5 (`float`): Another descriptor relating to electronegativity,
             heat of formation, electrophilicity and hardness.
 
     References:
@@ -718,9 +718,10 @@ class Peptide(typing.Sequence[str]):
         """
         if window < 1:
             raise ValueError("Window must be strictly positive")
+
         # skip computing profile is window is larger than the available
         # number of residues in the peptide sequence
-        if len(self) + 1 > window:
+        if len(self) >= window:
             # build a look-up table and index values
             lut = [table.get(aa, default) for aa in self._CODE1]
             if numpy is None:
@@ -728,8 +729,8 @@ class Peptide(typing.Sequence[str]):
             else:
                 values = numpy.take(lut, self.encoded)  # type: ignore
             # don't perform window averaging if window is 1
-            if window == 1:
-                p = list(values)
+            if window <= 1:
+                return list(values)
             elif window > 1:
                 p = []
                 # use a rolling sum over the window
@@ -741,6 +742,8 @@ class Peptide(typing.Sequence[str]):
                     s -= values[j-window]
                     s += values[j]
                 p.append(s / window)
+        else:
+            p = []
 
         return p
 
@@ -2002,7 +2005,7 @@ class Peptide(typing.Sequence[str]):
 
         Returns:
             `peptides.KideraFactors`: The computed average Kidera factors
-            for all the amino acids in the peptide. 
+            for all the amino acids in the peptide.
 
         Example:
             >>> peptide = Peptide("KLKLLLLLKLK")
@@ -2214,7 +2217,7 @@ class Peptide(typing.Sequence[str]):
     def vhse_scales(self) -> VHSEScales:
         """Compute the VHSE-scales of the peptide.
 
-        See `~peptides.VHSEScales` for more information.       
+        See `~peptides.VHSEScales` for more information.
 
         Returns:
             `peptides.VHSEScales`: The computed average of VHSE-scales of
