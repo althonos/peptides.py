@@ -356,7 +356,7 @@ class TScales(typing.NamedTuple):
 class VHSEScales(typing.NamedTuple):
     """The VHSE-scales of a peptide.
 
-     The VHSE-scales (principal components score Vectors of Hydrophobic,
+    The VHSE-scales (principal components score Vectors of Hydrophobic,
     Steric, and Electronic properties), are derived from principal
     components analysis (PCA) on independent families of 18 hydrophobic
     properties, 17 steric properties, and 15 electronic properties,
