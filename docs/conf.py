@@ -24,12 +24,6 @@ import sphinx_bootstrap_theme
 
 docssrc_dir = os.path.dirname(os.path.abspath(__file__))
 project_dir = os.path.dirname(docssrc_dir)
-sys.path.insert(0, project_dir)
-
-# Mock dynamically generated Python files so that we can build the documentation
-# without having build these files first (e.g on ReadTheDocs)
-
-sys.modules['peptides.tables'] = types.ModuleType('peptides.tables')
 
 # -- Sphinx Setup ------------------------------------------------------------
 
@@ -93,6 +87,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
     "sphinx.ext.extlinks",
+    "sphinxcontrib.jquery",
     "sphinx_bootstrap_theme",
     "recommonmark",
 ]
@@ -181,9 +176,9 @@ htmlhelp_basename = peptides.__name__
 # -- Options for extlinks extension ------------------------------------------
 
 extlinks = {
-    'doi': ('https://doi.org/%s', 'doi:'),
-    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:'),
-    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:')
+    'doi': ('https://doi.org/%s', 'doi:%s'),
+    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:%s'),
+    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:%s')
 }
 
 
