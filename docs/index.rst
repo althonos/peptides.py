@@ -11,7 +11,7 @@
 
 *Physicochemical properties, indices and descriptors for amino-acid sequences.*
 
-|Actions| |Coverage| |PyPI| |Wheel| |Versions| |Implementations| |License| |Source| |Mirror| |Issues| |Docs| |Changelog| |Downloads|
+|Actions| |Coverage| |License| |PyPI| |Bioconda| |Wheel| |Versions| |Implementations| |Source| |Mirror| |Issues| |Docs| |Changelog| |Downloads|
 
 .. |Actions| image:: https://img.shields.io/github/actions/workflow/status/althonos/peptides.py/test.yml?branch=main&logo=github&style=flat-square&maxAge=300
    :target: https://github.com/althonos/peptides.py/actions
@@ -21,6 +21,9 @@
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/peptides.svg?style=flat-square&maxAge=3600
    :target: https://pypi.python.org/pypi/peptides
+
+.. |Bioconda| image:: https://img.shields.io/conda/vn/bioconda/peptides?style=flat-square&maxAge=3600&logo=anaconda
+   :target: https://anaconda.org/bioconda/peptides
 
 .. |Wheel| image:: https://img.shields.io/pypi/wheel/peptides?style=flat-square&maxAge=3600
    :target: https://pypi.org/project/peptides/#files
@@ -83,6 +86,7 @@ A non-exhaustive list of available features:
   - `ProtFP descriptors <https://doi.org/10.1186/1758-2946-5-41>`_
   - `Sneath vectors <https://doi.org/10.1016/0022-5193(66)90112-3>`_
   - `ST-scales <https://doi.org/10.1007/s00726-009-0287-y>`_
+  - `SVGER descriptors <https://doi.org/10.1002/minf.201501023>`_
   - `T-scales <https://doi.org/10.1016/j.molstruc.2006.07.004>`_
   - `VHSE-scales <https://doi.org/10.1002/bip.20296>`_
   - `Z-scales <https://doi.org/10.1021/jm9700575>`_
@@ -138,6 +142,8 @@ The original R `Peptides` package was written by `Daniel Osorio <https://orcid.o
 `Paola Rondón-Villarreal <https://orcid.org/0000-0001-8209-3885>`_ and
 `Rodrigo Torres <https://orcid.org/0000-0003-1113-3020>`_, and is licensed under
 the terms of the `GNU General Public License v2.0 <https://choosealicense.com/licenses/gpl-2.0/>`_.
+The `EMBOSS <http://emboss.bioinformatics.nl/cgi-bin/emboss/>`_ applications are
+released under the `GNU General Public License v1.0 <https://www.gnu.org/licenses/old-licenses/gpl-1.0.html>`_.
 
 *This project is in no way not affiliated, sponsored, or otherwise endorsed
 by the original* `Peptides`_ *authors. It was developed by*
