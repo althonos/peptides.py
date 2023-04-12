@@ -32,6 +32,8 @@ Descriptors
 
 .. autoclass:: peptides.STScales(typing.NamedTuple)
 
+.. autoclass:: peptides.SVGERDescriptors(typing.NamedTuple)
+
 .. autoclass:: peptides.TScales(typing.NamedTuple)
 
 .. autoclass:: peptides.VHSEScales(typing.NamedTuple)

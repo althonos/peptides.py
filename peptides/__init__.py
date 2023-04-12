@@ -330,6 +330,39 @@ class STScales(typing.NamedTuple):
     st8: float
 
 
+class SVGERDescriptors(typing.NamedTuple):
+    """The SVGER descriptors of a peptide.
+
+    SVGER descriptors were constructed by Principal Component Analysis
+    of 74 geometrical descriptors (`svger1` to `svger6`), 44 eigenvalue
+    descriptors (`svger7`, `svger8` and `svger9`), and 41 Randić 
+    descriptors (`svger10` and `svger11`) computed for the 20 proteinogenic 
+    amino acids.
+
+    References:
+        - Tong, J., L. Li, M. Bai, and K. Li. 
+          *A New Descriptor of Amino Acids-SVGER and Its Applications in 
+          Peptide QSAR*. Molecular Informatics 36, no. 5–6 (2017): 1501023. 
+          :doi:`10.1002/minf.201501023`.
+        - Randic, M. 
+          *Molecular Shape Profiles*. Journal of Chemical Information and 
+          Computer Sciences 35, no. 3 (1 May 1995): 373–82. 
+          :doi:`10.1021/ci00025a005`.
+
+    """
+    svger1: float
+    svger2: float
+    svger3: float
+    svger4: float
+    svger5: float
+    svger6: float
+    svger7: float
+    svger8: float
+    svger9: float
+    svger10: float
+    svger11: float
+
+
 class TScales(typing.NamedTuple):
     """The T-scales of a peptide.
 
@@ -2179,14 +2212,30 @@ class Peptide(typing.Sequence[str]):
             ST7    0.58020
             ST8    0.54400
 
-
-
         """
         out = []
         for i in range(len(tables.ST_SCALES)):
             p = self.profile(tables.ST_SCALES[f"ST{i+1}"])
             out.append(_sum(p) / len(self))
         return STScales(*out)
+
+    def svger_descriptors(self) -> SVGERDescriptors:
+        """Compute the SVGER descriptors of the peptide.
+
+        See `~peptides.SVGERDescriptors` for more information.
+
+        Returns:
+            `peptides.SVGERDescriptors`: The computed average of SVGER
+            descriptors of all the amino acids in the peptide.
+
+        .. versionadded:: 0.3.2
+
+        """
+        out = []
+        for i in range(len(tables.SVGER)):
+            p = self.profile(tables.SVGER[f"SVGER{i+1}"])
+            out.append(_sum(p) / len(self))
+        return SVGERDescriptors(*out)
 
     def t_scales(self) -> TScales:
         """Compute the T-scales of the peptide.
@@ -2283,6 +2332,7 @@ class Peptide(typing.Sequence[str]):
         "ProtFP": protfp_descriptors,
         "SV": sneath_vectors,
         "ST": st_scales,
+        "SVGER": svger_descriptors,
         "T": t_scales,
         "VHSE": vhse_scales,
         "Z": z_scales,
