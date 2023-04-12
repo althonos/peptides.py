@@ -20,7 +20,7 @@ except ImportError:
     _sum = sum
 
 __all__ = ["Peptide", "tables", "datasets"]
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
 __license__ = "GPLv3"
 __credits__ = """

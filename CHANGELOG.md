@@ -6,7 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.2...HEAD
+
+
+## [v0.3.2] - 2023-04-01
+[v0.3.2]: https://github.com/althonos/peptides.py/compare/v0.3.1...v0.3.2
+
+### Added
+- `Peptide.svger_descriptors` to compute SVGER descriptors from Tong *et al.* (2016).
+
+### Fixed
+- `Peptide.physical_descriptors` not being computed by `Peptide.descriptors`.
+
+### Documentation
+- Refactor documentation of individual descriptors into their own class.
+- Add missing `PCPDescriptors` and `PhysicalDescriptors` to the API documentation.
 
 
 ## [v0.3.1] - 2022-09-01
