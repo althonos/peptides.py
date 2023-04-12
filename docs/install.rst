@@ -5,22 +5,22 @@ PyPi
 ^^^^
 
 ``peptides.py`` is hosted on GitHub, but the easiest way to install it is to
-download the latest release from its `PyPi repository <https://pypi.python.org/pypi/pyrodigal>`_.
+download the latest release from its `PyPi repository <https://pypi.python.org/pypi/peptides>`_.
 
 .. code:: console
 
-	$ pip install --user pyrodigal
+    $ pip install --user peptides
 
-.. Conda
-.. ^^^^^
-..
-.. Pronto is also available as a `recipe <https://anaconda.org/bioconda/pyrodigal>`_
-.. in the `bioconda <https://bioconda.github.io/>`_ channel. To install, simply
-.. use the ``conda`` installer:
-..
-.. .. code:: console
-..
-.. 	 $ conda install -c bioconda pyrodigal
+Conda
+^^^^^
+
+``peptides.py`` is also available as a `recipe <https://anaconda.org/bioconda/peptides>`_
+in the `bioconda <https://bioconda.github.io/>`_ channel. To install, simply
+use the ``conda`` installer:
+
+.. code:: console
+
+    $ conda install -c bioconda peptides
 
 
 GitHub + ``pip``
@@ -31,8 +31,8 @@ the repository and install the repository by running (with the admin rights):
 
 .. code:: console
 
-  $ git clone --recursive https://github.com/althonos/peptides.py
-	$ pip install --user ./peptides.py
+    $ git clone --recursive https://github.com/althonos/peptides.py
+    $ pip install --user ./peptides.py
 
 .. caution::
 
@@ -49,9 +49,9 @@ build dependencies (mainly `astor <https://pypi.org/project/astor>`_):
 
 .. code:: console
 
-	$ git clone --recursive https://github.com/althonos/peptides.py
-	$ cd peptides.py
-	# python setup.py build_py install
+    $ git clone --recursive https://github.com/althonos/peptides.py
+    $ cd peptides.py
+    # python setup.py build_py install
 
 .. Danger::
 

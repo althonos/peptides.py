@@ -59,12 +59,11 @@ which hosts universal wheels that can be installed with `pip`:
 $ pip install peptides
 ```
 
-<!--
 Otherwise, `peptides.py` is also available as a [Bioconda](https://bioconda.github.io/)
 package:
 ```console
-$ conda install -c bioconda peptides-py
-``` -->
+$ conda install -c bioconda peptides
+```
 
 ## 📖 Documentation
 
