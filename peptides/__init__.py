@@ -396,7 +396,7 @@ class VHSEScales(typing.NamedTuple):
     respectively, which are included in total 50 physicochemical
     variables of 20 coded amino acids.
 
-    Attribute:
+    Attributes:
         vhse1 (`float`): A descriptor representing hydrophobic properties.
         vhse2 (`float`): Another descriptor representing hydrophobic
             properties.
