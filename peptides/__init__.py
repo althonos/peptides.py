@@ -427,6 +427,29 @@ class VHSEScales(typing.NamedTuple):
     vhse8: float
 
 
+class VSTPVDescriptors(typing.NamedTuple):
+    """The VSTPV descriptors of a peptide.
+
+    The VSTPV (vector of structural and topological variables) are derived
+    from principal component analysis (PCA) of 85 structural variables of 
+    166 amino acids.
+
+    References:
+        - Shu, M., Yu, R., Zhang, Y., Wang, J., Wang, L., Lin, Z.
+          *Predicting the Activity of Antimicrobial Peptides with Amino Acid
+          Topological Information*.
+          Medicinal Chemistry. Feb 2013;9(1):32-44.
+          :doi:`10.2174/157340613804488350`.
+
+    """
+    vstpv1: float
+    vstpv2: float
+    vstpv3: float
+    vstpv4: float
+    vstpv5: float
+    vstpv6: float
+
+
 class ZScales(typing.NamedTuple):
     """The Z-scales of a peptide.
 
@@ -2295,6 +2318,22 @@ class Peptide(typing.Sequence[str]):
             out.append(_sum(p) / len(self))
         return VHSEScales(*out)
 
+    def vstpv_descriptors(self) -> VSTPVDescriptors:
+        """Compute the VSTPV descriptors of the peptide.
+
+        See `~peptides.VSTPVDescriptors` for more information.
+
+        Returns:
+            `peptides.VSTPVDescriptors`: The computed VSTPV descriptors for 
+            the peptide.
+
+        """
+        out = []
+        for i in range(len(tables.VSTPV)):
+            p = self.profile(tables.VSTPV[f"VSTPV{i+1}"])
+            out.append(_sum(p) / len(self))
+        return VSTPVDescriptors(*out)
+
     def z_scales(self) -> ZScales:
         """Compute the Z-scales of the peptide.
 
@@ -2335,5 +2374,6 @@ class Peptide(typing.Sequence[str]):
         "SVGER": svger_descriptors,
         "T": t_scales,
         "VHSE": vhse_scales,
+        "VSTPV": vstpv_descriptors,
         "Z": z_scales,
     }
