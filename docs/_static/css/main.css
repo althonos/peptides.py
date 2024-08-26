@@ -2,13 +2,13 @@ p {
     text-align: justify;
 }
 
-.admonition-references p {
-    text-align: left;
-}
-
-.sig-name {
+/* a.reference strong {
+    font-weight: bold;
+    font-size: 90%;
     color: #c7254e;
-}
+    box-sizing: border-box;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+} */
 
 .field-list a.reference {
     font-weight: bold;

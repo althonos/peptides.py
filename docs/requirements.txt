@@ -10,6 +10,6 @@ pygments-style-monokailight ~=0.4
 ipython ~=7.19
 pygments ~=2.4
 sphinxcontrib-jquery ~=4.1
+sphinx-design
+pydata-sphinx-theme
 
-# sphinx-bootstrap-theme ~=0.7 with patched admonition
-https://github.com/althonos/sphinx-bootstrap-theme/archive/master.zip

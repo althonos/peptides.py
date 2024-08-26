@@ -1,16 +1,7 @@
-API Reference
-=============
-
-Peptide
--------
-
-.. autoclass:: peptides.Peptide(typing.Sequence[str])
-   :special-members: __init__
-   :members:
-
-
 Descriptors
------------
+===========
+
+.. currentmodule:: peptides
 
 .. autoclass:: peptides.BLOSUMIndices(typing.NamedTuple)
 

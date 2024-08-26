@@ -16,26 +16,13 @@ import shutil
 import semantic_version
 import sphinx_bootstrap_theme
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-
-docssrc_dir = os.path.dirname(os.path.abspath(__file__))
-project_dir = os.path.dirname(docssrc_dir)
-
 # -- Sphinx Setup ------------------------------------------------------------
 
 def setup(app):
     # Add custom stylesheet
-    app.add_css_file(os.path.join("_static/css/main.css"))
-    app.add_js_file("js/apitoc.js")
-    app.add_js_file("js/example-admonition.js")
-
+    app.add_css_file("css/main.css")
 
 # -- Project information -----------------------------------------------------
-
 
 import peptides
 
@@ -51,13 +38,7 @@ version = str(semver.truncate(level="patch"))
 release = str(semver)
 
 # extract the project URLs from ``setup.cfg``
-cfgparser = configparser.ConfigParser()
-cfgparser.read(os.path.join(project_dir, "setup.cfg"))
-project_urls = dict(
-    map(str.strip, line.split(" = ", 1))
-    for line in cfgparser.get("metadata", "project_urls").splitlines()
-    if line.strip()
-)
+project_urls = {}
 
 # patch the docstring of the main module so that we don't show the link to
 # redirect to the docs (we don't want to see it when reading the docs
@@ -81,14 +62,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
-    # "sphinx.ext.imgconverter",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
     "sphinx.ext.extlinks",
+    "sphinx_design",
     "sphinxcontrib.jquery",
-    "sphinx_bootstrap_theme",
     "recommonmark",
 ]
 
@@ -112,57 +92,54 @@ default_role = "py:obj"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'bootstrap'
-
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['_static/js', '_static/bibtex', '_static/css', '_static/json']
+html_js_files = ["custom-icon.js"]
+html_css_files = ["custom.css"]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
 html_theme_options = {
-    # Bootswatch (http://bootswatch.com/) theme.
-    "bootswatch_theme": "flatly",
-    # Choose Bootstrap version.
-    "bootstrap_version": "3",
-    # Tab name for entire site. (Default: "Site")
-    "navbar_site_name": "Documentation",
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    "navbar_class": "navbar",
-    # Render the next and previous page links in navbar. (Default: true)
-    "navbar_sidebarrel": True,
-    # Render the current pages TOC in the navbar. (Default: true)
-    "navbar_pagenav": False,
-    # A list of tuples containing pages or urls to link to.
-    "navbar_links": [
-        ("GitHub", cfgparser.get("metadata", "url").strip(), True)
-    ] + [
-        (k, v, True)
-        for k, v in project_urls.items()
-        if k in {"Zenodo", "PyPI"}
+    "external_links": [],
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/althonos/peptides.py",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/peptides",
+            "icon": "fa-custom fa-pypi",
+        },
     ],
-    "admonition_use_panel": True,
+    "logo": {
+        "text": "Peptides",
+        # "image_light": "_images/logo.png",
+        # "image_dark": "_images/logo.png",
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    "navbar_align": "left",
+    "footer_start": ["copyright"],
+    "footer_center": ["sphinx-version"],
+    "switcher": {
+        "json_url": "https://peptides.readthedocs.io/en/latest/_static/switcher.json",
+        "version_match": version,
+    }
 }
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-html_sidebars = {
-    "*": ["localtoc.html"],
-    "api/*": ["localtoc.html"],
-    "examples/*": ["localtoc.html"],
+html_context = {
+    "github_user": "althonos",
+    "github_repo": "peptides.py",
+    "github_version": "main",
+    "doc_path": "docs",
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -172,15 +149,6 @@ htmlhelp_basename = peptides.__name__
 
 
 # -- Extension configuration -------------------------------------------------
-
-# -- Options for extlinks extension ------------------------------------------
-
-extlinks = {
-    'doi': ('https://doi.org/%s', 'doi:%s'),
-    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:%s'),
-    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:%s')
-}
-
 
 # -- Options for imgmath extension -------------------------------------------
 
@@ -207,7 +175,6 @@ autosummary_generate = []
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
-    "biopython": ("https://biopython.org/docs/latest/api/", None),
 }
 
 # -- Options for recommonmark extension --------------------------------------
@@ -216,4 +183,15 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.txt': 'markdown',
     '.md': 'markdown',
+}
+
+# -- Options for extlinks extension ------------------------------------------
+
+extlinks = {
+    'doi': ('https://doi.org/%s', 'doi:%s'),
+    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:%s'),
+    'pmc': ('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC%s', 'PMC%s'),
+    'isbn': ('https://www.worldcat.org/isbn/%s', 'ISBN:%s'),
+    'wiki': ('https://en.wikipedia.org/wiki/%s', '%s'),
+    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:%s')
 }
