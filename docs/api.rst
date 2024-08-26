@@ -26,6 +26,8 @@ Descriptors
 
 .. autoclass:: peptides.PCPDescriptors(typing.NamedTuple)
 
+.. autoclass:: peptides.PRINComponents(typing.NamedTuple)
+
 .. autoclass:: peptides.ProtFPDescriptors(typing.NamedTuple)
 
 .. autoclass:: peptides.SneathVectors(typing.NamedTuple)
@@ -37,5 +39,7 @@ Descriptors
 .. autoclass:: peptides.TScales(typing.NamedTuple)
 
 .. autoclass:: peptides.VHSEScales(typing.NamedTuple)
+
+.. autoclass:: peptides.VSTPVDescriptors(typing.NamedTuple)
 
 .. autoclass:: peptides.ZScales(typing.NamedTuple)

@@ -237,6 +237,32 @@ class PCPDescriptors(typing.NamedTuple):
     e5: float
 
 
+class PRINComponents(typing.NamedTuple):
+    """The PRIN components of a peptide.
+
+    The PRIN components were constructed in Vicator *et al* (2005)
+    by running PCA on different amino-acid properties.
+
+    Attributes:
+        prin1 (`float`): The PRIN1 component, representing hydrophobicity
+            properties.
+        prin2 (`float`): The PRIN2 component, representing the residue
+            size.
+        prin3 (`float`): The PRIN3 component, representing the pkN values
+            of the amino-acids.
+
+    References:
+        - Vicatos, S., Reddy, B.V., and Y. Kaznessis.
+          *Prediction of distant residue contacts with the use of
+          evolutionary information*. Proteins. 2005 Mar 1;58(4):935-49.
+          :doi:`10.1002/prot.20370` :pmid:`15645442`.
+
+    """
+    prin1: float
+    prin2: float
+    prin3: float
+
+
 class ProtFPDescriptors(typing.NamedTuple):
     """The ProtFP descriptors of a peptide.
 
@@ -335,18 +361,18 @@ class SVGERDescriptors(typing.NamedTuple):
 
     SVGER descriptors were constructed by Principal Component Analysis
     of 74 geometrical descriptors (`svger1` to `svger6`), 44 eigenvalue
-    descriptors (`svger7`, `svger8` and `svger9`), and 41 Randić 
-    descriptors (`svger10` and `svger11`) computed for the 20 proteinogenic 
+    descriptors (`svger7`, `svger8` and `svger9`), and 41 Randić
+    descriptors (`svger10` and `svger11`) computed for the 20 proteinogenic
     amino acids.
 
     References:
-        - Tong, J., L. Li, M. Bai, and K. Li. 
-          *A New Descriptor of Amino Acids-SVGER and Its Applications in 
-          Peptide QSAR*. Molecular Informatics 36, no. 5–6 (2017): 1501023. 
+        - Tong, J., L. Li, M. Bai, and K. Li.
+          *A New Descriptor of Amino Acids-SVGER and Its Applications in
+          Peptide QSAR*. Molecular Informatics 36, no. 5–6 (2017): 1501023.
           :doi:`10.1002/minf.201501023`.
-        - Randic, M. 
-          *Molecular Shape Profiles*. Journal of Chemical Information and 
-          Computer Sciences 35, no. 3 (1 May 1995): 373–82. 
+        - Randic, M.
+          *Molecular Shape Profiles*. Journal of Chemical Information and
+          Computer Sciences 35, no. 3 (1 May 1995): 373–82.
           :doi:`10.1021/ci00025a005`.
 
     """
@@ -397,12 +423,16 @@ class VHSEScales(typing.NamedTuple):
     variables of 20 coded amino acids.
 
     Attributes:
-        vhse1 (`float`): A descriptor representing hydrophobic properties.
+        vhse1 (`float`): A descriptor representing hydrophobic 
+            properties.
         vhse2 (`float`): Another descriptor representing hydrophobic
             properties.
-        vhse3 (`float`): A descriptor representing steric properties.
-        vhse4 (`float`): Another descriptor representing steric properties.
-        vhse5 (`float`): A descriptor representing electronic properties.
+        vhse3 (`float`): A descriptor representing steric 
+            properties.
+        vhse4 (`float`): Another descriptor representing steric 
+            properties.
+        vhse5 (`float`): A descriptor representing electronic 
+            properties.
         vhse6 (`float`): A second descriptor representing electronic
             properties.
         vhse7 (`float`): A third descriptor representing electronic
@@ -431,7 +461,7 @@ class VSTPVDescriptors(typing.NamedTuple):
     """The VSTPV descriptors of a peptide.
 
     The VSTPV (vector of structural and topological variables) are derived
-    from principal component analysis (PCA) of 85 structural variables of 
+    from principal component analysis (PCA) of 85 structural variables of
     166 amino acids.
 
     References:
@@ -2159,6 +2189,22 @@ class Peptide(typing.Sequence[str]):
             out.append(_sum(p) / len(self))
         return PhysicalDescriptors(*out)
 
+    def prin_components(self) -> PRINComponents:
+        """Compute the PRIN components of the peptide.
+
+        See `~peptides.PRINComponents` for more information.
+
+        Returns:
+            `peptides.PRINComponents`: The computed average of PRIN
+            components of all the amino acids in the peptide.
+
+        """
+        out = []
+        for i in range(len(tables.PRIN)):
+            p = self.profile(tables.PRIN[f"PRIN{i+1}"])
+            out.append(_sum(p) / len(self))
+        return PRINComponents(*out)
+
     def protfp_descriptors(self) -> ProtFPDescriptors:
         """Compute the ProtFP descriptors of the peptide.
 
@@ -2324,7 +2370,7 @@ class Peptide(typing.Sequence[str]):
         See `~peptides.VSTPVDescriptors` for more information.
 
         Returns:
-            `peptides.VSTPVDescriptors`: The computed VSTPV descriptors for 
+            `peptides.VSTPVDescriptors`: The computed VSTPV descriptors for
             the peptide.
 
         """
@@ -2368,6 +2414,7 @@ class Peptide(typing.Sequence[str]):
         "MSWHIM": ms_whim_scores,
         "E": pcp_descriptors,
         "PD": physical_descriptors,
+        "PRIN": prin_components,
         "ProtFP": protfp_descriptors,
         "SV": sneath_vectors,
         "ST": st_scales,
