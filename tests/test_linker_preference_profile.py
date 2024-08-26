@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 import peptides
 
 
+@unittest.skip("server not available")
 class TestLinkerPreferenceProfile(unittest.TestCase):
 
     DOMCUT_URL = "http://www.bork.embl-heidelberg.de/Docu/mikita/domplot.cgi"
