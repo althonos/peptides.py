@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.3...HEAD
+
+
+## [v0.3.3] - 2024-08-26
+[v0.3.3]: https://github.com/althonos/peptides.py/compare/v0.3.2...v0.3.3
+
+### Added
+- PRIN components and VSTPV descriptors to `Peptide`.
+
+### Changed
+- Change Sphinx documentation to use the PyData theme.
 
 
 ## [v0.3.2] - 2023-04-01
