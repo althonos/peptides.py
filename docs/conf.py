@@ -14,7 +14,6 @@ import types
 import re
 import shutil
 import semantic_version
-import sphinx_bootstrap_theme
 
 # -- Sphinx Setup ------------------------------------------------------------
 
