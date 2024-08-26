@@ -44,6 +44,8 @@ def load_tests(loader, tests, ignore):
 
     def setUp(self):
         warnings.simplefilter("ignore")
+        if numpy is not None:
+            numpy.set_printoptions(legacy='1.25')
 
     def tearDown(self):
         warnings.simplefilter(warnings.defaultaction)
