@@ -11,6 +11,8 @@ Descriptors
 
 .. autoclass:: peptides.KideraFactors(typing.NamedTuple)
 
+.. autoclass:: peptides.AtchleyFactors(typing.NamedTuple)
+
 .. autoclass:: peptides.MSWHIMScores(typing.NamedTuple)
 
 .. autoclass:: peptides.PhysicalDescriptors(typing.NamedTuple)

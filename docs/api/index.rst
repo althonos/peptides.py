@@ -27,6 +27,7 @@ Descriptors
    CrucianiProperties
    FasgaiVectors
    KideraFactors
+   AtchleyFactors
    MSWHIMScores
    PhysicalDescriptors
    PCPDescriptors
