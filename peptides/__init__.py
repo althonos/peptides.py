@@ -144,6 +144,34 @@ class KideraFactors(typing.NamedTuple):
     kf10: float
 
 
+class AtchleyFactors(typing.NamedTuple):
+    """The Atchley factors of a peptide.
+
+    The Atchley Factors were originally derived by applying multivariate
+    analysis to 494 physical properties of the 20 amino acids and using
+    dimension reduction techniques.
+
+    Attributes:
+        af1 (`float`): A factor modeling polarity, accessibility, and hydrophobicity.
+        af2 (`float`): A factor modeling propensity for secondary structure.
+        af3 (`float`): A factor modeling molecular size.
+        af4 (`float`): A factor modeling codon composition.
+        af5 (`float`): A factor modeling electrostatic charge.
+
+    References:
+        - Atchley, W. R., Zhao, J., Fernandes, A. D., Drüke, T.
+          *Solving the protein sequence metric problem*.
+          Proceedings of the National Academy of Sciences.
+          Apr 2005;102(18):6395-6400. :doi:`10.1073/pnas.040867710`.
+
+    """
+    af1: float
+    af2: float
+    af3: float
+    af4: float
+    af5: float
+
+
 class MSWHIMScores(typing.NamedTuple):
     """The MS-WHIM scores of a peptide.
 
@@ -648,7 +676,7 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
             >>> sorted(peptide.descriptors().keys())
-            ['BLOSUM1', ..., 'F1', ..., 'KF1', ..., 'MSWHIM1', ..., 'PP1', ...]
+            ['AF1', ..., 'F1', ..., 'KF1', ..., 'MSWHIM1', ..., 'PP1', ...]
 
         Hint:
             Use this method to create a `~pandas.DataFrame` containing the
@@ -2115,6 +2143,32 @@ class Peptide(typing.Sequence[str]):
             out.append(_sum(p) / len(self))
         return KideraFactors(*out)
 
+    def atchley_factors(self) -> AtchleyFactors:
+        """Compute the Atchley factors of the peptide.
+
+        See `~peptides.AtchleyFactors` for more information.
+
+        Returns:
+            `peptides.AtchleyFactors`: The computed average Atchley factors
+            for all the amino acids in the peptide.
+
+        Example:
+            >>> peptide = Peptide("KLKLLLLLKLK")
+            >>> for i, kf in enumerate(peptide.atchley_factors()):
+            ...     print(f"AF{i+1:<3} {kf: .4f}")
+            AF1    0.0176
+            AF2   -0.8321
+            AF3   -0.7636
+            AF4    0.7048
+            AF5    0.0189
+
+        """
+        out = []
+        for i in range(len(tables.ATCHLEY)):
+            p = self.profile(tables.ATCHLEY[f"AF{i+1}"])
+            out.append(_sum(p) / len(self))
+        return AtchleyFactors(*out)
+
     def ms_whim_scores(self) -> MSWHIMScores:
         """Compute the MS-WHIM scores of the peptide.
 
@@ -2407,6 +2461,7 @@ class Peptide(typing.Sequence[str]):
         return ZScales(*out)
 
     __DESCRIPTORS = {
+        "AF": atchley_factors,
         "BLOSUM": blosum_indices,
         "PP": cruciani_properties,
         "F": fasgai_vectors,

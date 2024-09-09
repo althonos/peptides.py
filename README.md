@@ -33,7 +33,7 @@ versions (3.6+).
 A non-exhaustive list of available features:
 
 - Peptide statistics: amino acid counts and frequencies.
-- **QSAR** descriptors: BLOSUM indices, Cruciani properties, FASGAI vectors, Kidera factors, MS-WHIM scores, PCP descriptors, ProtFP descriptors, Sneath vectors, ST-scales, T-scales, VHSE-scales, Z-scales.
+- **QSAR** descriptors: BLOSUM indices, Cruciani properties, FASGAI vectors, Kidera factors, Atchley factors, MS-WHIM scores, PCP descriptors, ProtFP descriptors, Sneath vectors, ST-scales, T-scales, VHSE-scales, Z-scales.
 - Sequence profiles: hydrophobicity, hydrophobic moment, membrane position.
 - Physicochemical properties: aliphatic index, instability index, theoretical net charge, isoelectric point, molecular weight (with isotope labelling support).
 - Biological properties: structural class prediction.

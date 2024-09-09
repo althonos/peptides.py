@@ -81,6 +81,7 @@ A non-exhaustive list of available features:
   - `Cruciani properties <https://doi.org/10.1002/cem.856>`_
   - `FASGAI vectors <https://doi.org/10.1111/j.1747-0285.2008.00641.x>`_
   - `Kidera factors <https://doi.org/10.1007/BF01025492>`_
+  - `Atchley factors <https://doi.org/10.1073/pnas.0408677102>`_
   - `MS-WHIM scores <https://doi.org/10.1021/ci980211b>`_
   - `PCP descriptors <https://doi.org/10.1007/s00894-001-0058-5>`_
   - `ProtFP descriptors <https://doi.org/10.1186/1758-2946-5-41>`_
