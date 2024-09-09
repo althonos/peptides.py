@@ -2461,6 +2461,7 @@ class Peptide(typing.Sequence[str]):
         return ZScales(*out)
 
     __DESCRIPTORS = {
+        "AF": atchley_factors,
         "BLOSUM": blosum_indices,
         "PP": cruciani_properties,
         "F": fasgai_vectors,
