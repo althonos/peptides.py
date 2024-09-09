@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.4...HEAD
+
+
+## [v0.3.4] - 2024-09-09
+[v0.3.4]: https://github.com/althonos/peptides.py/compare/v0.3.3...v0.3.4
+
+### Added
+- `AshleyFactors` descriptors ([#5](https://github.com/althonos/peptides.py/pull/5), by [@BenSolomon](https://github.com/BenSolomon)).
+
+### Fixed
+- `Peptide` methods not being documented in Sphinx documentation.
 
 
 ## [v0.3.3] - 2024-08-26
