@@ -676,7 +676,7 @@ class Peptide(typing.Sequence[str]):
         Example:
             >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
             >>> sorted(peptide.descriptors().keys())
-            ['BLOSUM1', ..., 'F1', ..., 'KF1', ..., 'MSWHIM1', ..., 'PP1', ...]
+            ['AF1', ..., 'F1', ..., 'KF1', ..., 'MSWHIM1', ..., 'PP1', ...]
 
         Hint:
             Use this method to create a `~pandas.DataFrame` containing the
