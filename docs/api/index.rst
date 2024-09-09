@@ -11,7 +11,6 @@ Peptide
    Peptide
 
 .. toctree::
-   :caption: Peptide
    :maxdepth: 1
    :hidden:
 
@@ -43,7 +42,6 @@ Descriptors
 
 
 .. toctree::
-   :caption: Descriptors
    :maxdepth: 1
    :hidden:
 
