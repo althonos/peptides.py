@@ -3,7 +3,7 @@ setuptools >=46.4
 astor ~=0.6
 
 # coverage dependencies
-coverage ~=5.0
+coverage[toml] ~=7.0
 
 # deployment dependencies
 wheel
