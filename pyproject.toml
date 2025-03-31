@@ -1,0 +1,82 @@
+[build-system]
+requires = ['setuptools >=46.4', 'astor ~=0.6']
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peptides"
+dynamic = ["version"]
+description = "Physicochemical properties, indices and descriptors for amino-acid sequences."
+readme = "README.md"
+requires-python = ">=3.6"
+license = { file = "COPYING" }
+authors = [
+  { name = "Martin Larralde", email = "martin.larralde@embl.de" },
+]
+keywords = ["bioinformatics", "protein", "sequence", "peptide", "qsar"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/althonos/peptides.py/issues"
+"Changelog" = "https://github.com/althonos/peptides.py/blob/master/CHANGELOG.md"
+"Coverage" = "https://codecov.io/gh/althonos/peptides.py/"
+"Builds" = "https://github.com/althonos/peptides.py/actions"
+"PyPI" = "https://pypi.org/project/peptides"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+namespaces = false
+include = ["peptides"]
+exclude = ["docs*", "tests*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "peptides.__version__" }
+
+[tool.coverage.report]
+include = ["peptides/*"]
+omit = ["tests/*"]
+show_missing = true
+exclude_lines = [
+   "pragma: no cover",
+   "raise NotImplementedError",
+   "return NotImplemented",
+   "if __name__ == .__main__.:",
+   "except ImportError:",
+   "if typing.TYPE_CHECKING:",
+   "@abc.abstractmethod",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["peptides"]
+
+[tool.pydocstyle]
+inherit = false
+ignore = ["D100", "D101", "D102", "D105", "D107", "D200", "D203", "D213", "D406", "D407"]
+match-dir = "(?!tests)(?!resources)(?!docs)(?!build)[^\\.].*"
+match = "(?!test)(?!setup)[^\\._].*\\.py"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+["tool.mypy-peptides.*"]
+disallow_any_decorated = false
+disallow_any_generics = false
+disallow_any_unimported = false
+disallow_subclassing_any = true
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+ignore_missing_imports = false
+warn_unused_ignores = false
+warn_return_any = false
