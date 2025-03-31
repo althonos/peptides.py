@@ -906,17 +906,23 @@ class Peptide(typing.Sequence[str]):
     # --- Physico-chemical properties ----------------------------------------
 
     def aliphatic_index(self) -> float:
-        """Compute the aliphatic index of the peptide.
+        r"""Compute the aliphatic index of the peptide.
 
         The aliphatic index of a protein was proposed in Ikai (1980). It is
         defined as the relative volume occupied by aliphatic side chains
-        (Alanine, Valine, Isoleucine, and Leucine). It may be regarded as
-        a positive factor for the increase of thermostability of globular
-        proteins.
+        (Alanine, Valine, Isoleucine, and Leucine):
+
+        .. math::
+
+            \text{aliphatic index} = A + 2.9 V + 3.9 (I + L + J)
+
+
+        It may be regarded as a positive factor for the increase of
+        thermostability of globular proteins.
 
         Returns:
-            `float`: The computed aliphatic index for the peptide sequence,
-            between *0* and *100*.
+            `float`: The computed aliphatic index for the peptide
+            sequence, between *0.0* and *390.0*.
 
         Example:
             >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
