@@ -67,7 +67,7 @@ $ conda install -c bioconda peptides
 
 ## 📖 Documentation
 
-A complete [API reference](https://peptides.readthedocs.io/en/stable/api.html)
+A complete [API reference](https://peptides.readthedocs.io/en/stable/api/index.html)
 can be found in the [online documentation](https://peptides.readthedocs.io/),
 or directly from the command line using
 [`pydoc`](https://docs.python.org/3/library/pydoc.html):
