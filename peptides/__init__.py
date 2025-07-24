@@ -2033,6 +2033,63 @@ class Peptide(typing.Sequence[str]):
         """
         return self.profile(tables.LINKER_INDEX["Suyama"], window=window)
 
+    # --- Biosynthetic costs -------------------------------------------------
+
+    def nutrient_cost(
+        self,
+        nutrient: str = "glucose",
+        organism: str = "yeast",
+        relative: bool = False,
+    ):
+        """Estimate the nutrient cost of a peptide.
+
+        The nutrient cost was proposed by Barton *et al.* to estimate 
+        the energy cost required to biosynthesize a peptide based on 
+        genome-scale metabolic modeling in *Saccharomyces cerevisiae* and 
+        *Escherichia coli*. This approach offers advantages to estimate 
+        costs in nutrient-limited environments compared to energy-based
+        methods.
+
+        Arguments:
+            nutrient (`str`): The name of the nutrient, one of ``glucose``,
+                ``sulphate`` or ``ammonia``.
+            organism (`str`): The reference organism for which the values
+                were computed, either ``yeast`` or ``ecoli``.
+            relative (`bool`): Whether to use the absolute or relative 
+                values when computing costs.
+
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLE")
+            >>> peptide.nutrient_cost("glucose", "ecoli")
+            15.763...
+            >>> peptide.nutrient_cost("ammonia", "yeast", relative=True)
+            10.839...
+
+        References:
+            - Barton, M. D., Delneri, D., Oliver, S. G., Rattray, M., 
+              & Bergman, C. M. (2010). *Evolutionary systems biology of amino 
+              acid biosynthetic cost in yeast*. PloS one, 5(8), e11935.
+              :pmid:`20808905` :doi:`10.1371/journal.pone.0011935`.
+
+        """
+        if nutrient == "glucose":
+            n = "car"
+        elif nutrient == "ammonia":
+            n = "nit"
+        elif nutrient == "sulphate":
+            n = "sul"
+        else:
+            raise ValueError(f"invalid nutrient: {nutrient!r}")
+
+        if organism not in ("ecoli", "yeast"):
+            raise ValueError(f"invalid organism: {organism!r}")
+
+        r = "rel" if relative else "abs"
+        table = f"{organism}_{n}_{r}"
+        
+        p = self.profile(tables.BIOSYNTHESIS_COST[table])
+        return _sum(p)
+        
     # --- Descriptors --------------------------------------------------------
 
     def blosum_indices(self) -> BLOSUMIndices:
