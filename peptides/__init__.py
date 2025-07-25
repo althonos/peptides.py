@@ -29,6 +29,29 @@ Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
 Dong-Sheng Cao, Nan Xiao, Qing-Song Xu, and Alex F. Chen for ``Rcpi``.
 """.strip()
 
+# --- Constants --------------------------------------------------------------
+
+# fmt: off
+_CODE1 = [
+    "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I",
+    "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V",
+    "O", "U", "B", "Z", "J", "X"
+]
+
+# fmt: off
+_CODE3 = [
+    "Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly", "His", "Ile",
+    "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp", "Tyr", "Val",
+    "Pyl", "Sec", "Asx", "Glx", "Xle", "Xaa"
+]
+
+_TRANS = bytes(
+    _CODE1.index(chr(x).upper()) if chr(x).upper() in _CODE1 else _CODE1.index("X")
+    for x in range(256)
+)
+
+
+# --- Helper classes ---------------------------------------------------------
 
 class BLOSUMIndices(typing.NamedTuple):
     """The BLOSUM62-derived indices of a peptide.
@@ -543,6 +566,8 @@ class ZScales(typing.NamedTuple):
     z5: float
 
 
+# --- Peptide class ----------------------------------------------------------
+
 class Peptide(typing.Sequence[str]):
     """A sequence of amino acids.
 
@@ -551,22 +576,6 @@ class Peptide(typing.Sequence[str]):
             one-letter code.
 
     """
-
-    # --- Class constants ----------------------------------------------------
-
-    # fmt: off
-    _CODE1 = [
-        "A", "R", "N", "D", "C", "Q", "E", "G", "H", "I",
-        "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V",
-        "O", "U", "B", "Z", "J", "X"
-    ]
-
-    # fmt: off
-    _CODE3 = [
-        "Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly", "His", "Ile",
-        "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp", "Tyr", "Val",
-        "Pyl", "Sec", "Asx", "Glx", "Xle", "Xaa"
-    ]
 
     # --- Class methods ------------------------------------------------------
 
@@ -641,11 +650,10 @@ class Peptide(typing.Sequence[str]):
         """
         # store the sequence in text format
         self.sequence: str = sequence
-        # store an encoded version of the sequence as an array of indices
-        encoder = {aa:i for i,aa in enumerate(self._CODE1)}
-        self.encoded = array.array('B')
-        for i, aa in enumerate(sequence):
-            self.encoded.append(encoder.get(aa, encoder["X"]))
+        # encode the sequence as ASCII bytes
+        binary = sequence.encode('ascii')
+        # encode the peptide with the given encoding
+        self.encoded = array.array('B', binary.translate(_TRANS))
 
     def __len__(self) -> int:
         return len(self.sequence)
@@ -709,7 +717,7 @@ class Peptide(typing.Sequence[str]):
             sigma = statistics.stdev(table.values())
             table = {k: (v - mu) / sigma for k, v in table.items()}
         # build look up table
-        lut = [table.get(aa, 0.0) for aa in self._CODE1]
+        lut = [table.get(aa, 0.0) for aa in _CODE1]
         # compute using Cruciani formula
         if numpy is None:
             s1 = s2 = 0.0
@@ -743,7 +751,7 @@ class Peptide(typing.Sequence[str]):
             sigma = statistics.stdev(table.values())
             table = {k: (v - mu) / sigma for k, v in table.items()}
         # build the lookup table
-        lut = [table.get(aa, 0.0) for aa in self._CODE1]
+        lut = [table.get(aa, 0.0) for aa in _CODE1]
         # compute correlation using Cruciani formula
         if numpy is None:
             s = 0.0
@@ -784,8 +792,8 @@ class Peptide(typing.Sequence[str]):
             table2 = {k: (v - mu2) / sigma2 for k, v in table2.items()}
 
         # build the lookup table
-        lut1 = [table1.get(aa, 0.0) for aa in self._CODE1]
-        lut2 = [table2.get(aa, 0.0) for aa in self._CODE1]
+        lut1 = [table1.get(aa, 0.0) for aa in _CODE1]
+        lut2 = [table2.get(aa, 0.0) for aa in _CODE1]
 
         # compute using Cruciani formula
         if numpy is None:
@@ -837,7 +845,7 @@ class Peptide(typing.Sequence[str]):
         # number of residues in the peptide sequence
         if len(self) >= window:
             # build a look-up table and index values
-            lut = [table.get(aa, default) for aa in self._CODE1]
+            lut = [table.get(aa, default) for aa in _CODE1]
             if numpy is None:
                 values = [lut[i] for i in self.encoded]
             else:
@@ -882,7 +890,7 @@ class Peptide(typing.Sequence[str]):
         #     some overhead.
         return {
             aa: self.sequence.count(aa)
-            for aa in self._CODE1
+            for aa in _CODE1
         }
 
     def frequencies(self) -> typing.Dict[str, float]:
@@ -1067,8 +1075,8 @@ class Peptide(typing.Sequence[str]):
         scale_sign = tables.CHARGE["sign"]
 
         # build a look-up table for the pKa scale and the charge sign
-        lut_pKa = [scale_pKa.get(aa, 0.0) for aa in self._CODE1]
-        lut_sign = [scale_sign.get(aa, 0.0) for aa in self._CODE1]
+        lut_pKa = [scale_pKa.get(aa, 0.0) for aa in _CODE1]
+        lut_sign = [scale_sign.get(aa, 0.0) for aa in _CODE1]
 
         # compute charge of each amino-acid, and sum
         if numpy is None:
@@ -1130,7 +1138,7 @@ class Peptide(typing.Sequence[str]):
         """
         window = min(window, len(self))
         scale = tables.HYDROPHOBICITY["Eisenberg"]
-        lut = [scale.get(aa, 0.0) for aa in self._CODE1]
+        lut = [scale.get(aa, 0.0) for aa in _CODE1]
         angles = [(angle * i) % 360 for i in range(window)]
 
         if numpy is None:
@@ -1970,7 +1978,7 @@ class Peptide(typing.Sequence[str]):
                 s = sum((pep_frequencies[x]-table[x])**2 for x in table)
                 distances[name] = math.sqrt(s)
         elif distance == "mahalanobis" or distance == "discriminant":
-            x = [pep_frequencies[aa] for aa in sorted(self._CODE1[:20])]
+            x = [pep_frequencies[aa] for aa in sorted(_CODE1[:20])]
             for name,tables in dataset.items():
                 if name == "all":
                     continue
@@ -1982,7 +1990,7 @@ class Peptide(typing.Sequence[str]):
                     continue
                 # compute Mahalanobis distance using the components of
                 # the eigendecomposition
-                xm = [mean[aa] for aa in sorted(self._CODE1[:20])]
+                xm = [mean[aa] for aa in sorted(_CODE1[:20])]
                 y = [
                     sum(eivecs[i][j] * (x[j] - xm[j]) for j in range(20))
                     for i in range(20)
