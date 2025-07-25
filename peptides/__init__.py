@@ -474,15 +474,15 @@ class VHSEScales(typing.NamedTuple):
     variables of 20 coded amino acids.
 
     Attributes:
-        vhse1 (`float`): A descriptor representing hydrophobic 
+        vhse1 (`float`): A descriptor representing hydrophobic
             properties.
         vhse2 (`float`): Another descriptor representing hydrophobic
             properties.
-        vhse3 (`float`): A descriptor representing steric 
+        vhse3 (`float`): A descriptor representing steric
             properties.
-        vhse4 (`float`): Another descriptor representing steric 
+        vhse4 (`float`): Another descriptor representing steric
             properties.
-        vhse5 (`float`): A descriptor representing electronic 
+        vhse5 (`float`): A descriptor representing electronic
             properties.
         vhse6 (`float`): A second descriptor representing electronic
             properties.
@@ -2049,12 +2049,12 @@ class Peptide(typing.Sequence[str]):
         organism: str = "yeast",
         relative: bool = False,
     ):
-        """Estimate the nutrient cost of a peptide.
+        """Estimate the nutrient cost to biosynthesize a peptide.
 
-        The nutrient cost was proposed by Barton *et al.* to estimate 
-        the energy cost required to biosynthesize a peptide based on 
-        genome-scale metabolic modeling in *Saccharomyces cerevisiae* and 
-        *Escherichia coli*. This approach offers advantages to estimate 
+        The nutrient cost was proposed by Barton *et al.* to estimate
+        the energy cost required to biosynthesize a peptide based on
+        genome-scale metabolic modeling in *Saccharomyces cerevisiae* and
+        *Escherichia coli*. This approach offers advantages to estimate
         costs in nutrient-limited environments compared to energy-based
         methods.
 
@@ -2063,7 +2063,7 @@ class Peptide(typing.Sequence[str]):
                 ``sulphate`` or ``ammonia``.
             organism (`str`): The reference organism for which the values
                 were computed, either ``yeast`` or ``ecoli``.
-            relative (`bool`): Whether to use the absolute or relative 
+            relative (`bool`): Whether to use the absolute or relative
                 values when computing costs.
 
         Example:
@@ -2074,8 +2074,8 @@ class Peptide(typing.Sequence[str]):
             10.839...
 
         References:
-            - Barton, M. D., Delneri, D., Oliver, S. G., Rattray, M., 
-              & Bergman, C. M. (2010). *Evolutionary systems biology of amino 
+            - Barton, M. D., Delneri, D., Oliver, S. G., Rattray, M.,
+              & Bergman, C. M. (2010). *Evolutionary systems biology of amino
               acid biosynthetic cost in yeast*. PloS one, 5(8), e11935.
               :pmid:`20808905` :doi:`10.1371/journal.pone.0011935`.
 
@@ -2094,10 +2094,82 @@ class Peptide(typing.Sequence[str]):
 
         r = "rel" if relative else "abs"
         table = f"{organism}_{n}_{r}"
-        
-        p = self.profile(tables.BIOSYNTHESIS_COST[table])
+
+        p = self.profile(tables.NUTRIENT_COST[table])
         return _sum(p)
-        
+
+    def energy_cost(
+        self,
+        scale: str = "Akashi",
+        *,
+        mode: typing.Optional[str] = None,
+    ):
+        """Estimate the energy cost required to biosynthesize a peptide.
+
+        Arguments:
+            scale (`str`): The name of the energy estimation scale to use.
+                Supports the following values:
+
+                Akashi
+                    The energetic cost computed by Akashi & Gojobori (2002) 
+                    based on major codon usage values in *Escherichia coli* 
+                    and *Bacillus subtilis*.
+                Craig
+                    The energetic cost computed by Craig & Weber ()
+                    from amino-acid substitution probabilities in 
+                    *Escherichia coli*.
+                Heizer
+                    The energetic cost computed by Heizer *et al.* (2006), 
+                    derived from Akashi & Gojobori (2002) for photoautotrophs 
+                    (capable of the Calvin cycle reactions).
+                Wagner
+                    The energetic cost computed by Wagner (2005)
+                    based on expression data in *Saccharomyces cerevisiae*.
+
+        Keyword Arguments:
+            mode (`str`): For the ``Wagner`` scale, the mode of growth of 
+                the source organism, either ``respiration`` (the default) or 
+                ``fermentation``.
+
+        Example:
+            >>> peptide = Peptide("SDKEVDEVDAALSDLEITLEYLKW")
+            >>> peptide.energy_cost()
+            550.5...
+            >>> peptide.energy_cost("Heizer")
+            554.5...
+
+        References:
+            - Akashi, H., & Gojobori, T. (2002). *Metabolic efficiency and
+              amino acid composition in the proteomes of Escherichia coli and
+              Bacillus subtilis*. Proceedings of the National Academy of
+              Sciences of the United States of America, 99(6), 3695–3700.
+              :pmid:`11904428`. :doi:`10.1073/pnas.062526999`.
+            - Heizer, E. M., Jr, Raiford, D. W., Raymer, M. L., Doom, T. E.,
+              Miller, R. V., & Krane, D. E. (2006). *Amino acid cost and
+              codon-usage biases in 6 prokaryotic genomes: a whole-genome
+              analysis*. Molecular biology and evolution, 23(9), 1670–1680.
+              :pmid:`16754641`. :doi:`10.1093/molbev/msl029`.
+            - Wagner A. (2005). *Energy constraints on the evolution of gene
+              expression*. Molecular biology and evolution, 22(6), 1365–1374.
+              :pmid:`15758206`. :doi:`10.1093/molbev/msi126`.
+
+        """
+        if scale == "Wagner":
+            if mode == "respiration" or mode is None:
+                table = tables.ENERGY_COST["Wagner_resp"]
+            elif mode == "fermentation":
+                table = tables.ENERGY_COST["Wagner_ferm"]
+            else:
+                raise ValueError(f"invalid lifestyle for {scale!r} scale: {mode!r}")
+        elif scale in tables.ENERGY_COST:
+            table = tables.ENERGY_COST[scale]
+        else:
+            raise ValueError(f"invalid scale: {scale!r}")
+
+        p = self.profile(table)
+        return _sum(p)
+
+
     # --- Descriptors --------------------------------------------------------
 
     def blosum_indices(self) -> BLOSUMIndices:
