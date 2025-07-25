@@ -6,7 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.4.0...HEAD
+
+
+## [v0.4.0] - 2025-07-25
+[v0.4.0]: https://github.com/althonos/peptides.py/compare/v0.3.4...v0.4.0
+
+### Added
+- `energy_cost` and `nutrient_cost` methods to compute biosynthesis cost of a peptide according to various parameters.
+
+### Changed
+- Use `bytes.translate` method to improve performance of sequence encoding on `Peptide` instantiation.
+
+### Fixed
+- Documentation error in `aliphatic_index` method ([#6](https://github.com/althonos/peptides.py/issues/6)).
 
 
 ## [v0.3.4] - 2024-09-09

@@ -20,9 +20,9 @@ except ImportError:
     _sum = sum
 
 __all__ = ["Peptide", "tables", "datasets"]
-__version__ = "0.3.4"
+__version__ = "0.4.0"
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
-__license__ = "GPLv3"
+__license__ = "GPL-3.0-or-later"
 __credits__ = """
 Daniel Osorio, Paola Rondón-Villarreal and Rodrigo Torres for ``Peptides``.
 Alan Bleasby for the ``hmoment`` binary of the EMBOSS.
