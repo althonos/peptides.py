@@ -63,7 +63,44 @@ _SWISSPROT_THRESHOLDS = {
 # --- Helper classes ---------------------------------------------------------
 
 class OutlierResult(typing.NamedTuple):
-    """The result of outlier detection.
+    """The result of outlier detection with `Peptide.detect_outlier`.
+
+    The outlier detection function analyzes a peptide sequence using 
+    composition-based vetting metrics and compares them against established 
+    SwissProt protein distributions to identify potential outliers, 
+    artifacts, or unusual sequences. This approach provides an automated way 
+    to flag sequences that may require further investigation. 
+    
+    Hint:
+        The following metrics are used:
+
+        `~Peptide.entropy`: 
+            This metric is a direct measure of the information content of 
+            a peptide sequence.
+
+            **Range**: 
+                0.0 to log₂(26) ≈ 4.70 bits.
+            **Interpretation**:
+                Most values fall between 3.71 and 4.18 bits for SwissProt 
+                data.
+
+        `~Peptide.max_frequency`: 
+            This metric is useful for identifying dominant amino acids and 
+            assessing sequence diversity. 
+
+            **Range**: 
+                1/sequence_length to 1.0
+            **Interpretation**:
+                Most values fall between 0.085 and 0.172 for SwissProt data.
+
+        `~Peptide.longest_run`: 
+            This metric is useful for detecting repetitive regions, low 
+            complexity sequences, and potential sequencing artifacts.
+        
+            **Range**:
+                1 to sequence_length
+            **Interpretation**:
+                Most values fall between 2 and 5 for SwissProt data.
 
     Attributes:
         is_outlier (`bool`): A flag indicating whether the peptide is
@@ -2746,25 +2783,64 @@ class Peptide(typing.Sequence[str]):
             out.append(_sum(p) / len(self))
         return ZScales(*out)
 
+    __DESCRIPTORS = {
+        "AF": atchley_factors,
+        "BLOSUM": blosum_indices,
+        "PP": cruciani_properties,
+        "F": fasgai_vectors,
+        "KF": kidera_factors,
+        "MSWHIM": ms_whim_scores,
+        "E": pcp_descriptors,
+        "PD": physical_descriptors,
+        "PRIN": prin_components,
+        "ProtFP": protfp_descriptors,
+        "SV": sneath_vectors,
+        "ST": st_scales,
+        "SVGER": svger_descriptors,
+        "T": t_scales,
+        "VHSE": vhse_scales,
+        "VSTPV": vstpv_descriptors,
+        "Z": z_scales,
+    }
+
+
+    # --- Sequence vetting -----------------------------------------------------
+
     def detect_outlier(self) -> OutlierResult:
         """Detect if this sequence is an outlier based on SwissProt distributions.
 
         This method analyzes the sequence using the vetting metrics (entropy,
         max_frequency, longest_run) and compares them against established
         distributions from SwissProt proteins to identify potential outliers,
-        artifacts, or unusual sequences.
+        artifacts, or unusual sequences. It provides an automated way to flag 
+        sequences that may require further investigation.
+
+        See `~peptides.OutlierResult` for more information.
 
         Returns:
             `~peptides.OutlierResult`: The outlier detection results, as
             a named tuple.
 
         Example:
-            >>> peptide = Peptide("AAAA")
-            >>> result = peptide.detect_outlier()
-            >>> result.is_outlier
-            True
-            >>> result.issues[0]
-            'Entropy (0.000) below 5th percentile (3.714)'
+            For a real peptide, the large ribosomal subunit protein bL32
+            *Escherichia coli* (:uniprot:`P0A7N4`)::
+
+                >>> peptide = Peptide(
+                ...     "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKT"
+                ...     "SGEKHLRHHITADGYYRGRKVIAK"
+                ... )
+                >>> result = peptide.detect_outlier()
+                >>> result.is_outlier
+                False
+
+            For a problematic sequence::
+            
+                >>> peptide = Peptide("AAAA")
+                >>> result = peptide.detect_outlier()
+                >>> result.is_outlier
+                True
+                >>> result.issues[0]
+                'Entropy (0.000) below 5th percentile (3.714)'
 
         Note:
             Thresholds are based on SwissProt analysis and are hardcoded
@@ -2809,23 +2885,3 @@ class Peptide(typing.Sequence[str]):
 
         # Note: sequence length is reported in metrics but not used for outlier checks
         return OutlierResult(len(issues) > 0, issues, metrics)
-
-    __DESCRIPTORS = {
-        "AF": atchley_factors,
-        "BLOSUM": blosum_indices,
-        "PP": cruciani_properties,
-        "F": fasgai_vectors,
-        "KF": kidera_factors,
-        "MSWHIM": ms_whim_scores,
-        "E": pcp_descriptors,
-        "PD": physical_descriptors,
-        "PRIN": prin_components,
-        "ProtFP": protfp_descriptors,
-        "SV": sneath_vectors,
-        "ST": st_scales,
-        "SVGER": svger_descriptors,
-        "T": t_scales,
-        "VHSE": vhse_scales,
-        "VSTPV": vstpv_descriptors,
-        "Z": z_scales,
-    }
