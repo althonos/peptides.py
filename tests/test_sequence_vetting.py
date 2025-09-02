@@ -226,17 +226,14 @@ class TestSequenceVetting(unittest.TestCase):
         try:
             result = normal_peptide.detect_outlier()
             # Verify the result structure
-            self.assertIn('is_outlier', result)
-            self.assertIn('issues', result)
-            self.assertIn('metrics', result)
-            self.assertIsInstance(result['is_outlier'], bool)
-            self.assertIsInstance(result['issues'], list)
-            self.assertIsInstance(result['metrics'], dict)
+            self.assertIsInstance(result.is_outlier, bool)
+            self.assertIsInstance(result.issues, list)
+            self.assertIsInstance(result.metrics, dict)
             
             # Verify metrics are present
             expected_metrics = ['entropy', 'max_frequency', 'longest_run', 'sequence_length']
             for metric in expected_metrics:
-                self.assertIn(metric, result['metrics'])
+                self.assertIn(metric, result.metrics)
                 
         except FileNotFoundError:
             # Skip test if distribution data not available
@@ -247,8 +244,8 @@ class TestSequenceVetting(unittest.TestCase):
         try:
             result = problematic_peptide.detect_outlier()
             # This should definitely be an outlier
-            self.assertTrue(result['is_outlier'])
-            self.assertGreater(len(result['issues']), 0)
+            self.assertTrue(result.is_outlier)
+            self.assertGreater(len(result.issues), 0)
             
         except FileNotFoundError:
             self.skipTest("SwissProt distribution data not available.")
