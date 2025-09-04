@@ -130,6 +130,8 @@ class OutlierResult(typing.NamedTuple):
             sequence vetting.
         metrics (`dict`): A dictionary of calculated vetting metrics.
 
+    .. versionadded:: 0.5.0
+
     """
     is_outlier: bool
     issues: typing.List[str]
@@ -1033,6 +1035,8 @@ class Peptide(typing.Sequence[str]):
               Bell System Technical Journal. 1948;27(3):379-423.
               :doi:`10.1002/j.1538-7305.1948.tb01338.x`.
 
+        .. versionadded:: 0.5.0
+
         """
         if not self.sequence:
             return 0.0
@@ -1065,6 +1069,8 @@ class Peptide(typing.Sequence[str]):
             >>> peptide.max_frequency()
             0.05
 
+        .. versionadded:: 0.5.0
+
         """
         if not self.sequence:
             return 0.0
@@ -1095,6 +1101,8 @@ class Peptide(typing.Sequence[str]):
             >>> peptide = Peptide("AALLLSSS")
             >>> peptide.longest_run()
             3
+
+        .. versionadded:: 0.5.0
 
         """
         if not self.sequence:
@@ -2866,6 +2874,8 @@ class Peptide(typing.Sequence[str]):
         Note:
             Thresholds are based on SwissProt analysis and are hardcoded
             for efficiency. No external files are required.
+
+        .. versionadded:: 0.5.0
 
         """
 
