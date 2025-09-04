@@ -70,37 +70,58 @@ class OutlierResult(typing.NamedTuple):
     SwissProt protein distributions to identify potential outliers, 
     artifacts, or unusual sequences. This approach provides an automated way 
     to flag sequences that may require further investigation. 
-    
+
     Hint:
         The following metrics are used:
 
-        `~Peptide.entropy`: 
-            This metric is a direct measure of the information content of 
+        `~Peptide.entropy`:
+            This metric is a direct measure of the information content of
             a peptide sequence.
 
-            **Range**: 
+            **Range**:
                 0.0 to log₂(26) ≈ 4.70 bits.
             **Interpretation**:
-                Most values fall between 3.71 and 4.18 bits for SwissProt 
+                Most values fall between 3.71 and 4.18 bits for SwissProt
                 data.
 
-        `~Peptide.max_frequency`: 
-            This metric is useful for identifying dominant amino acids and 
-            assessing sequence diversity. 
+        `~Peptide.max_frequency`:
+            This metric is useful for identifying dominant amino acids and
+            assessing sequence diversity.
 
-            **Range**: 
+            **Range**:
                 1/sequence_length to 1.0
             **Interpretation**:
                 Most values fall between 0.085 and 0.172 for SwissProt data.
 
-        `~Peptide.longest_run`: 
-            This metric is useful for detecting repetitive regions, low 
+        `~Peptide.longest_run`:
+            This metric is useful for detecting repetitive regions, low
             complexity sequences, and potential sequencing artifacts.
-        
+
             **Range**:
                 1 to sequence_length
             **Interpretation**:
                 Most values fall between 2 and 5 for SwissProt data.
+
+    Example:
+        For a real peptide, the large ribosomal subunit protein bL32
+        of *Escherichia coli* (:uniprot:`P0A7N4`)::
+
+            >>> peptide = Peptide(
+            ...     "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKT"
+            ...     "SGEKHLRHHITADGYYRGRKVIAK"
+            ... )
+            >>> result = peptide.detect_outlier()
+            >>> result.is_outlier
+            False
+
+        For a problematic sequence::
+
+            >>> peptide = Peptide("AAAA")
+            >>> result = peptide.detect_outlier()
+            >>> result.is_outlier
+            True
+            >>> result.issues[0]
+            'Entropy (0.000) below 5th percentile (3.714)'
 
     Attributes:
         is_outlier (`bool`): A flag indicating whether the peptide is
@@ -2823,7 +2844,7 @@ class Peptide(typing.Sequence[str]):
 
         Example:
             For a real peptide, the large ribosomal subunit protein bL32
-            *Escherichia coli* (:uniprot:`P0A7N4`)::
+            of *Escherichia coli* (:uniprot:`P0A7N4`)::
 
                 >>> peptide = Peptide(
                 ...     "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKT"
@@ -2834,7 +2855,7 @@ class Peptide(typing.Sequence[str]):
                 False
 
             For a problematic sequence::
-            
+
                 >>> peptide = Peptide("AAAA")
                 >>> result = peptide.detect_outlier()
                 >>> result.is_outlier
