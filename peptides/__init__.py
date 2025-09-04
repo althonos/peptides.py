@@ -814,6 +814,8 @@ class Peptide(typing.Sequence[str]):
             v2 = numpy.take(lut, self.encoded[lag:])
             s1 = numpy.sum(v1*v2)
             s2 = numpy.sum(v1**2)
+        if s2 == 0.0:
+            return 0.0 if s1 == 0.0 else math.nan
         return s1 / s2
 
     def auto_covariance(
