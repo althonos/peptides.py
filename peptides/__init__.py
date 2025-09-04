@@ -50,8 +50,70 @@ _TRANS = bytes(
     for x in range(256)
 )
 
+# SwissProt distribution data for outlier detection
+# These values are based on analysis of uniprot_sprot.fasta (downloaded 2025-08-27)
+# Generated using generate_swissprot_distributions_for_vetting_functions.py
+_SWISSPROT_THRESHOLDS = {
+    'entropy': {'5th': 3.7136571073282285, '95th': 4.184916104046552},
+    'max_frequency': {'5th': 0.08547008547008547, '95th': 0.1724137931034483},
+    'longest_run': {'5th': 2.0, '95th': 5.0},
+    'sequence_length': {'5th': 71.0, '95th': 836.0}
+}
 
 # --- Helper classes ---------------------------------------------------------
+
+class OutlierResult(typing.NamedTuple):
+    """The result of outlier detection with `Peptide.detect_outlier`.
+
+    The outlier detection function analyzes a peptide sequence using 
+    composition-based vetting metrics and compares them against established 
+    SwissProt protein distributions to identify potential outliers, 
+    artifacts, or unusual sequences. This approach provides an automated way 
+    to flag sequences that may require further investigation. 
+    
+    Hint:
+        The following metrics are used:
+
+        `~Peptide.entropy`: 
+            This metric is a direct measure of the information content of 
+            a peptide sequence.
+
+            **Range**: 
+                0.0 to log₂(26) ≈ 4.70 bits.
+            **Interpretation**:
+                Most values fall between 3.71 and 4.18 bits for SwissProt 
+                data.
+
+        `~Peptide.max_frequency`: 
+            This metric is useful for identifying dominant amino acids and 
+            assessing sequence diversity. 
+
+            **Range**: 
+                1/sequence_length to 1.0
+            **Interpretation**:
+                Most values fall between 0.085 and 0.172 for SwissProt data.
+
+        `~Peptide.longest_run`: 
+            This metric is useful for detecting repetitive regions, low 
+            complexity sequences, and potential sequencing artifacts.
+        
+            **Range**:
+                1 to sequence_length
+            **Interpretation**:
+                Most values fall between 2 and 5 for SwissProt data.
+
+    Attributes:
+        is_outlier (`bool`): A flag indicating whether the peptide is
+            an outlier.
+        issues (`list` of `str`): A list of specific issues found during
+            sequence vetting.
+        metrics (`dict`): A dictionary of calculated vetting metrics.
+
+    """
+    is_outlier: bool
+    issues: typing.List[str]
+    metrics: typing.Dict[str, float]
+
 
 class BLOSUMIndices(typing.NamedTuple):
     """The BLOSUM62-derived indices of a peptide.
@@ -910,6 +972,124 @@ class Peptide(typing.Sequence[str]):
             aa:count/len(self)
             for aa,count in self.counts().items()
         }
+
+    def entropy(self) -> float:
+        """Compute the Shannon entropy of the amino acid sequence.
+
+        The Shannon entropy measures the diversity of amino acids in the
+        peptide sequence. It is calculated using the formula:
+
+        .. math::
+
+            H = -\\sum_{i=1}^{n} p_i \\log_2(p_i)
+
+        where :math:`p_i` is the frequency of amino acid :math:`i` and
+        :math:`n` is the number of possible amino acids (26, including
+        ambiguous codes).
+
+        The entropy is maximized when all amino acids are equally
+        frequent, and minimized when the sequence consists of only one
+        amino acid type.
+
+        Returns:
+            `float`: The Shannon entropy of the peptide sequence in bits.
+            The maximum possible value is log₂(26) ≈ 4.70 bits.
+
+        Example:
+            >>> peptide = Peptide("AALS")
+            >>> peptide.entropy()
+            1.5
+            >>> peptide = Peptide("AAAA")
+            >>> peptide.entropy()
+            0.0
+            >>> peptide = Peptide("ACDEFGHIKLMNPQRSTVWY")
+            >>> peptide.entropy()
+            4.3219...
+
+        References:
+            - Shannon, C. E.
+              *A Mathematical Theory of Communication*.
+              Bell System Technical Journal. 1948;27(3):379-423.
+              :doi:`10.1002/j.1538-7305.1948.tb01338.x`.
+
+        """
+        if not self.sequence:
+            return 0.0
+        frequencies = self.frequencies()
+        entropy = 0.0
+        for freq in frequencies.values():
+            if freq > 0:  # Avoid log(0)
+                entropy -= freq * math.log2(freq)
+        return entropy
+
+    def max_frequency(self) -> float:
+        """Return the maximum frequency of any amino acid in the peptide.
+
+        This method identifies the amino acid that appears most frequently
+        in the sequence and returns its frequency. A high maximum frequency
+        indicates low sequence diversity.
+
+        Returns:
+            `float`: The maximum frequency of any amino acid in the peptide,
+            between *1/len(sequence)* and *1.0*.
+
+        Example:
+            >>> peptide = Peptide("AALS")
+            >>> peptide.max_frequency()
+            0.5
+            >>> peptide = Peptide("AAAA")
+            >>> peptide.max_frequency()
+            1.0
+            >>> peptide = Peptide("ACDEFGHIKLMNPQRSTVWY")
+            >>> peptide.max_frequency()
+            0.05
+
+        """
+        if not self.sequence:
+            return 0.0
+        frequencies = self.frequencies()
+        return max(frequencies.values())
+
+    def longest_run(self) -> int:
+        """Return the length of the longest consecutive run of the same amino acid.
+
+        This method finds the longest stretch of consecutive identical amino
+        acids in the sequence. Long runs of the same amino acid can indicate
+        repetitive regions or low complexity sequences.
+
+        Returns:
+            `int`: The length of the longest consecutive run, between *1* and
+            *len(sequence)*.
+
+        Example:
+            >>> peptide = Peptide("AALS")
+            >>> peptide.longest_run()
+            2
+            >>> peptide = Peptide("AAAA")
+            >>> peptide.longest_run()
+            4
+            >>> peptide = Peptide("ACDEFGHIKLMNPQRSTVWY")
+            >>> peptide.longest_run()
+            1
+            >>> peptide = Peptide("AALLLSSS")
+            >>> peptide.longest_run()
+            3
+
+        """
+        if not self.sequence:
+            return 0
+
+        max_run = 1
+        current_run = 1
+
+        for i in range(1, len(self.sequence)):
+            if self.sequence[i] == self.sequence[i-1]:
+                current_run += 1
+                max_run = max(max_run, current_run)
+            else:
+                current_run = 1
+
+        return max_run
 
     # --- Physico-chemical properties ----------------------------------------
 
@@ -2111,24 +2291,24 @@ class Peptide(typing.Sequence[str]):
                 Supports the following values:
 
                 Akashi
-                    The energetic cost computed by Akashi & Gojobori (2002) 
-                    based on major codon usage values in *Escherichia coli* 
+                    The energetic cost computed by Akashi & Gojobori (2002)
+                    based on major codon usage values in *Escherichia coli*
                     and *Bacillus subtilis*.
                 Craig
                     The energetic cost computed by Craig & Weber ()
-                    from amino-acid substitution probabilities in 
+                    from amino-acid substitution probabilities in
                     *Escherichia coli*.
                 Heizer
-                    The energetic cost computed by Heizer *et al.* (2006), 
-                    derived from Akashi & Gojobori (2002) for photoautotrophs 
+                    The energetic cost computed by Heizer *et al.* (2006),
+                    derived from Akashi & Gojobori (2002) for photoautotrophs
                     (capable of the Calvin cycle reactions).
                 Wagner
                     The energetic cost computed by Wagner (2005)
                     based on expression data in *Saccharomyces cerevisiae*.
 
         Keyword Arguments:
-            mode (`str`): For the ``Wagner`` scale, the mode of growth of 
-                the source organism, either ``respiration`` (the default) or 
+            mode (`str`): For the ``Wagner`` scale, the mode of growth of
+                the source organism, either ``respiration`` (the default) or
                 ``fermentation``.
 
         Example:
@@ -2622,3 +2802,86 @@ class Peptide(typing.Sequence[str]):
         "VSTPV": vstpv_descriptors,
         "Z": z_scales,
     }
+
+
+    # --- Sequence vetting -----------------------------------------------------
+
+    def detect_outlier(self) -> OutlierResult:
+        """Detect if this sequence is an outlier based on SwissProt distributions.
+
+        This method analyzes the sequence using the vetting metrics (entropy,
+        max_frequency, longest_run) and compares them against established
+        distributions from SwissProt proteins to identify potential outliers,
+        artifacts, or unusual sequences. It provides an automated way to flag 
+        sequences that may require further investigation.
+
+        See `~peptides.OutlierResult` for more information.
+
+        Returns:
+            `~peptides.OutlierResult`: The outlier detection results, as
+            a named tuple.
+
+        Example:
+            For a real peptide, the large ribosomal subunit protein bL32
+            *Escherichia coli* (:uniprot:`P0A7N4`)::
+
+                >>> peptide = Peptide(
+                ...     "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKT"
+                ...     "SGEKHLRHHITADGYYRGRKVIAK"
+                ... )
+                >>> result = peptide.detect_outlier()
+                >>> result.is_outlier
+                False
+
+            For a problematic sequence::
+            
+                >>> peptide = Peptide("AAAA")
+                >>> result = peptide.detect_outlier()
+                >>> result.is_outlier
+                True
+                >>> result.issues[0]
+                'Entropy (0.000) below 5th percentile (3.714)'
+
+        Note:
+            Thresholds are based on SwissProt analysis and are hardcoded
+            for efficiency. No external files are required.
+
+        """
+
+        # Calculate vetting metrics
+        metrics = {
+            'entropy': self.entropy(),
+            'max_frequency': self.max_frequency(),
+            'longest_run': self.longest_run(),
+            'sequence_length': len(self.sequence)
+        }
+
+        # Check against thresholds (5th and 95th percentiles)
+        issues = []
+
+        # Entropy check
+        entropy_5th = _SWISSPROT_THRESHOLDS['entropy']['5th']
+        entropy_95th = _SWISSPROT_THRESHOLDS['entropy']['95th']
+        if metrics['entropy'] < entropy_5th:
+            issues.append(f"Entropy ({metrics['entropy']:.3f}) below 5th percentile ({entropy_5th:.3f})")
+        elif metrics['entropy'] > entropy_95th:
+            issues.append(f"Entropy ({metrics['entropy']:.3f}) above 95th percentile ({entropy_95th:.3f})")
+
+        # Max frequency check
+        max_freq_5th = _SWISSPROT_THRESHOLDS['max_frequency']['5th']
+        max_freq_95th = _SWISSPROT_THRESHOLDS['max_frequency']['95th']
+        if metrics['max_frequency'] < max_freq_5th:
+            issues.append(f"Max frequency ({metrics['max_frequency']:.3f}) below 5th percentile ({max_freq_5th:.3f})")
+        elif metrics['max_frequency'] > max_freq_95th:
+            issues.append(f"Max frequency ({metrics['max_frequency']:.3f}) above 95th percentile ({max_freq_95th:.3f})")
+
+        # Longest run check
+        longest_run_5th = _SWISSPROT_THRESHOLDS['longest_run']['5th']
+        longest_run_95th = _SWISSPROT_THRESHOLDS['longest_run']['95th']
+        if metrics['longest_run'] < longest_run_5th:
+            issues.append(f"Longest run ({metrics['longest_run']}) below 5th percentile ({longest_run_5th})")
+        elif metrics['longest_run'] > longest_run_95th:
+            issues.append(f"Longest run ({metrics['longest_run']}) above 95th percentile ({longest_run_95th})")
+
+        # Note: sequence length is reported in metrics but not used for outlier checks
+        return OutlierResult(len(issues) > 0, issues, metrics)

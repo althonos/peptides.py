@@ -193,5 +193,6 @@ extlinks = {
     'pmc': ('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC%s', 'PMC%s'),
     'isbn': ('https://www.worldcat.org/isbn/%s', 'ISBN:%s'),
     'wiki': ('https://en.wikipedia.org/wiki/%s', '%s'),
-    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:%s')
+    'aaindex': ('https://www.genome.jp/entry/aaindex:%s', 'AAindex:%s'),
+    'uniprot': ('https://www.uniprot.org/uniprotkb/%s', 'UniProt:%s'),
 }

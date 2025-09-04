@@ -17,6 +17,20 @@ Peptide
    peptide
 
 
+Vetting
+-------
+
+.. autosummary::
+
+   OutlierResult
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   vetting
+
+
 Descriptors
 -----------
 
