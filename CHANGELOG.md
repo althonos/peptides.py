@@ -6,7 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/althonos/peptides.py/compare/v0.5.0...HEAD
+
+
+## [v0.5.0] - 2025-09-04
+[v0.5.0]: https://github.com/althonos/peptides.py/compare/v0.4.0...v0.5.0
+
+### Added
+- `entropy`, `max_frequency` and `longest_run` methods to `Peptide` (by Rauf Salamzade [@raufs](https://github.com/raufs)).
+- `detect_outlier` method to detect outlier sequences compared to SwissProt proteins ([#8](https://github.com/althonos/peptides.py/pull/8), by Rauf Salamzade [@raufs](https://github.com/raufs)).
+
+### Fixed
+- Zero division error in `auto_correlate` ([#2](https://github.com/althonos/peptides.py/issues/2)).
 
 
 ## [v0.4.0] - 2025-07-25
